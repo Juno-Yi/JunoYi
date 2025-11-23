@@ -17,6 +17,7 @@
         <module>junoyi-server</module>
         <module>junoyi-framework</module>
         <module>junoyi-module-system</module>
+        <module>junoyi-common</module>
     </modules>
 
     <properties>
