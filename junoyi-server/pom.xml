@@ -6,25 +6,49 @@
     <parent>
         <groupId>cn.junoyi</groupId>
         <artifactId>JunoYI</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>junoyi-server</artifactId>
 
     <!--  依赖  -->
     <dependencies>
-
-        <dependency>
-            <groupId>cn.junoyi.module.system</groupId>
-            <artifactId>junoyi-module</artifactId>
-        </dependency>
-
+        <!-- Spring Boot Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- 功能模块 -->
+        <dependency>
+            <groupId>cn.junoyi</groupId>
+            <artifactId>junoyi-module-system</artifactId>
+        </dependency>
 
+        <!-- 框架核心 -->
+        <dependency>
+            <groupId>cn.junoyi</groupId>
+            <artifactId>junoyi-framework-web</artifactId>
+        </dependency>
     </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

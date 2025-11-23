@@ -5,23 +5,35 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>cn.junoyi</groupId>
-    <version>1.0.0</version>
+    <parent>
+        <groupId>cn.junoyi</groupId>
+        <artifactId>JunoYI</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
     <artifactId>junoyi-dependencies</artifactId>
     <packaging>pom</packaging>
     <name>junoyi-dependencies</name>
-    <description>JunoYi 项目依赖管理</description>
+    <description>JunoYi 项目依赖管理 - 统一管理所有第三方和内部模块的版本</description>
 
     <properties>
         <!-- 统一依赖版本号 -->
-        <junoyi.version>1.0.0</junoyi.version>
-        <spring.boot.version>2.7.18</spring.boot.version>
-
+        <spring.boot.version>3.2.0</spring.boot.version>
+        <mybatis-plus.version>3.5.5</mybatis-plus.version>
+        <druid.version>1.2.20</druid.version>
+        <mysql.version>8.0.33</mysql.version>
+        <lombok.version>1.18.30</lombok.version>
+        <hutool.version>5.8.23</hutool.version>
+        <fastjson2.version>2.0.43</fastjson2.version>
+        <knife4j.version>4.3.0</knife4j.version>
+        <jwt.version>0.12.3</jwt.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Spring Boot 依赖 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -30,10 +42,117 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- ========== 内部模块版本管理 ========== -->
+            <!-- Common 公共模块 -->
             <dependency>
-                <groupId>cn.junoyi.module.system</groupId>
-                <artifactId>junoyi-module</artifactId>
-                <version>${junoyi.version}</version>
+                <groupId>cn.junoyi</groupId>
+                <artifactId>junoyi-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!-- Framework 框架核心模块 -->
+            <dependency>
+                <groupId>cn.junoyi</groupId>
+                <artifactId>junoyi-framework-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.junoyi</groupId>
+                <artifactId>junoyi-framework-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!-- Module API 模块 -->
+            <dependency>
+                <groupId>cn.junoyi</groupId>
+                <artifactId>junoyi-module-system-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!-- Module 功能模块 -->
+            <dependency>
+                <groupId>cn.junoyi</groupId>
+                <artifactId>junoyi-module-system</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!-- ========== 第三方依赖版本管理 ========== -->
+            <!-- MyBatis Plus -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <!-- Druid 数据库连接池 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+
+            <!-- MySQL 驱动 -->
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+
+            <!-- Lombok -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+
+            <!-- Hutool 工具类 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+
+            <!-- FastJson2 -->
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
+            </dependency>
+
+            <!-- Knife4j 接口文档 -->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+                <version>${knife4j.version}</version>
+            </dependency>
+
+            <!-- JWT -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+
+            <!-- MapStruct 对象转换 -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
             </dependency>
 
         </dependencies>

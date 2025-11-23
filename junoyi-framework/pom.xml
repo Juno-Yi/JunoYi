@@ -6,11 +6,14 @@
     <parent>
         <groupId>cn.junoyi</groupId>
         <artifactId>JunoYI</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>junoyi-framework</artifactId>
     <packaging>pom</packaging>
+
+
     <modules>
         <module>junoyi-framework-core</module>
         <module>junoyi-framework-web</module>
