@@ -32,7 +32,7 @@
 
             <dependency>
                 <groupId>cn.junoyi.module.system</groupId>
-                <artifactId>junoyi-module-system</artifactId>
+                <artifactId>junoyi-module</artifactId>
                 <version>${junoyi.version}</version>
             </dependency>
 

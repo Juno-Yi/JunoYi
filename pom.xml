@@ -16,8 +16,9 @@
         <module>junoyi-dependencies</module>
         <module>junoyi-server</module>
         <module>junoyi-framework</module>
-        <module>junoyi-module-system</module>
+        <module>junoyi-module</module>
         <module>junoyi-common</module>
+        <module>junoyi-module-api</module>
     </modules>
 
     <properties>
