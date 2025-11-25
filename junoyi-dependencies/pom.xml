@@ -18,6 +18,7 @@
         <!-- 统一依赖版本号 -->
         <spring.boot.version>3.3.5</spring.boot.version>
 
+        <bytebuddy.version>1.15.0</bytebuddy.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
         <druid.version>1.2.20</druid.version>
         <mysql.version>8.0.33</mysql.version>
@@ -94,6 +95,12 @@
             </dependency>
 
             <!-- ========== 第三方依赖版本管理 ========== -->
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${bytebuddy.version}</version>
+            </dependency>
+
             <!-- MyBatis Plus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
