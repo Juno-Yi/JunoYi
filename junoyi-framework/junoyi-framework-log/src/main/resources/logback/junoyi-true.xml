@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<included>
     <!-- 引入Spring Boot属性 -->
     <springProperty scope="context" name="COLOR_ENABLED" source="junoyi.log.console.color-enabled" defaultValue="true"/>
     <springProperty scope="context" name="SHOW_THREAD_NAME" source="junoyi.log.console.show-thread-name" defaultValue="true"/>
@@ -13,10 +13,11 @@
     <springProperty scope="context" name="SPRING_LEVEL" source="junoyi.log.level.spring" defaultValue="WARN"/>
     <springProperty scope="context" name="MYBATIS_LEVEL" source="junoyi.log.level.mybatis" defaultValue="WARN"/>
     <springProperty scope="context" name="SQL_LEVEL" source="junoyi.log.level.sql" defaultValue="DEBUG"/>
+    <springProperty scope="context" name="CUSTOM_LEVEL" source="junoyi.log.level.custom" defaultValue=""/>
     
     <!-- 定义控制台输出 - 使用JunoYi自定义编码器 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="cn.junoyi.framework.log.encoder.JunoYiLogbackEncoder">
+        <encoder class="cn.junoyi.framework.log.JunoYiLogbackEncoder">
             <showThreadName>${SHOW_THREAD_NAME}</showThreadName>
             <showMDC>${SHOW_MDC}</showMDC>
             <showClassName>${SHOW_CLASS_NAME}</showClassName>
@@ -57,4 +58,6 @@
     <logger name="cn.junoyi.**.dao" level="${SQL_LEVEL}" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
-</configuration>
+    
+    <!-- 注意：自定义包日志级别需要通过Java代码动态设置 -->
+</included>

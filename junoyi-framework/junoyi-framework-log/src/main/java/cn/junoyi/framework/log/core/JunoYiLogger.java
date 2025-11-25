@@ -1,4 +1,4 @@
-package cn.junoyi.framework.log;
+package cn.junoyi.framework.log.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

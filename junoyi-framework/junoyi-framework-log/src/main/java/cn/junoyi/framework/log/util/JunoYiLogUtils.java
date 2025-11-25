@@ -1,5 +1,6 @@
-package cn.junoyi.framework.log;
+package cn.junoyi.framework.log.util;
 
+import cn.junoyi.framework.log.core.JunoYiLogger;
 import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;

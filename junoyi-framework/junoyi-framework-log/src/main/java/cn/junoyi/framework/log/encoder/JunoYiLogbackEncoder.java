@@ -1,4 +1,4 @@
-package cn.junoyi.framework.log;
+package cn.junoyi.framework.log.encoder;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.encoder.EncoderBase;
@@ -153,7 +153,7 @@ public class JunoYiLogbackEncoder extends EncoderBase<ILoggingEvent> {
             case ch.qos.logback.classic.Level.WARN_INT:
                 return TerminalColor.BOLD_YELLOW;
             case ch.qos.logback.classic.Level.INFO_INT:
-                return TerminalColor.BOLD_WHITE;
+                return ""; // INFO级别使用默认样式，不重置颜色
             case ch.qos.logback.classic.Level.DEBUG_INT:
                 return TerminalColor.BOLD_BLUE;
             case ch.qos.logback.classic.Level.TRACE_INT:

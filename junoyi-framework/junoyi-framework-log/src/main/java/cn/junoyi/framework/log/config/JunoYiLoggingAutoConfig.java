@@ -1,10 +1,9 @@
-package cn.junoyi.framework.log;
+package cn.junoyi.framework.log.config;
 
+import cn.junoyi.framework.log.config.JunoYiLogProperties;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +20,6 @@ import org.springframework.lang.NonNull;
  */
 @Configuration
 @AutoConfigureOrder(Integer.MIN_VALUE)
-@EnableConfigurationProperties(JunoYiLogProperties.class)
-@ConditionalOnProperty(prefix = "junoyi.log", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class JunoYiLoggingAutoConfig implements ApplicationContextAware, InitializingBean {
 
     private LoggingSystem loggingSystem;

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <!-- 使用Spring Boot默认配置，但不覆盖日志级别 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    
+    <!-- 使用Spring Boot默认的console appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    
+    <!-- 设置根日志级别为INFO，使用Spring Boot默认格式 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+    
+    <!-- 禁用logback内部日志 -->
+    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="org.springframework.boot.logging.logback" level="WARN"/>
+    
+</included>

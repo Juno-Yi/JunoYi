@@ -1,16 +1,18 @@
-package cn.junoyi.framework.log;
+package cn.junoyi.framework.log.config;
 
+import cn.junoyi.framework.log.core.JunoYiLogger;
+import cn.junoyi.framework.log.encoder.JunoYiLogbackEncoder;
 import jakarta.annotation.PostConstruct;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import ch.qos.logback.core.util.FileSize;
 import ch.qos.logback.core.util.OptionHelper;
-import ch.qos.logback.classic.spi.ILoggingEvent;
+import cn.junoyi.framework.log.config.JunoYiLogProperties;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  * Logback配置类
@@ -18,8 +20,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Fan
  */
-@Configuration
-@ConditionalOnProperty(prefix = "junoyi.log", name = "enabled", havingValue = "true", matchIfMissing = true)
+@Component
 public class JunoYiLogbackConfig {
 
     private final JunoYiLogProperties logProperties;

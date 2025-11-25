@@ -5,12 +5,10 @@ junoyi:
 
   # 日志配置
   log:
-    # 是否启用JunoYi日志框架
-    enabled: true
-
     # 控制台输出配置
     console:
       enabled: true
+      # 是否启动彩色日志输出
       color-enabled: true
       show-thread-name: true
       show-mdc: true
@@ -26,16 +24,6 @@ junoyi:
       total-size-cap: 1GB
       compress: true
       encoding: UTF-8
-
-    # 日志级别配置
-    level:
-      root: WARN
-      junoyi: INFO
-      spring: WARN
-      mybatis: WARN
-      sql: DEBUG
-      # 自定义包日志级别：package1:level1,package2:level2
-      custom: "com.example:DEBUG,org.apache:WARN"
 
     # 日志格式配置
     format:
@@ -61,11 +49,6 @@ junoyi:
       thread-pool-size: 1
 
 
-# 日志配置
-logging:
-  level:
-    root: warn
-    JunoYI: info
 
 # 服务器配置
 server:

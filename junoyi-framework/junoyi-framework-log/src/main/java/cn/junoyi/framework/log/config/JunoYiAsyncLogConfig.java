@@ -1,5 +1,6 @@
-package cn.junoyi.framework.log;
+package cn.junoyi.framework.log.config;
 
+import cn.junoyi.framework.log.config.JunoYiLogProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +29,9 @@ public class JunoYiAsyncLogConfig {
     /**
      * 异步日志线程池
      */
-    @Bean(name = "junoYiLogExecutor")
-    public Executor junoYiLogExecutor() {
+    @Bean(name = "junoYiLogAsyncExecutor")
+    @ConditionalOnProperty(prefix = "junoyi.log.async", name = "enabled", havingValue = "true")
+    public Executor asyncLogExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         
         // 设置核心线程数

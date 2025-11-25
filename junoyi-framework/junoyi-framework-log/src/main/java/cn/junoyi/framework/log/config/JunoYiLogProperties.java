@@ -1,4 +1,4 @@
-package cn.junoyi.framework.log;
+package cn.junoyi.framework.log.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

@@ -17,7 +17,10 @@ public class JunoYiApplication {
      */
     public static void run(Class<?> primarySource, String[] args){
         SpringApplication springApplication = new SpringApplication(primarySource);
+        
+        // JunoYi框架始终启用，始终显示启动横幅
         springApplication.setBanner(new JunoYiBanner());
+        
         springApplication.run(args);
     }
 }
