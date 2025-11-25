@@ -3,6 +3,63 @@ junoyi:
 #  name: JunoYi
 #  copyrightYear: 2025
 
+  # 日志配置
+  log:
+    # 是否启用JunoYi日志框架
+    enabled: true
+
+    # 控制台输出配置
+    console:
+      enabled: true
+      color-enabled: true
+      show-thread-name: true
+      show-mdc: true
+      show-class-name: true
+      max-class-name-length: 20
+
+    # 文件输出配置
+    file:
+      enabled: true
+      path: logs/junoyi.log
+      max-size: 100MB
+      max-history: 30
+      total-size-cap: 1GB
+      compress: true
+      encoding: UTF-8
+
+    # 日志级别配置
+    level:
+      root: WARN
+      junoyi: INFO
+      spring: WARN
+      mybatis: WARN
+      sql: DEBUG
+      # 自定义包日志级别：package1:level1,package2:level2
+      custom: "com.example:DEBUG,org.apache:WARN"
+
+    # 日志格式配置
+    format:
+      date-time-pattern: "yyyy-MM-dd HH:mm:ss.SSS"
+      max-stack-trace-lines: 5
+      max-mdc-properties: 3
+      max-thread-name-length: 15
+      simplify-package-names: true
+      package-simplifications:
+        "cn.junoyi": "j"
+        "org.springframework": "s"
+        "com.baomidou": "m"
+        "org.apache": "a"
+        "java.lang": "j.l"
+        "java.util": "j.u"
+
+    # 异步日志配置
+    async:
+      enabled: true
+      queue-size: 256
+      discarding-threshold: DISCARD
+      include-caller-data: false
+      thread-pool-size: 1
+
 
 # 日志配置
 logging:

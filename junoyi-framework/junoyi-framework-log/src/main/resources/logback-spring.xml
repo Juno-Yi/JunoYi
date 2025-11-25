@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 禁用Spring Boot的默认日志配置 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    
+    <!-- 定义控制台输出 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="cn.junoyi.framework.log.JunoYiLogbackEncoder">
+            <showThreadName>true</showThreadName>
+            <showMDC>true</showMDC>
+            <showClassName>true</showClassName>
+            <maxClassNameLength>25</maxClassNameLength>
+        </encoder>
+    </appender>
+    
+    <!-- 根日志配置 -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+    
+    <!-- JunoYi框架日志 -->
+    <logger name="JUNOYI" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <logger name="cn.junoyi" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+    <!-- Spring日志 -->
+    <logger name="org.springframework" level="WARN" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+</configuration>
