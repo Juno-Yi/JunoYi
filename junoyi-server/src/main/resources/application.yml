@@ -5,7 +5,10 @@ junoyi:
 
 
 # 日志配置
-
+logging:
+  level:
+    root: warn
+    JunoYI: info
 
 # 服务器配置
 server:

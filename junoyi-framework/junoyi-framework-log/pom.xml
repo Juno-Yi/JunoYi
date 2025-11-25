@@ -15,6 +15,9 @@
     <artifactId>junoyi-framework-log</artifactId>
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
     </dependencies>
 </project>
