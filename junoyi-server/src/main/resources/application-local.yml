@@ -1,0 +1,168 @@
+# ==================== Spring 数据源配置 ====================
+spring:
+  datasource:
+    # ========== 动态数据源配置 (使用 dynamic-datasource-spring-boot-starter) ==========
+    dynamic:
+      # ---------- 主数据源配置 ----------
+      # primary: 指定默认使用的数据源名称
+      # 作用: 当代码中没有使用 @DS 注解指定数据源时，默认使用此数据源
+      # 注意: 这里的值必须是 datasource 中定义的某个数据源的 key
+      primary: master
+
+      # ---------- 严格模式配置 ----------
+      # strict: 是否开启严格模式 (可选配置，默认 false)
+      # true:  当使用 @DS("xxx") 指定的数据源不存在时，抛出异常
+      # false: 当指定的数据源不存在时，使用 primary 默认数据源
+      # 建议: 开发环境设置为 true，及时发现配置错误；生产环境根据需求设置
+      # strict: true
+
+      # ---------- 数据源列表配置 ----------
+      # datasource: 定义所有可用的数据源
+      # 每个数据源是一个 key-value 对，key 是数据源名称，value 是数据源配置
+      datasource:
+        # ========== 主数据源 (master) ==========
+        # 数据源名称: master
+        # 用途: 主数据库，用于所有写操作 (INSERT、UPDATE、DELETE)
+        # 特点:
+        #   - 数据最新、最准确
+        #   - 承担写压力
+        #   - 是数据的唯一来源
+        master:
+          # 数据库驱动类
+          # MySQL 8.x 使用: com.mysql.cj.jdbc.Driver
+          # MySQL 5.x 使用: com.mysql.jdbc.Driver (已废弃)
+          driver-class-name: com.mysql.cj.jdbc.Driver
+
+          # JDBC 连接 URL
+          # 格式: jdbc:mysql://主机:端口/数据库名?参数1&参数2
+          # localhost: 数据库服务器地址 (可以是 IP 或域名)
+          # 3306: MySQL 默认端口
+          # db_master: 数据库名称
+          url: jdbc:mysql://localhost:3306/db_master
+
+          # 数据库用户名
+          username: root
+
+          # 数据库密码
+          # 注意: 生产环境建议使用加密配置或环境变量，不要明文存储
+          password: root
+
+          # ---------- 可选的连接参数 (完整示例) ----------
+          # url: jdbc:mysql://localhost:3306/db_master?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+          # 参数说明:
+          #   useUnicode=true              - 使用 Unicode 字符集
+          #   characterEncoding=utf8       - 字符编码设置为 UTF-8
+          #   serverTimezone=Asia/Shanghai - 设置时区为上海 (解决时区问题)
+          #   useSSL=false                 - 禁用 SSL 连接 (开发环境)
+          #   allowPublicKeyRetrieval=true - 允许客户端从服务器获取公钥 (MySQL 8.x)
+          #   rewriteBatchedStatements=true- 批量操作优化 (提升性能)
+
+        # ========== 从数据源 1 (slave_1) ==========
+        # 数据源名称: slave_1
+        # 用途: 从数据库 (只读副本)，用于读操作 (SELECT)
+        # 特点:
+        #   - 通过主从复制从 master 同步数据
+        #   - 分担读压力，提升查询性能
+        #   - 可能存在数据延迟 (通常几毫秒到几秒)
+        # 使用场景:
+        #   - 列表查询
+        #   - 报表统计
+        #   - 非实时性要求的查询
+        slave_1:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+
+          # 注意: 端口 3307，与主库不同
+          # 实际部署时，从库通常在不同的服务器上
+          url: jdbc:mysql://localhost:3307/db_slave1
+
+          username: root
+          password: root
+
+          # ---------- 从库特有配置 (可选) ----------
+          # 只读模式: 防止误操作写入从库
+          # read-only: true
+
+          # 连接池配置: 从库通常需要更大的连接池 (读多写少)
+          # hikari:
+          #   maximum-pool-size: 50  # 从库连接池可以设置更大
+
+        # ========== 从数据源 2 (slave_2) ==========
+        # 数据源名称: slave_2
+        # 用途: 第二个从数据库，与 slave_1 作用相同
+        # 特点:
+        #   - 多个从库可以实现负载均衡
+        #   - 提高读并发能力
+        #   - 提供冗余备份
+        # 负载均衡策略:
+        #   - 当使用 @DS("slave") 时，会在 slave_1 和 slave_2 之间轮询
+        #   - 也可以配置随机、权重等策略
+        slave_2:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+
+          # 注意: 端口 3308，第三个 MySQL 实例
+          url: jdbc:mysql://localhost:3308/db_slave2
+
+          username: root
+          password: root
+
+      # ---------- 全局连接池配置 (可选) ----------
+      # 使用 Druid 连接池 (阿里巴巴开源，功能强大)
+      # 这些配置会应用到所有数据源，除非单独配置覆盖
+      # druid:
+      #   # 初始化连接数: 应用启动时创建的连接数
+      #   initial-size: 5
+      #
+      #   # 最小空闲连接数: 连接池中保持的最少空闲连接
+      #   min-idle: 5
+      #
+      #   # 最大活跃连接数: 连接池最多能创建的连接数
+      #   max-active: 20
+      #
+      #   # 获取连接超时时间: 等待连接的最长时间 (毫秒)
+      #   max-wait: 60000
+      #
+      #   # 连接检测间隔: 多久检测一次空闲连接 (毫秒)
+      #   time-between-eviction-runs-millis: 60000
+      #
+      #   # 最小空闲时间: 连接在池中最小空闲时间 (毫秒)
+      #   min-evictable-idle-time-millis: 300000
+      #
+      #   # 验证查询: 用于测试连接是否有效的 SQL
+      #   validation-query: SELECT 1
+      #
+      #   # 空闲时测试: 从连接池获取连接时是否测试
+      #   test-while-idle: true
+      #
+      #   # 获取时测试: 获取连接时是否测试 (影响性能，不建议开启)
+      #   test-on-borrow: false
+      #
+      #   # 归还时测试: 归还连接时是否测试 (影响性能，不建议开启)
+      #   test-on-return: false
+      #
+      #   # 监控统计: 开启 SQL 监控统计
+      #   stat-view-servlet:
+      #     enabled: true
+      #     url-pattern: /druid/*
+      #     login-username: admin
+      #     login-password: admin
+
+      # ---------- 使用 HikariCP 连接池 (可选，性能更好) ----------
+      # hikari:
+      #   # 最小空闲连接数
+      #   minimum-idle: 5
+      #
+      #   # 最大连接池大小
+      #   maximum-pool-size: 20
+      #
+      #   # 连接超时时间 (毫秒)
+      #   connection-timeout: 30000
+      #
+      #   # 空闲超时时间 (毫秒)
+      #   idle-timeout: 600000
+      #
+      #   # 连接最大存活时间 (毫秒)
+      #   max-lifetime: 1800000
+      #
+      #   # 连接测试查询
+      #   connection-test-query: SELECT 1
+
