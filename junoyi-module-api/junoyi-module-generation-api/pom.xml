@@ -5,19 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>cn.junoyi</groupId>
-        <artifactId>JunoYI</artifactId>
+        <artifactId>junoyi-module-api</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>junoyi-module</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>junoyi-module-system</module>
-        <module>junoyi-module-generation</module>
-    </modules>
+    <artifactId>junoyi-module-generation-api</artifactId>
 
-    <dependencies>
 
-    </dependencies>
 </project>
