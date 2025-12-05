@@ -61,7 +61,7 @@ junoyi:
       simplify-package-names: true
       # 包名简化映射配置（将长包名简化为短字符）
       package-simplifications:
-        "cn.junoyi": "j"           # JunoYi框架包简化为"j"
+        "com.junoyi": "j"           # JunoYi框架包简化为"j"
         "org.springframework": "s" # Spring框架包简化为"s"
         "com.baomidou": "m"        # MyBatis Plus包简化为"m"
         "org.apache": "a"          # Apache包简化为"a"

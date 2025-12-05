@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-cn.junoyi.framework.stater.listener.ServerPortListener
+com.junoyi.framework.stater.listener.ServerPortListener

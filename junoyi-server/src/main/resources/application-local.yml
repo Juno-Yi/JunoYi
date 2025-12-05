@@ -163,7 +163,7 @@ spring:
         
         # ---------- Spring 监控配置 ----------
         # AOP 监控 Spring Bean
-        aop-patterns: cn.junoyi.module.*.service.*
+        aop-patterns: com.junoyi.module.*.service.*
         
         # ---------- 防火墙配置 ----------
         # SQL 防火墙配置 (防止 SQL 注入)

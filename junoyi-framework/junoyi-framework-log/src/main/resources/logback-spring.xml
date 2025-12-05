@@ -24,7 +24,7 @@
     
     <!-- 定义控制台输出 - 使用JunoYi自定义编码器 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="cn.junoyi.framework.log.encoder.JunoYiLogbackEncoder">
+        <encoder class="com.junoyi.framework.log.encoder.JunoYiLogbackEncoder">
             <showThreadName>${SHOW_THREAD_NAME}</showThreadName>
             <showMDC>${SHOW_MDC}</showMDC>
             <showClassName>${SHOW_CLASS_NAME}</showClassName>
@@ -37,7 +37,7 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- 当前日志文件：使用固定名称 -->
         <file>${FILE_PATH}/junoyi.log</file>
-        <encoder class="cn.junoyi.framework.log.encoder.JunoYiLogbackEncoder">
+        <encoder class="com.junoyi.framework.log.encoder.JunoYiLogbackEncoder">
             <showThreadName>${SHOW_THREAD_NAME}</showThreadName>
             <showMDC>${SHOW_MDC}</showMDC>
             <showClassName>${SHOW_CLASS_NAME}</showClassName>
@@ -65,7 +65,7 @@
         <appender-ref ref="FILE"/>
     </logger>
     
-    <logger name="cn.junoyi" level="${JUNOYI_LEVEL}" additivity="false">
+    <logger name="com.junoyi" level="${JUNOYI_LEVEL}" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>
@@ -83,12 +83,12 @@
     </logger>
     
     <!-- SQL日志 -->
-    <logger name="cn.junoyi.**.mapper" level="${SQL_LEVEL}" additivity="false">
+    <logger name="com.junoyi.**.mapper" level="${SQL_LEVEL}" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>
     
-    <logger name="cn.junoyi.**.dao" level="${SQL_LEVEL}" additivity="false">
+    <logger name="com.junoyi.**.dao" level="${SQL_LEVEL}" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </logger>

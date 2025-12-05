@@ -5,7 +5,7 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>cn.junoyi</groupId>
+    <groupId>com.junoyi</groupId>
     <artifactId>junoyi-dependencies</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
@@ -56,48 +56,48 @@
             <!-- ========== 内部模块版本管理 ========== -->
             <!-- Common 公共模块 -->
             <dependency>
-                <groupId>cn.junoyi</groupId>
+                <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-common</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!-- Framework 框架核心模块 -->
             <dependency>
-                <groupId>cn.junoyi</groupId>
+                <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-framework-core</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>cn.junoyi</groupId>
+                <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-framework-web</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>cn.junoyi</groupId>
+                <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-framework-log</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>cn.junoyi</groupId>
+                <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-framework-stater</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
-                <groupId>cn.junoyi</groupId>
+                <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-framework-datasource</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!-- Module API 模块 -->
             <dependency>
-                <groupId>cn.junoyi</groupId>
+                <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-module-system-api</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!-- Module 功能模块 -->
             <dependency>
-                <groupId>cn.junoyi</groupId>
+                <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-module-system</artifactId>
                 <version>${revision}</version>
             </dependency>
