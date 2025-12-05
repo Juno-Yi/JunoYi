@@ -1,0 +1,62 @@
+package cn.junoyi.system.controller;
+
+import cn.junoyi.framework.core.domain.R;
+import cn.junoyi.framework.log.core.JunoLog;
+import cn.junoyi.framework.log.core.JunoLogFactory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * 系统用户控制类
+ *
+ * @author Fan
+ */
+@RestController
+@RequestMapping("/system/user")
+@RequiredArgsConstructor
+public class SysUserController {
+    private final JunoLog log = JunoLogFactory.getLogger(SysUserController.class);
+
+    /**
+     * 获取用户列表（分页）
+     * @return 响应结果
+     */
+    @GetMapping
+    public R<?> getUserList(){
+
+        return R.ok();
+    }
+
+    /**
+     * 通过id来获取用户
+     * @param id 用户id
+     * @return 响应结果
+     */
+    @GetMapping("/{id}")
+    public R<?> getUserById(@PathVariable Long id){
+        return R.ok(id);
+    }
+
+    /**
+     * 添加用户
+     */
+    @PostMapping
+    public void addUser(){
+
+    }
+
+    /**
+     * 删除用户
+     */
+    @DeleteMapping
+    public void delUser(){
+
+    }
+
+    /**
+     * 删除用户
+     */
+    @PutMapping
+    public void updateUser(){
+    }
+}

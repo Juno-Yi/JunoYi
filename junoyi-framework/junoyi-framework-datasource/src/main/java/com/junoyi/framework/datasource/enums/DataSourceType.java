@@ -3,7 +3,7 @@ package com.junoyi.framework.datasource.enums;
 /**
  * 数据源类型枚举
  *
- * @author JunoYi
+ * @author Fan
  */
 public enum DataSourceType {
     /**
