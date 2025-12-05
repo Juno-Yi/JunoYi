@@ -20,7 +20,6 @@ public class JunoYiApplication {
         
         // JunoYi框架始终启用，始终显示启动横幅
         springApplication.setBanner(new JunoYiBanner());
-
         springApplication.run(args);
     }
 }

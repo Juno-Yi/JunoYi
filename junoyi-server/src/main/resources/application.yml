@@ -3,9 +3,13 @@ junoyi:
   # 框架版本号
   version: 1.0.0
   # 框架名称（可选）
-#  name: JunoYi
+  name: JunoYi
   # 版权年份（可选）
-#  copyrightYear: 2025
+  copyrightYear: 2025
+  copyright: JunoYi钧逸
+
+  # 端口号
+  port: 7588
 
   # 日志配置模块
   log:
