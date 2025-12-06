@@ -48,7 +48,7 @@ public class SysInfoController {
     }
 
     /**
-     * 获取图片
+     * 获取LOGO图片
      * 直接将图片响应
      */
     @GetMapping("/logo")
