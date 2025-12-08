@@ -17,21 +17,34 @@
     </description>
 
     <dependencies>
+        <!-- 日志模块 -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-log</artifactId>
+        </dependency>
 
+        <!-- 核心模块 -->
         <dependency>
             <groupId>com.junoyi</groupId>
             <artifactId>junoyi-framework-core</artifactId>
         </dependency>
 
-        <!-- JSON工具类 -->
+        <!-- Jackson JSON 工具类 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <!-- Jackson Java 8 日期时间支持 -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Jackson 自动配置 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
     </dependencies>
 

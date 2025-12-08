@@ -9,7 +9,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * Json工具类
  *
  * @author Fan
+ * @deprecated 请使用 {@link com.junoyi.framework.json.utils.JsonUtils} 代替,该类提供更完善的功能
  */
+@Deprecated
 public class JsonUtils {
 
     private static final ObjectMapper JSON = new ObjectMapper();

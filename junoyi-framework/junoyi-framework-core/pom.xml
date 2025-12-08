@@ -13,14 +13,13 @@
     <artifactId>junoyi-framework-core</artifactId>
 
     <dependencies>
-
-        <!--   Spring Boot Starter     -->
+        <!-- Spring Boot Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!--   Spring Boot Aop     -->
+        <!-- Spring Boot Aop -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
@@ -37,14 +36,13 @@
             <artifactId>spring-web</artifactId>
         </dependency>
 
-
-        <!--    lombok    -->
+        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <!--    工具包类库    -->
+        <!-- 工具包类库 -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
@@ -55,13 +53,7 @@
             <artifactId>commons-compress</artifactId>
         </dependency>
 
-        <!-- JSON工具类 -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <!-- servlet包 -->
+        <!-- Servlet包 -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
@@ -73,12 +65,17 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Jackson JSON 工具类 (保留用于 core 模块的 JsonUtils,建议使用 junoyi-framework-json 模块) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- 日志模块 -->
         <dependency>
             <groupId>com.junoyi</groupId>
             <artifactId>junoyi-framework-log</artifactId>
         </dependency>
-
-
     </dependencies>
 
 </project>
