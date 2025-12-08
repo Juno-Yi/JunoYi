@@ -25,6 +25,7 @@
         <lombok.version>1.18.30</lombok.version>
         <hutool.version>5.8.23</hutool.version>
         <dynamic-datasource.version>4.2.0</dynamic-datasource.version>
+        <easyexcel.version>3.2.1</easyexcel.version>
         <!-- Apache Commons Compress 版本 -->
         <commons-compress.version>1.26.2</commons-compress.version>
         <fastjson2.version>2.0.43</fastjson2.version>
@@ -103,6 +104,19 @@
             </dependency>
 
             <!-- ========== 第三方依赖版本管理 ========== -->
+            <!--      阿里Excel处理      -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.poi</groupId>
+                        <artifactId>poi-ooxml-schemas</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <dependency>
                 <groupId>net.bytebuddy</groupId>
                 <artifactId>byte-buddy</artifactId>
