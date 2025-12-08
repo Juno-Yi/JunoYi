@@ -22,6 +22,8 @@ import java.lang.reflect.Field;
  * Excel字典转换器，用于在Excel导入导出时将字段值与字典标签进行相互转换。
  * <p>
  * 支持通过注解 {@link ExcelDictFormat} 配置字典类型或表达式来实现数据的映射关系。
+ *
+ * @author Fan
  */
 public class ExcelDictConvert implements Converter<Object> {
 

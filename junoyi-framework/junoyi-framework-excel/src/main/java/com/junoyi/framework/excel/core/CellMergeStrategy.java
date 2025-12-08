@@ -23,6 +23,8 @@ import java.util.Map;
 /**
  * 自定义单元格合并策略，用于在导出 Excel 时根据指定字段的值进行相邻相同值的合并。
  * 支持通过 {@link CellMerge} 注解标记需要合并的字段，并结合 {@link ExcelProperty} 设置表头层级。
+ *
+ * @author Fan
  */
 public class CellMergeStrategy extends AbstractMergeStrategy {
 
