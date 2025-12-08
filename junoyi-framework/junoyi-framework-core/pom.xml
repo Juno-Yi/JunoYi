@@ -77,6 +77,8 @@
             <groupId>com.junoyi</groupId>
             <artifactId>junoyi-framework-log</artifactId>
         </dependency>
+
+
     </dependencies>
 
 </project>

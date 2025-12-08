@@ -10,6 +10,7 @@ import com.junoyi.framework.log.core.JunoYiLogFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -33,7 +34,9 @@ public class JacksonConfig {
      *
      * @return Jackson2ObjectMapperBuilderCustomizer对象，用于自定义ObjectMapper构建器
      */
+    @Bean
     public Jackson2ObjectMapperBuilderCustomizer customizer(){
+        log.info("Initialize jackson configuration.");
         return builder -> {
             // 配置Java时间模块，处理日期时间类型的序列化和反序列化
             JavaTimeModule javaTimeModule = new JavaTimeModule();
@@ -46,7 +49,6 @@ public class JacksonConfig {
             javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
             builder.modules(javaTimeModule);
             builder.timeZone(TimeZone.getDefault());
-            log.info("Initialize jackson configuration.");
         };
     }
 }
