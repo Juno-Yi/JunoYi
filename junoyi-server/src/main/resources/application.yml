@@ -1,4 +1,6 @@
-# JunoYi框架配置
+
+
+# ==================== JunoYi 框架配置 ====================
 junoyi:
   # 框架版本号
   version: 1.0.0
@@ -15,7 +17,7 @@ junoyi:
   # 端口号
   port: 7588
 
-  # 日志配置模块
+  # ==================== 日志配置 ====================
   log:
     # 控制台输出配置
     console:
@@ -83,6 +85,17 @@ junoyi:
       # 异步日志线程池大小（建议设置为CPU核心数的1-2倍）
       thread-pool-size: 1
 
+  # ==================== 数据源配置 ====================
+  datasource:
+    # 启用 SQL 美化输出
+    sql-beautify-enabled: true
+    # 启用慢 SQL 监控
+    slow-sql-enabled: true
+    # 慢 SQL 阈值（毫秒）
+    slow-sql-threshold: 3000
+    # 启用 SQL 日志
+    sql-log-enabled: true
+
 # Spring Boot服务器配置
 server:
   # 应用服务端口
@@ -95,3 +108,9 @@ logging:
     org.springframework.context.support.PostProcessorRegistrationDelegate: ERROR
     # 屏蔽 Netty DNS 警告
     io.netty.resolver.dns: ERROR
+
+
+# ==================== Spring Boot 配置 ====================
+spring:
+  profiles:
+    active: local

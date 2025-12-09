@@ -16,16 +16,28 @@
     </description>
 
     <dependencies>
-        <!-- Spring Boot Starter -->
+        <!-- 框架核心 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-core</artifactId>
         </dependency>
 
-        <!-- Spring Boot AOP -->
+        <!-- 日志模块 -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-log</artifactId>
+        </dependency>
+
+        <!-- Spring Boot JDBC -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
+        <!-- MyBatis Plus -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
 
         <!-- MyBatis Plus 动态数据源 -->
@@ -46,16 +58,11 @@
             <artifactId>mysql-connector-j</artifactId>
         </dependency>
 
-        <!-- Lombok -->
+        <!-- Spring Boot Configuration Processor -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-
-        <!-- 公共模块 -->
-        <dependency>
-            <groupId>com.junoyi</groupId>
-            <artifactId>junoyi-common</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

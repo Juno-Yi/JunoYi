@@ -34,10 +34,16 @@
             <artifactId>junoyi-framework-json</artifactId>
         </dependency>
 
-        <!--   Redis 模块     -->
+        <!-- Redis 模块 -->
         <dependency>
             <groupId>com.junoyi</groupId>
             <artifactId>junoyi-framework-redis</artifactId>
+        </dependency>
+
+        <!-- 数据源模块 -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-datasource</artifactId>
         </dependency>
     </dependencies>
 
