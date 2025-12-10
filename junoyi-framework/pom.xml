@@ -18,7 +18,7 @@
         <module>junoyi-framework-core</module>
         <module>junoyi-framework-web</module>
         <module>junoyi-framework-log</module>
-        <module>junoyi-framework-stater</module>
+        <module>junoyi-framework-starter</module>
         <module>junoyi-framework-security</module>
         <module>junoyi-framework-datasource</module>
         <module>junoyi-framework-excel</module>

@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>com.junoyi</groupId>
-            <artifactId>junoyi-framework-stater</artifactId>
+            <artifactId>junoyi-framework-starter</artifactId>
         </dependency>
     </dependencies>
 </project>

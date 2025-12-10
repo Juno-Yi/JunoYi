@@ -16,7 +16,7 @@ junoyi:
   # 版权年份（可选）
   copyrightYear: 2025
   copyright: JunoYi钧逸
-  # 网站备案号
+  # 网站备案号L
   registration: 苏@123456
   # LOGO 图片文件（在resources/public/目录中存放，这里指定文件名）
   logo: LOGO.png

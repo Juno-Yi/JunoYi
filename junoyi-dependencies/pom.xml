@@ -104,7 +104,7 @@
             </dependency>
             <dependency>
                 <groupId>com.junoyi</groupId>
-                <artifactId>junoyi-framework-stater</artifactId>
+                <artifactId>junoyi-framework-starter</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
