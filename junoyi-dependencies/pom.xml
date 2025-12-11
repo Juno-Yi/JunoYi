@@ -79,6 +79,11 @@
             </dependency>
             <dependency>
                 <groupId>com.junoyi</groupId>
+                <artifactId>junoyi-framework-event</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-framework-excel</artifactId>
                 <version>${revision}</version>
             </dependency>

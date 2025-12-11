@@ -26,5 +26,11 @@
             <artifactId>junoyi-framework-core</artifactId>
         </dependency>
 
+        <!--    事件模块    -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-event</artifactId>
+        </dependency>
+
     </dependencies>
 </project>
