@@ -68,8 +68,8 @@ public class EventBus {
 
     /**
      * 触发事件，调用所有注册的事件处理器
-     * 处理器严格按照优先级从高到低顺序执行
-     * 异步处理器会在独立线程中执行，但会等待其完成后再执行下一个处理器
+     * 同步处理器按照优先级从高到低顺序执行
+     * 异步处理器提交到线程池并发执行，不阻塞主线程
      *
      * @param event 要触发的事件对象
      * @param <T> 事件类型
@@ -82,16 +82,8 @@ public class EventBus {
         // 按优先级顺序遍历并调用每个处理器的方法
         for (RegisteredHandler handler : handlers){
             if (handler.async()) {
-                // 异步执行，但等待完成以保证顺序
-                Future<?> future = asyncExecutor.submit(() -> executeHandler(handler, event));
-                try {
-                    future.get(); // 等待异步任务完成
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    log.error("EventHandlerInterrupted", "Handler execution was interrupted: " + handler.method().getName(), e);
-                } catch (ExecutionException e) {
-                    log.error("EventHandlerExecutionError", "Handler execution failed: " + handler.method().getName(), e.getCause());
-                }
+                // 异步执行，不阻塞主线程
+                asyncExecutor.submit(() -> executeHandler(handler, event));
             } else {
                 // 同步执行
                 executeHandler(handler, event);

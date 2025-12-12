@@ -11,7 +11,7 @@ public class TestConfig {
 
     public TestConfig(){
         // 手动注册事件监听器
-        EventBus.get().registerListener(new TestEventListener());
+//        EventBus.get().registerListener(new TestEventListener());
         EventBus.get().registerListener(new Test2EventListener());
         System.out.println("事件监听器已经注册");
     }

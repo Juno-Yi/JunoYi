@@ -64,7 +64,7 @@ junoyi:
       # MDC属性显示的最大数量（超出部分会被截断）
       max-mdc-properties: 3
       # 线程名称显示的最大长度（超出部分会被截断）
-      max-thread-name-length: 15
+      max-thread-name-length: 20
       # 是否简化包名显示（true=简化，false=显示完整包名）
       simplify-package-names: true
       # 包名简化映射配置（将长包名简化为短字符）
