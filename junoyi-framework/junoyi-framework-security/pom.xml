@@ -16,4 +16,23 @@
         安全验证机制核心模块
     </description>
 
+    <dependencies>
+        <!-- SpringBoot Web容器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- SpringBoot 拦截器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-core</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>
