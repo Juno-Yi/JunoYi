@@ -10,7 +10,7 @@
 # ==================== JunoYi 框架配置 ====================
 junoyi:
   # 框架版本号
-  version: 0.1.0-alpha
+  version: 0.0.4-alpha
   # 框架名称（可选）
   name: JunoYi
   # 版权年份（可选）
