@@ -1,8 +1,8 @@
 package com.junoyi.framework.event.domain.spring;
 
 
-import com.junoyi.framework.event.domain.BaseEvent;
 import org.springframework.boot.ConfigurableBootstrapContext;
+import org.springframework.boot.SpringApplication;
 
 /**
  * SpringApplicationStartingEvent类表示Spring应用程序启动事件
@@ -10,7 +10,8 @@ import org.springframework.boot.ConfigurableBootstrapContext;
  *
  * @author Fan
  */
-public class SpringApplicationStartingEvent extends BaseEvent {
+@Deprecated
+public class SpringApplicationStartingEvent extends SpringApplicationEvent {
 
     private final ConfigurableBootstrapContext bootstrapContext;
 
@@ -18,8 +19,12 @@ public class SpringApplicationStartingEvent extends BaseEvent {
      * 构造函数，创建一个SpringApplicationStartingEvent实例
      * @param bootstrapContext 可配置的引导上下文对象，用于获取启动阶段的配置信息
      */
-    public SpringApplicationStartingEvent(ConfigurableBootstrapContext bootstrapContext){
+    public SpringApplicationStartingEvent(ConfigurableBootstrapContext bootstrapContext,
+                                          SpringApplication application,
+                                          String[] args) {
+        super(application, args);
         this.bootstrapContext = bootstrapContext;
+
     }
 
     /**

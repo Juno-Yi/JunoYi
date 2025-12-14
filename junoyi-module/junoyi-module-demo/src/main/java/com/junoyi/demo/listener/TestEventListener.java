@@ -4,6 +4,7 @@ import com.junoyi.demo.event.TestEvent;
 import com.junoyi.framework.event.annotation.EventHandler;
 import com.junoyi.framework.event.annotation.EventListener;
 import com.junoyi.framework.event.domain.spring.SpringApplicationReadyEvent;
+import com.junoyi.framework.event.domain.spring.SpringApplicationStartingEvent;
 import com.junoyi.framework.event.enums.EventPriority;
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
@@ -15,8 +16,15 @@ import com.junoyi.framework.log.core.JunoYiLogFactory;
 public class TestEventListener {
     private final JunoYiLog log = JunoYiLogFactory.getLogger(TestEventListener.class);
 
+    @EventHandler
+    public void onSpringApplicationStartingEvent(SpringApplicationStartingEvent event){
+        System.out.println("===============");
+        System.out.println(" 测试  SpringApplicationStartingEvent 事件监听");
+        System.out.println("===============");
+    }
+
     /**
-     * SpringApplicationStartedEvent被触发时候
+     * SpringApplicationReadyEvent被触发时候
      * @param event SpringApplicationStartedEvent
      */
     @EventHandler(priority = EventPriority.MONITOR)

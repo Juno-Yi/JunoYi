@@ -37,6 +37,8 @@ public class SpringApplicationReadyEventAdapter implements SpringEventAdapter<Ap
     public Event adapt(Object springEvent) {
         ApplicationReadyEvent applicationReadyEvent = (ApplicationReadyEvent) springEvent;
         return new SpringApplicationReadyEvent(
+                applicationReadyEvent.getSpringApplication(),
+                applicationReadyEvent.getArgs(),
                 applicationReadyEvent.getApplicationContext(),
                 applicationReadyEvent.getTimeTaken()
                 );
