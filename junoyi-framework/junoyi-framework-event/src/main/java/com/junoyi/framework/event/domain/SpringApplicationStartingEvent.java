@@ -1,7 +1,7 @@
 package com.junoyi.framework.event.domain;
 
 /**
- * SpringApplicationStartingEvent 事件
+ * Spring 中 ApplicationStartingEvent 事件
  *
  * @author Fan
  */
