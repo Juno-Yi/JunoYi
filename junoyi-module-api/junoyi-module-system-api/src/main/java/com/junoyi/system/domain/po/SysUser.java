@@ -72,18 +72,10 @@ public class SysUser extends BaseEntity {
     private boolean delFlag;
 
     /**
-     * 登录IP
-     */
-    private String loginIp;
-
-    /**
-     * 登录时间
-     */
-    private Date loginTime;
-
-    /**
      * 密码修改时间
      */
     private Date pwdUpdateTime;
 
+
+    private SysUserPlatform sysUserPlatform;
 }
