@@ -20,4 +20,13 @@ public class TokenHelper {
 
     @Value("${junoyi.security.token.secret")
     private String secret;
+
+
+    /**
+     * 生成token
+     * @return 返回生成好的token
+     */
+    public String test(){
+        return null;
+    }
 }
