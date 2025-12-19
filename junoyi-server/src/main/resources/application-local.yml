@@ -45,7 +45,7 @@ spring:
 
 # ==================== Redisson 配置 ====================
 redisson:
-  keyPrefix:
+  keyPrefix: junoyi
   threads: 4
   nettyThreads: 8
   singleServerConfig:

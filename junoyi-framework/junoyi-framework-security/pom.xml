@@ -55,6 +55,12 @@
             <groupId>cn.dev33</groupId>
             <artifactId>sa-token-spring-boot3-starter</artifactId>
         </dependency>
+
+        <!--   redis核心封装模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-redis</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
