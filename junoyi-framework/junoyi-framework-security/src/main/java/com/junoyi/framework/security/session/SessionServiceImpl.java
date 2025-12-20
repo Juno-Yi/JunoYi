@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * 会话服务实现类
- * 
+ *
  * Redis 存储结构：
  * 1. session:{tokenId}     -> UserSession（会话详情）
  * 2. refresh:{tokenId}     -> userId（RefreshToken 白名单）
@@ -36,6 +36,14 @@ public class SessionServiceImpl implements SessionService {
     private static final String REFRESH_KEY_PREFIX = "refresh:";
     private static final String USER_SESSIONS_KEY_PREFIX = "user:sessions:";
 
+    /**
+     * 用户登录并创建新的会话
+     *
+     * @param loginUser 登录用户信息
+     * @param loginIp   登录IP地址
+     * @param userAgent 客户端标识
+     * @return TokenPair 包含访问令牌和刷新令牌的对象
+     */
     @Override
     public TokenPair login(LoginUser loginUser, String loginIp, String userAgent) {
         // 创建 Token 对
@@ -77,13 +85,19 @@ public class SessionServiceImpl implements SessionService {
         String userSessionsKey = USER_SESSIONS_KEY_PREFIX + loginUser.getUserId();
         RedisUtils.setCacheSet(userSessionsKey, Set.of(tokenId));
 
-        log.info("SessionCreated", "用户登录成功 | 用户: " + loginUser.getUserName() 
+        log.info("SessionCreated", "用户登录成功 | 用户: " + loginUser.getUserName()
                 + " | tokenId: " + tokenId.substring(0, 8) + "..."
                 + " | IP: " + loginIp);
 
         return tokenPair;
     }
 
+    /**
+     * 根据访问令牌执行登出操作
+     *
+     * @param token 访问令牌字符串
+     * @return boolean 是否成功登出
+     */
     @Override
     public boolean logout(String token) {
         if (StringUtils.isBlank(token))
@@ -99,11 +113,14 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * 执行登出逻辑
+     *
+     * @param tokenId 会话唯一标识符
+     * @return boolean 是否成功登出
      */
     private boolean doLogout(String tokenId) {
         // 获取会话信息（用于获取 userId）
         UserSession session = getSessionByTokenId(tokenId);
-        
+
         // 删除会话
         String sessionKey = SESSION_KEY_PREFIX + tokenId;
         RedisUtils.deleteObject(sessionKey);
@@ -125,14 +142,20 @@ public class SessionServiceImpl implements SessionService {
                     RedisUtils.setCacheSet(userSessionsKey, sessions);
                 }
             }
-            
-            log.info("SessionDestroyed", "用户登出成功 | 用户: " + session.getUserName() 
+
+            log.info("SessionDestroyed", "用户登出成功 | 用户: " + session.getUserName()
                     + " | tokenId: " + tokenId.substring(0, 8) + "...");
         }
 
         return true;
     }
 
+    /**
+     * 根据访问令牌获取当前用户的会话信息
+     *
+     * @param token 访问令牌字符串
+     * @return UserSession 当前用户的会话对象，若不存在则返回null
+     */
     @Override
     public UserSession getSession(String token) {
         if (StringUtils.isBlank(token))
@@ -142,6 +165,12 @@ public class SessionServiceImpl implements SessionService {
         return getSessionByTokenId(tokenId);
     }
 
+    /**
+     * 根据tokenId获取对应的会话信息
+     *
+     * @param tokenId 会话唯一标识符
+     * @return UserSession 会话对象，若不存在则返回null
+     */
     @Override
     public UserSession getSessionByTokenId(String tokenId) {
         if (StringUtils.isBlank(tokenId))
@@ -151,6 +180,12 @@ public class SessionServiceImpl implements SessionService {
         return RedisUtils.getCacheObject(sessionKey);
     }
 
+    /**
+     * 根据访问令牌提取登录用户的基本信息
+     *
+     * @param token 访问令牌字符串
+     * @return LoginUser 登录用户基本信息对象，若无效则返回null
+     */
     @Override
     public LoginUser getLoginUser(String token) {
         UserSession session = getSession(token);
@@ -169,6 +204,13 @@ public class SessionServiceImpl implements SessionService {
                 .build();
     }
 
+    /**
+     * 使用刷新令牌重新生成一对新的访问与刷新令牌，并替换旧的会话
+     *
+     * @param refreshToken 刷新令牌字符串
+     * @return TokenPair 新的一对访问与刷新令牌
+     * @throws IllegalArgumentException 若刷新令牌无效、已过期或已被撤销时抛出异常
+     */
     @Override
     public TokenPair refreshToken(String refreshToken) {
         // 验证 RefreshToken
@@ -208,13 +250,20 @@ public class SessionServiceImpl implements SessionService {
         // 创建新会话
         TokenPair newTokenPair = login(loginUser, oldSession.getLoginIp(), oldSession.getUserAgent());
 
-        log.info("TokenRefreshed", "Token 刷新成功 | 用户: " + loginUser.getUserName() 
+        log.info("TokenRefreshed", "Token 刷新成功 | 用户: " + loginUser.getUserName()
                 + " | 旧tokenId: " + oldTokenId.substring(0, 8) + "..."
                 + " | 新tokenId: " + newTokenPair.getTokenId().substring(0, 8) + "...");
 
         return newTokenPair;
     }
 
+    /**
+     * 更新指定会话中的用户权限等信息
+     *
+     * @param tokenId   会话唯一标识符
+     * @param loginUser 要更新的用户信息
+     * @return boolean 是否更新成功
+     */
     @Override
     public boolean updateSession(String tokenId, LoginUser loginUser) {
         if (StringUtils.isBlank(tokenId))
@@ -235,12 +284,18 @@ public class SessionServiceImpl implements SessionService {
         String sessionKey = SESSION_KEY_PREFIX + tokenId;
         RedisUtils.setCacheObject(sessionKey, session, true);
 
-        log.info("SessionUpdated", "会话更新成功 | 用户: " + loginUser.getUserName() 
+        log.info("SessionUpdated", "会话更新成功 | 用户: " + loginUser.getUserName()
                 + " | tokenId: " + tokenId.substring(0, 8) + "...");
 
         return true;
     }
 
+    /**
+     * 查询某个用户的所有活跃会话列表
+     *
+     * @param userId 用户ID
+     * @return List<UserSession> 该用户的所有活跃会话集合
+     */
     @Override
     public List<UserSession> getUserSessions(Long userId) {
         if (userId == null)
@@ -248,7 +303,7 @@ public class SessionServiceImpl implements SessionService {
 
         String userSessionsKey = USER_SESSIONS_KEY_PREFIX + userId;
         Set<String> tokenIds = RedisUtils.getCacheSet(userSessionsKey);
-        
+
         if (tokenIds == null || tokenIds.isEmpty())
             return Collections.emptyList();
 
@@ -258,6 +313,12 @@ public class SessionServiceImpl implements SessionService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 强制踢出会话（单个）
+     *
+     * @param tokenId 会话唯一标识符
+     * @return boolean 是否成功踢出
+     */
     @Override
     public boolean kickOut(String tokenId) {
         if (StringUtils.isBlank(tokenId))
@@ -265,13 +326,19 @@ public class SessionServiceImpl implements SessionService {
 
         UserSession session = getSessionByTokenId(tokenId);
         if (session != null) {
-            log.info("SessionKicked", "会话被踢出 | 用户: " + session.getUserName() 
+            log.info("SessionKicked", "会话被踢出 | 用户: " + session.getUserName()
                     + " | tokenId: " + tokenId.substring(0, 8) + "...");
         }
 
         return doLogout(tokenId);
     }
 
+    /**
+     * 强制踢出某用户的所有在线会话
+     *
+     * @param userId 用户ID
+     * @return int 成功踢出的会话数量
+     */
     @Override
     public int kickOutAll(Long userId) {
         if (userId == null)
@@ -279,7 +346,7 @@ public class SessionServiceImpl implements SessionService {
 
         List<UserSession> sessions = getUserSessions(userId);
         int count = 0;
-        
+
         for (UserSession session : sessions) {
             if (doLogout(session.getSessionId()))
                 count++;
@@ -290,6 +357,12 @@ public class SessionServiceImpl implements SessionService {
         return count;
     }
 
+    /**
+     * 验证给定的令牌是否有效且对应一个有效的会话
+     *
+     * @param token 待验证的令牌字符串
+     * @return boolean 令牌是否有效
+     */
     @Override
     public boolean isValid(String token) {
         if (StringUtils.isBlank(token)) {
@@ -309,6 +382,11 @@ public class SessionServiceImpl implements SessionService {
         return RedisUtils.isExistsObject(sessionKey);
     }
 
+    /**
+     * 更新会话最后访问时间
+     *
+     * @param tokenId 会话唯一标识符
+     */
     @Override
     public void touch(String tokenId) {
         if (StringUtils.isBlank(tokenId))
@@ -324,13 +402,16 @@ public class SessionServiceImpl implements SessionService {
 
     /**
      * 解析设备类型
+     *
+     * @param userAgent 浏览器请求头中的User-Agent字段
+     * @return String 设备类型：Mobile / Tablet / Desktop / Unknown
      */
     private String parseDeviceType(String userAgent) {
         if (StringUtils.isBlank(userAgent))
             return "Unknown";
 
         userAgent = userAgent.toLowerCase();
-        
+
         if (userAgent.contains("mobile") || userAgent.contains("android") || userAgent.contains("iphone")) {
             return "Mobile";
         } else if (userAgent.contains("tablet") || userAgent.contains("ipad")) {
@@ -338,7 +419,7 @@ public class SessionServiceImpl implements SessionService {
         } else if (userAgent.contains("windows") || userAgent.contains("macintosh") || userAgent.contains("linux")) {
             return "Desktop";
         }
-        
+
         return "Unknown";
     }
 }
