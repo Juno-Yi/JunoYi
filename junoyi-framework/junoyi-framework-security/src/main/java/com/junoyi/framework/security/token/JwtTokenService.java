@@ -103,23 +103,23 @@ public class JwtTokenService implements TokenService {
     @Override
     public LoginUser paresAccessToken(String accessToken) {
         try {
-            // 1. 解析 Token
+            // 解析 Token
             Claims claims = parseToken(accessToken);
 
-            // 2. 验证 Token 类型
+            // 验证 Token 类型
             String tokenType = claims.get(CLAIM_TYPE, String.class);
             if (!TOKEN_TYPE_ACCESS.equals(tokenType)) {
                 log.warn("TokenTypeError", "Token 类型不匹配，期望: access，实际: " + tokenType);
                 return null;
             }
 
-            // 3. 提取用户信息
+            // 提取用户信息
             Long userId = Long.parseLong(claims.getSubject());
             String username = claims.get(CLAIM_USERNAME, String.class);
             String nickName = claims.get(CLAIM_NICK_NAME, String.class);
             Integer platformCode = claims.get(CLAIM_PLATFORM, Integer.class);
 
-            // 4. 构建 LoginUser 对象
+            // 构建 LoginUser 对象
             LoginUser loginUser = LoginUser.builder()
                     .userId(userId)
                     .userName(username)
@@ -198,15 +198,15 @@ public class JwtTokenService implements TokenService {
     @Override
     public String createRefreshToken(LoginUser loginUser) {
         try {
-            // 1. 生成唯一 JTI
+            // 生成唯一 JTI
             String jti = UUID.randomUUID().toString().replace("-", "");
 
-            // 2. 获取平台类型对应的过期时间（RefreshToken 有效期更长）
+            // 获取平台类型对应的过期时间（RefreshToken 有效期更长）
             Duration expireDuration = getRefreshExpireDuration(loginUser.getPlatformType());
             Date now = new Date();
             Date expiration = new Date(now.getTime() + expireDuration.toMillis());
 
-            // 3. 构建 JWT Token
+            // 构建 JWT Token
             String refreshToken = Jwts.builder()
                     .subject(String.valueOf(loginUser.getUserId()))
                     .claim(CLAIM_TYPE, TOKEN_TYPE_REFRESH)
