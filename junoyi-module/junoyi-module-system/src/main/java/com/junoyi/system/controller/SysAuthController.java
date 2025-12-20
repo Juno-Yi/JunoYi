@@ -42,7 +42,6 @@ public class SysAuthController extends BaseController {
      */
     @PostMapping("/refresh")
     public R<?> refresh(){
-
         return R.ok();
     }
 
