@@ -122,7 +122,7 @@ junoyi:
     api-encrypt:
       enable: true
       # 是否加密请求体
-      request: false
+      request: true
       # 是否加密响应体
       response: true
     # 白名单路径
