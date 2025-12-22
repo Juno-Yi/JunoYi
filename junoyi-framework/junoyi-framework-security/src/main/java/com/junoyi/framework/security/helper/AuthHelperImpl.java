@@ -219,7 +219,7 @@ public class AuthHelperImpl implements AuthHelper {
 
 
     /**
-     * 处理登录失败事件
+     * 处理登录失败
      * @param account 登录失败的账户名
      * @param platformType 登录的平台类型
      * @param ip 登录失败时的客户端IP地址
@@ -243,14 +243,30 @@ public class AuthHelperImpl implements AuthHelper {
 
         // IP限制模式
         if (securityProperties.getLogin().isEnableIpLimit()){
+            String ipKey = getIpKey(ip);
+            Integer ipFailCount = (Integer) RedisUtils.getCacheObject(ipKey);
+
+            ipFailCount = ipFailCount == null ? 1 : ipFailCount ++;
+
+            if (ipFailCount >= securityProperties.getLogin().getIpMaxFailCount() ){
+                log.info("", "当前IP超过登录次数，已经锁定等待冷却");
+
+                RedisUtils.setCacheObject(ipKey, ipFailCount,
+                        Duration.ofMinutes(securityProperties.getLogin().getIpFailCollDownMinutes()));
+            }
 
         }
 
-        return false;
+        // 检查是否锁定进入冷却
+        boolean accountLocked = accountFailCount >= securityProperties.getLogin().getMaxFailCount();
+        boolean ipLocked = securityProperties.getLogin().isEnableIpLimit() &&
+                (Integer) RedisUtils.getCacheObject(getIpKey(ip)) >= securityProperties.getLogin().getIpMaxFailCount();
+
+        return accountLocked || ipLocked;
     }
 
     /**
-     * 处理登录成功事件
+     * 处理登录成功
      * @param account 登录成功的账户名
      * @param platformType 登录成功的平台类型
      * @param ip 登录成功的ip
@@ -259,7 +275,7 @@ public class AuthHelperImpl implements AuthHelper {
     public void onLoginSuccess(String account,PlatformType platformType,String ip) {
         RedisUtils.deleteKeys(getAccountKey(account,platformType));
         if (securityProperties.getLogin().isEnableIpLimit()){
-
+            RedisUtils.deleteKeys(getIpKey(ip));
         }
     }
 
