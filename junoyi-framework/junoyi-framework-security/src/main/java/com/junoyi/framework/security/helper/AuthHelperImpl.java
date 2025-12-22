@@ -236,7 +236,7 @@ public class AuthHelperImpl implements AuthHelper {
         RedisUtils.setCacheObject(accountKey, accountFailCount,
                 Duration.ofMinutes(securityProperties.getLogin().getFailCollDownMinutes()));
 
-        if (accountFailCount >= securityProperties.getLogin().getMaxFailCount()) {
+        if (accountFailCount > securityProperties.getLogin().getMaxFailCount()) {
             log.info("AccountLocked", "账号超过登录次数，进入登录冷却: " + account);
         }
 
@@ -251,14 +251,15 @@ public class AuthHelperImpl implements AuthHelper {
             RedisUtils.setCacheObject(ipKey, ipFailCount,
                     Duration.ofMinutes(securityProperties.getLogin().getIpFailCollDownMinutes()));
 
-            if (ipFailCount >= securityProperties.getLogin().getIpMaxFailCount()) {
+            if (ipFailCount > securityProperties.getLogin().getIpMaxFailCount()) {
                 log.info("IpLocked", "当前IP超过登录次数，已经锁定等待冷却: " + ip);
                 ipLocked = true;
             }
         }
 
         // 检查是否锁定进入冷却
-        boolean accountLocked = accountFailCount >= securityProperties.getLogin().getMaxFailCount();
+        boolean accountLocked = accountFailCount > securityProperties.getLogin().getMaxFailCount();
+
         return accountLocked || ipLocked;
     }
 
