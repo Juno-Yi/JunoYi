@@ -1,6 +1,9 @@
 package com.junoyi.system.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.junoyi.framework.core.domain.base.BaseException;
+import com.junoyi.framework.core.exception.auth.LoginPasswordIsNullException;
+import com.junoyi.framework.core.exception.auth.LoginPasswordWrongException;
 import com.junoyi.framework.core.utils.ServletUtils;
 import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.security.enums.PlatformType;
@@ -140,10 +143,10 @@ public class SysAuthServiceImpl implements ISysAuthService {
      */
     private void validatePassword(String rawPassword, String salt, String encodedPassword) {
         if (StringUtils.isBlank(rawPassword))
-            throw new RuntimeException("密码不能为空");
+            throw new LoginPasswordIsNullException("密码不能为空");
 
         if (!PasswordUtils.matches(rawPassword, salt, encodedPassword)) {
-            throw new RuntimeException("密码错误");
+            throw new LoginPasswordWrongException("密码错误");
         }
     }
 

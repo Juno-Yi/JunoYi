@@ -17,8 +17,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * 基础通用异常处理
+     * @param e BaseException 异常对象
+     * @return R<?> 返回封装的异常响应结果
+     */
     @ExceptionHandler(BaseException.class)
     public R<?> handleBaseException(BaseException e) {
+        // 处理基础异常，返回失败响应
         return R.fail(e.getCode(), e.getMessage());
     }
+
+
+
 }

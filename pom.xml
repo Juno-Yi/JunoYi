@@ -36,7 +36,7 @@
             <dependency>
                 <groupId>com.junoyi</groupId>
                 <artifactId>junoyi-dependencies</artifactId>
-                <version>1.0.0</version>
+                <version>${revision}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
