@@ -24,6 +24,13 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     private final byte[] body;
     private final XssProperties xssProperties;
 
+    /**
+     * 构造 XSS 防护请求包装器
+     *
+     * @param request HTTP 请求对象
+     * @param xssProperties XSS 防护配置属性
+     * @throws IOException 读取请求体时可能抛出的 IO 异常
+     */
     public XssHttpServletRequestWrapper(HttpServletRequest request, XssProperties xssProperties) throws IOException {
         super(request);
         this.xssProperties = xssProperties;
@@ -35,6 +42,12 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         }
     }
 
+    /**
+     * 获取经过 XSS 过滤的请求参数值
+     *
+     * @param name 参数名称
+     * @return 过滤后的参数值
+     */
     @Override
     public String getParameter(String name) {
         if (!xssProperties.isFilterParameter()) return super.getParameter(name);
@@ -42,6 +55,12 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return filterValue(value);
     }
 
+    /**
+     * 获取经过 XSS 过滤的请求参数值数组
+     *
+     * @param name 参数名称
+     * @return 过滤后的参数值数组
+     */
     @Override
     public String[] getParameterValues(String name) {
         if (!xssProperties.isFilterParameter()) return super.getParameterValues(name);
@@ -55,6 +74,11 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return filteredValues;
     }
 
+    /**
+     * 获取经过 XSS 过滤的参数映射
+     *
+     * @return 过滤后的参数映射
+     */
     @Override
     public Map<String, String[]> getParameterMap() {
         if (!xssProperties.isFilterParameter()) return super.getParameterMap();
@@ -76,6 +100,12 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return filteredMap;
     }
 
+    /**
+     * 获取经过 XSS 过滤的请求头值
+     *
+     * @param name 请求头名称
+     * @return 过滤后的请求头值
+     */
     @Override
     public String getHeader(String name) {
         if (!xssProperties.isFilterHeader()) return super.getHeader(name);
@@ -83,6 +113,12 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return filterValue(value);
     }
 
+    /**
+     * 获取经过 XSS 过滤的输入流
+     *
+     * @return 过滤后的输入流
+     * @throws IOException 读取流时可能抛出的 IO 异常
+     */
     @Override
     public ServletInputStream getInputStream() throws IOException {
         if (!xssProperties.isFilterBody() || body == null) return super.getInputStream();
@@ -116,17 +152,33 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         };
     }
 
+    /**
+     * 获取经过 XSS 过滤的字符读取器
+     *
+     * @return 过滤后的字符读取器
+     * @throws IOException 读取时可能抛出的 IO 异常
+     */
     @Override
     public BufferedReader getReader() throws IOException {
         return new BufferedReader(new InputStreamReader(getInputStream(), StandardCharsets.UTF_8));
     }
 
+    /**
+     * 获取请求体内容长度
+     *
+     * @return 请求体内容长度
+     */
     @Override
     public int getContentLength() {
         if (body == null) return super.getContentLength();
         return body.length;
     }
 
+    /**
+     * 获取请求体内容长度（长整型）
+     *
+     * @return 请求体内容长度
+     */
     @Override
     public long getContentLengthLong() {
         if (body == null) return super.getContentLengthLong();
@@ -135,6 +187,9 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     /**
      * 根据配置的模式过滤值
+     *
+     * @param value 待过滤的值
+     * @return 过滤后的值
      */
     private String filterValue(String value) {
         if (value == null) return null;
@@ -148,6 +203,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     /**
      * 获取原始请求体（用于 REJECT 模式检测）
+     *
+     * @return 原始请求体字节数组
      */
     public byte[] getOriginalBody() {
         return body;
