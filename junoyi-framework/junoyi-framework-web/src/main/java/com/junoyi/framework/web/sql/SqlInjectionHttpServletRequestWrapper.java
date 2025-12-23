@@ -28,7 +28,7 @@ public class SqlInjectionHttpServletRequestWrapper extends HttpServletRequestWra
         super(request);
         this.properties = properties;
         // 缓存请求体
-        if (properties.isCheckBody()) {
+        if (properties.isFilterBody()) {
             this.body = request.getInputStream().readAllBytes();
         } else {
             this.body = null;
@@ -37,14 +37,14 @@ public class SqlInjectionHttpServletRequestWrapper extends HttpServletRequestWra
 
     @Override
     public String getParameter(String name) {
-        if (!properties.isCheckParameter()) return super.getParameter(name);
+        if (!properties.isFilterParameter()) return super.getParameter(name);
         String value = super.getParameter(name);
         return filterValue(value);
     }
 
     @Override
     public String[] getParameterValues(String name) {
-        if (!properties.isCheckParameter()) return super.getParameterValues(name);
+        if (!properties.isFilterParameter()) return super.getParameterValues(name);
         String[] values = super.getParameterValues(name);
         if (values == null) return null;
 
@@ -57,7 +57,7 @@ public class SqlInjectionHttpServletRequestWrapper extends HttpServletRequestWra
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        if (!properties.isCheckParameter()) return super.getParameterMap();
+        if (!properties.isFilterParameter()) return super.getParameterMap();
         Map<String, String[]> originalMap = super.getParameterMap();
         Map<String, String[]> filteredMap = new HashMap<>(originalMap.size());
 
@@ -78,14 +78,14 @@ public class SqlInjectionHttpServletRequestWrapper extends HttpServletRequestWra
 
     @Override
     public String getHeader(String name) {
-        if (!properties.isCheckHeader()) return super.getHeader(name);
+        if (!properties.isFilterHeader()) return super.getHeader(name);
         String value = super.getHeader(name);
         return filterValue(value);
     }
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-        if (!properties.isCheckBody() || body == null) return super.getInputStream();
+        if (!properties.isFilterBody() || body == null) return super.getInputStream();
 
         // 过滤请求体中的 SQL 注入
         String bodyStr = new String(body, StandardCharsets.UTF_8);
