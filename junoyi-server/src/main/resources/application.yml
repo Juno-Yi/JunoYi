@@ -120,6 +120,23 @@ junoyi:
   web:
     # 跨域
     cors:
+      # 是否开启跨域
+      enable: true
+      # 是否允许携带凭证（如 Cookie、Authorization Header）
+      allow-credentials: true
+      # 允许跨域访问的源（Origin）
+      allowed-origins:
+        - https://admin.junoyi.com
+      # 允许跨域的方法
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+      # 允许跨域的请求头
+      allowed-headers:
+        - Authorization
+        - Content-Type
 
     # XSS 攻击防护
     xss:

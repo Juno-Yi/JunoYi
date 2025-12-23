@@ -2,6 +2,7 @@ package com.junoyi.framework.web.config;
 
 import com.junoyi.framework.web.filter.SqlInjectionFilter;
 import com.junoyi.framework.web.filter.XssFilter;
+import com.junoyi.framework.web.properties.CorsProperties;
 import com.junoyi.framework.web.properties.SQLInjectionProperties;
 import com.junoyi.framework.web.properties.XssProperties;
 import org.slf4j.Logger;
@@ -18,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Fan
  */
 @Configuration
-@EnableConfigurationProperties({XssProperties.class, SQLInjectionProperties.class})
+@EnableConfigurationProperties({XssProperties.class, SQLInjectionProperties.class, CorsProperties.class})
 public class WebConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(WebConfiguration.class);
