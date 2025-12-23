@@ -50,7 +50,7 @@ public class TokenAuthenticationTokenFilter extends OncePerRequestFilter {
         
         // 检查是否在白名单中
         if (isWhitelisted(requestURI)) {
-            log.info("WhitelistAccess", "白名单放行: " + requestURI);
+//            log.info("WhitelistAccess", "Whitelist release: " + requestURI);
             filterChain.doFilter(request, response);
             return;
         }

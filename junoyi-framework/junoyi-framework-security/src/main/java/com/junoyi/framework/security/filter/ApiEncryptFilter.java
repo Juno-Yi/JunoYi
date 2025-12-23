@@ -51,7 +51,7 @@ public class ApiEncryptFilter extends OncePerRequestFilter {
 
         // 检查加密服务是否可用
         if (!rsaCryptoHelper.isAvailable()) {
-            log.warn("ApiEncryptUnavailable", "RSA 密钥未加载，API 加密功能不可用");
+            log.warn("ApiEncryptUnavailable", "RSA key not loaded, API encryption functionality is not available");
             filterChain.doFilter(request, response);
             return;
         }
@@ -65,7 +65,7 @@ public class ApiEncryptFilter extends OncePerRequestFilter {
             // 处理请求体解密
             if (securityProperties.getApiEncrypt().isRequest() && needDecryptRequest(request)) {
                 wrappedRequest = decryptRequest(request);
-                log.debug("RequestDecrypted", "请求体已解密: " + requestURI);
+                log.debug("RequestDecrypted", "Request body decrypted: " + requestURI);
             }
 
             // 判断是否需要加密响应
@@ -79,11 +79,11 @@ public class ApiEncryptFilter extends OncePerRequestFilter {
             // 加密响应体
             if (needEncryptResponse && wrappedResponse instanceof EncryptedResponseWrapper wrapper) {
                 encryptResponse(wrapper, response);
-                log.debug("ResponseEncrypted", "响应体已加密: " + requestURI);
+                log.debug("ResponseEncrypted", "The response body is encrypted: " + requestURI);
             }
 
         } catch (Exception e) {
-            log.error("ApiEncryptError", "API 加密处理失败: " + requestURI, e);
+            log.error("ApiEncryptError", "API encryption processing failed: " + requestURI, e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"code\":500,\"msg\":\"API 加密处理失败\"}");

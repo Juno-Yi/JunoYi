@@ -56,9 +56,9 @@ public class RsaCryptoHelper {
     public void init() {
         try {
             loadKeys();
-            log.info("RsaCryptoInit", "RSA 密钥加载成功");
+            log.info("RsaCryptoInit", "RSA key loaded successfully");
         } catch (Exception e) {
-            log.warn("RsaCryptoInit", "RSA 密钥加载失败，API 加密功能将不可用: " + e.getMessage());
+            log.warn("RsaCryptoInit", "RSA key loading failed, API encryption functionality will be unavailable: " + e.getMessage());
         }
     }
 

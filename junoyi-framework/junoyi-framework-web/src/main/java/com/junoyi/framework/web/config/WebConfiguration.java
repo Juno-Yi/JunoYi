@@ -29,12 +29,13 @@ public class WebConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "junoyi.web.xss", name = "enable", havingValue = "true", matchIfMissing = true)
     public FilterRegistrationBean<XssFilter> xssFilterRegistration(XssProperties xssProperties) {
-        log.info("[XSS] XSS过滤器已启用, 模式: {}", xssProperties.getMode());
+        log.info("[XSS Protection] XSS filter enabled, mode: {}", xssProperties.getMode());
         FilterRegistrationBean<XssFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new XssFilter(xssProperties));
         registration.addUrlPatterns("/*");
         registration.setName("xssFilter");
-        registration.setOrder(2); // 在 SQL 注入过滤器之后执行
+        // 在 SQL 注入过滤器之后执行
+        registration.setOrder(2);
         return registration;
     }
 
@@ -44,12 +45,13 @@ public class WebConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "junoyi.web.sql-injection", name = "enable", havingValue = "true", matchIfMissing = true)
     public FilterRegistrationBean<SqlInjectionFilter> sqlInjectionFilterRegistration(SQLInjectionProperties properties) {
-        log.info("[SQL注入防护] SQL注入防护过滤器已启用, 模式: {}", properties.getMode());
+        log.info("[SQL Injection Protection] SQL injection protection filter is enabled, mode:{}", properties.getMode());
         FilterRegistrationBean<SqlInjectionFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new SqlInjectionFilter(properties));
         registration.addUrlPatterns("/*");
         registration.setName("sqlInjectionFilter");
-        registration.setOrder(1); // 先执行 SQL 注入检测
+        // 先执行 SQL 注入检测
+        registration.setOrder(1);
         return registration;
     }
 }
