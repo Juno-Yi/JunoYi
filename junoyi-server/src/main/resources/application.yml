@@ -191,11 +191,11 @@ junoyi:
       # 验证码长度
       length: 4
       # 图片宽度
-      width: 130
+      width: 150
       # 图片高度
-      height: 48
-      # 干扰线数量
-      line-count: 10
+      height: 50
+      # 干扰圆圈数量 (适中即可，太多会看不清)
+      circle-count: 20
       # 验证码类型: math(数学运算) / char(字符)
       code-type: char
     # 滑块验证码配置

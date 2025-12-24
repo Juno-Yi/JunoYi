@@ -31,7 +31,7 @@ public class SysCaptchaController {
      * 校验验证码
      */
     @PostMapping("/validate")
-    public R<Boolean> validate(@RequestParam String captchaId, @RequestParam String code) {
+    public R<Boolean> validate(@RequestParam("captchaId") String captchaId, @RequestParam("code") String code) {
         boolean valid = captchaService.validate(captchaId, code);
         return R.ok(valid);
     }

@@ -46,15 +46,15 @@ public class CaptchaProperties {
         /**
          * 图片宽度
          */
-        private int width = 130;
+        private int width = 150;
         /**
          * 图片高度
          */
-        private int height = 48;
+        private int height = 50;
         /**
-         * 干扰线数量
+         * 干扰圆圈数量
          */
-        private int lineCount = 5;
+        private int circleCount = 20;
         /**
          * 验证码类型: math(数学运算), char(字符)
          */
