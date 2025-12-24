@@ -20,17 +20,34 @@ public class SliderCaptchaGenerator implements CaptchaGenerator {
     private final CaptchaStore captchaStore;
     private final CaptchaService captchaService;
 
+    /**
+     * 构造滑块验证码生成器
+     *
+     * @param properties 验证码配置属性
+     * @param captchaStore 验证码存储服务
+     * @param captchaService AJ-Captcha服务
+     */
     public SliderCaptchaGenerator(CaptchaProperties properties, CaptchaStore captchaStore, CaptchaService captchaService) {
         this.properties = properties;
         this.captchaStore = captchaStore;
         this.captchaService = captchaService;
     }
 
+    /**
+     * 获取验证码类型
+     *
+     * @return 验证码类型，固定返回SLIDER类型
+     */
     @Override
     public CaptchaType getType() {
         return CaptchaType.SLIDER;
     }
 
+    /**
+     * 生成滑块验证码
+     *
+     * @return 验证码结果对象，包含验证码ID、类型、背景图片、滑块图片等信息
+     */
     @Override
     public CaptchaResult generate() {
         CaptchaVO captchaVO = new CaptchaVO();
@@ -57,6 +74,13 @@ public class SliderCaptchaGenerator implements CaptchaGenerator {
                 .setExpireSeconds(properties.getExpireSeconds());
     }
 
+    /**
+     * 验证滑块验证码
+     *
+     * @param captchaId 验证码ID
+     * @param params 验证参数，包含用户滑动位置等信息
+     * @return 验证是否通过，true表示验证成功，false表示验证失败
+     */
     @Override
     public boolean validate(String captchaId, Object params) {
         if (params == null) return false;
