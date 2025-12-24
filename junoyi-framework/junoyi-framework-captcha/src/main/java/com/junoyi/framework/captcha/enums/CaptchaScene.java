@@ -35,5 +35,5 @@ public enum CaptchaScene {
     /**
      * 二次验证
      */
-    TWO_FACTOR;
+    TWO_FACTOR
 }

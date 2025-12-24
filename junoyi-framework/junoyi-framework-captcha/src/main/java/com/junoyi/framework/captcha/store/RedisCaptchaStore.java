@@ -3,7 +3,7 @@ package com.junoyi.framework.captcha.store;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Redis 验证码存储实现
@@ -23,7 +23,7 @@ public class RedisCaptchaStore implements CaptchaStore {
     @Override
     public void save(String captchaId, String value, int expireSeconds) {
         RBucket<String> bucket = redissonClient.getBucket(buildKey(captchaId));
-        bucket.set(value, Duration.ofSeconds(expireSeconds));
+        bucket.set(value, expireSeconds, TimeUnit.SECONDS);
     }
 
     @Override
