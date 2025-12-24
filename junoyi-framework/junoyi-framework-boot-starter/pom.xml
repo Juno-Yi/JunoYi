@@ -64,10 +64,16 @@
             <artifactId>junoyi-framework-redis</artifactId>
         </dependency>
 
-        <!--   验证认证安全模块     -->
+        <!--   认证安全模块     -->
         <dependency>
             <groupId>com.junoyi</groupId>
             <artifactId>junoyi-framework-security</artifactId>
+        </dependency>
+
+        <!--   人机验证（验证码）模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-captcha</artifactId>
         </dependency>
 
         <!--   web模块     -->
