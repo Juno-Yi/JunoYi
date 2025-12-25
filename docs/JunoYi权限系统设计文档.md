@@ -65,25 +65,238 @@ system.*                # 系统模块所有权限
 
 ---
 
-## 三、极简数据模型
+## 三、架构设计
 
-### 3.1 核心表结构（仅3张表）
+### 3.1 模块结构
+
+```
+junoyi-framework-permission/
+├── annotation/
+│   ├── Permission.java          # 权限校验注解
+│   ├── DataScope.java           # 数据范围注解
+│   └── FieldPermission.java     # 字段权限注解
+├── aspect/
+│   └── PermissionAspect.java    # 权限校验切面
+├── enums/
+│   ├── Logical.java             # 逻辑运算符（AND/OR）
+│   ├── DataScopeType.java       # 数据范围类型
+│   ├── PermissionType.java      # 权限类型
+│   └── PermissionEffect.java    # 权限效果（ALLOW/DENY）
+├── matcher/
+│   └── PermissionMatcher.java   # 权限匹配器（支持通配符）
+├── helper/
+│   └── PermissionHelper.java    # 权限工具类
+├── handler/
+│   └── PermissionLoader.java    # 权限加载器接口
+├── exception/
+│   └── PermissionException.java # 权限异常
+├── config/
+│   └── PermissionConfiguration.java
+└── properties/
+    └── PermissionProperties.java
+```
+
+### 3.2 与 Security 模块集成
+
+权限信息存储在 `SecurityContext` 的 `LoginUser` 中，统一管理认证和授权：
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    SecurityContext                       │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │                   LoginUser                      │    │
+│  │  - userId, userName, nickName                   │    │
+│  │  - permissions (Set<String>)  ← 权限节点        │    │
+│  │  - groups (Set<String>)       ← 权限组          │    │
+│  │  - deptId                                        │    │
+│  │  - superAdmin                                    │    │
+│  │  - roles                                         │    │
+│  └─────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────┘
+                          ↑
+                          │ 读取
+          ┌───────────────┴───────────────┐
+          │                               │
+    SecurityUtils              PermissionHelper
+    (认证相关)                  (授权相关)
+```
+
+---
+
+## 四、权限匹配规则
+
+### 4.1 匹配优先级
+
+```
+黑名单（-开头） > 精确匹配 > 通配符匹配
+```
+
+### 4.2 通配符规则
+
+| 模式 | 说明 | 示例 |
+|------|------|------|
+| `*` | 单级通配 | `system.user.*` 匹配 `system.user.delete` |
+| `**` | 多级通配 | `system.**` 匹配 `system.user.delete.field` |
+| `-` | 黑名单前缀 | `-system.user.delete` 禁止删除用户 |
+
+### 4.3 匹配示例
+
+```java
+用户权限: ["system.user.*", "system.role.view", "-system.user.delete"]
+
+system.user.create  → ✅ 匹配 system.user.*
+system.user.delete  → ❌ 被黑名单禁止
+system.user.view    → ✅ 匹配 system.user.*
+system.role.view    → ✅ 精确匹配
+system.role.edit    → ❌ 无匹配
+```
+
+---
+
+## 五、使用指南
+
+### 5.1 注解方式
+
+```java
+// 单个权限
+@Permission("system.user.delete")
+@DeleteMapping("/{id}")
+public R<?> deleteUser(@PathVariable Long id) {
+    // ...
+}
+
+// 多个权限（OR 关系，满足任意一个即可）
+@Permission(value = {"system.user.view", "system.admin"}, logical = Logical.OR)
+@GetMapping("/{id}")
+public R<?> getUser(@PathVariable Long id) {
+    // ...
+}
+
+// 多个权限（AND 关系，必须同时满足）
+@Permission(value = {"system.user.view", "system.user.edit"}, logical = Logical.AND)
+@PutMapping("/{id}")
+public R<?> updateUser(@PathVariable Long id) {
+    // ...
+}
+
+// 指定权限类型
+@Permission(value = "button.user.export", type = PermissionType.UI_BUTTON)
+@GetMapping("/export")
+public void exportUsers() {
+    // ...
+}
+
+// 自定义错误消息
+@Permission(value = "system.user.delete", message = "您没有删除用户的权限")
+@DeleteMapping("/{id}")
+public R<?> deleteUser(@PathVariable Long id) {
+    // ...
+}
+```
+
+### 5.2 编程方式
+
+```java
+import com.junoyi.framework.permission.helper.PermissionHelper;
+
+// 判断是否有权限
+if (PermissionHelper.hasPermission("system.user.delete")) {
+    // 执行删除操作
+}
+
+// 判断是否有任意一个权限
+if (PermissionHelper.hasAnyPermission("system.user.view", "system.admin")) {
+    // 执行查看操作
+}
+
+// 判断是否有所有权限
+if (PermissionHelper.hasAllPermissions("system.user.view", "system.user.edit")) {
+    // 执行编辑操作
+}
+
+// 判断是否为超级管理员
+if (PermissionHelper.isSuperAdmin()) {
+    // 超级管理员逻辑
+}
+
+// 判断是否在某个权限组
+if (PermissionHelper.inGroup("admin")) {
+    // 管理员组逻辑
+}
+
+// 获取当前用户权限列表
+Set<String> permissions = PermissionHelper.getCurrentUserPermissions();
+
+// 获取当前用户权限组列表
+Set<String> groups = PermissionHelper.getCurrentUserGroups();
+```
+
+### 5.3 数据范围注解
+
+```java
+// 基于部门的数据范围
+@DataScope(scopeType = DataScopeType.DEPT, scopeField = "dept_id")
+public List<User> listUsers(UserQuery query) {
+    // SQL 自动追加: AND dept_id = #{currentDeptId}
+}
+
+// 本部门及子部门
+@DataScope(scopeType = DataScopeType.DEPT_AND_CHILD, scopeField = "dept_id")
+public List<User> listUsers(UserQuery query) {
+    // SQL 自动追加: AND dept_id IN (...)
+}
+
+// 仅本人数据
+@DataScope(scopeType = DataScopeType.SELF, scopeField = "create_by")
+public List<Order> listOrders(OrderQuery query) {
+    // SQL 自动追加: AND create_by = #{currentUserId}
+}
+
+// 自定义 SQL
+@DataScope(customSql = "region_id IN (SELECT region_id FROM user_region WHERE user_id = #{userId})")
+public List<Report> listReports(ReportQuery query) {
+    // ...
+}
+```
+
+### 5.4 字段权限注解
+
+```java
+public class User {
+    private Long id;
+    private String username;
+
+    // 薪资字段需要特定权限才能查看和编辑
+    @FieldPermission(read = "field.user.salary.read", write = "field.user.salary.write")
+    private BigDecimal salary;
+
+    // 手机号需要脱敏显示
+    @FieldPermission(read = "field.user.phone.read", mask = true, maskPattern = "PHONE")
+    private String phone;
+}
+```
+
+---
+
+## 六、数据库设计
+
+### 6.1 极简表结构（仅3张表）
 
 #### sys_perm_group（权限组表）
 
 ```sql
 CREATE TABLE sys_perm_group (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
-    group_code      VARCHAR(50) NOT NULL UNIQUE,   -- 权限组编码
-    group_name      VARCHAR(100) NOT NULL,         -- 权限组名称
-    permissions     TEXT,                          -- 权限字符串数组（JSON）
-    parent_id       BIGINT DEFAULT 0,              -- 父权限组（支持继承）
-    priority        INT DEFAULT 0,                 -- 优先级（数值越大优先级越高）
+    group_code      VARCHAR(50) NOT NULL UNIQUE COMMENT '权限组编码',
+    group_name      VARCHAR(100) NOT NULL COMMENT '权限组名称',
+    permissions     TEXT COMMENT '权限字符串数组（JSON）',
+    parent_id       BIGINT DEFAULT 0 COMMENT '父权限组（支持继承）',
+    priority        INT DEFAULT 0 COMMENT '优先级',
     description     VARCHAR(500),
     status          TINYINT DEFAULT 1,
     create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+) COMMENT '权限组表';
 
 -- 示例数据
 INSERT INTO sys_perm_group (group_code, group_name, permissions, priority) VALUES
@@ -97,12 +310,12 @@ INSERT INTO sys_perm_group (group_code, group_name, permissions, priority) VALUE
 ```sql
 CREATE TABLE sys_user_group (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id         BIGINT NOT NULL,
-    group_id        BIGINT NOT NULL,
-    expire_time     DATETIME,                      -- 过期时间（支持临时授权）
+    user_id         BIGINT NOT NULL COMMENT '用户ID',
+    group_id        BIGINT NOT NULL COMMENT '权限组ID',
+    expire_time     DATETIME COMMENT '过期时间（支持临时授权）',
     create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_user_group (user_id, group_id)
-);
+) COMMENT '用户-权限组关联表';
 ```
 
 #### sys_role_group（角色-权限组关联表，可选）
@@ -110,115 +323,134 @@ CREATE TABLE sys_user_group (
 ```sql
 CREATE TABLE sys_role_group (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
-    role_id         BIGINT NOT NULL,
-    group_id        BIGINT NOT NULL,
+    role_id         BIGINT NOT NULL COMMENT '角色ID',
+    group_id        BIGINT NOT NULL COMMENT '权限组ID',
     create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_role_group (role_id, group_id)
-);
+) COMMENT '角色-权限组关联表';
 ```
 
 ---
 
-## 四、权限匹配引擎
+## 七、配置项
 
-### 4.1 匹配规则
-
+```yaml
+junoyi:
+  permission:
+    enable: true                    # 是否启用权限控制
+    cache:
+      enable: true                  # 是否启用缓存
+      expire: 3600                  # 缓存过期时间（秒）
+    super-admin:
+      enable: true                  # 是否启用超级管理员
+      user-ids: [1]                 # 超级管理员用户ID
+      permission: "*"               # 超级管理员权限节点
+    default-groups:
+      - guest                       # 新用户默认权限组
 ```
-1. 精确匹配：system.user.delete
-2. 单级通配：system.user.* 匹配 system.user.delete
-3. 多级通配：system.** 匹配 system.user.delete.field
-4. 全局通配：* 匹配所有
-5. 黑名单：-system.user.delete 禁止该权限（优先级最高）
+
+---
+
+## 八、前端集成
+
+### 8.1 获取用户权限
+
+登录成功后，前端可以获取用户的权限列表：
+
+```javascript
+// 登录响应中包含权限信息
+{
+  "accessToken": "xxx",
+  "refreshToken": "xxx",
+  "permissions": ["system.user.*", "system.role.view", "-system.user.delete"],
+  "groups": ["user_manager"]
+}
 ```
 
-### 4.2 匹配优先级
+### 8.2 前端权限判断
 
-```
-黑名单（-开头） > 精确匹配 > 通配符匹配
+```javascript
+// 权限匹配工具函数
+function hasPermission(permission) {
+    const permissions = store.getters.permissions;
+    
+    // 1. 检查黑名单
+    if (permissions.includes('-' + permission)) {
+        return false;
+    }
+    
+    // 2. 超级管理员
+    if (permissions.includes('*')) {
+        return true;
+    }
+    
+    // 3. 精确匹配
+    if (permissions.includes(permission)) {
+        return true;
+    }
+    
+    // 4. 通配符匹配
+    return permissions.some(p => matchWildcard(p, permission));
+}
+
+function matchWildcard(pattern, permission) {
+    if (pattern === '*' || pattern === '**') return true;
+    if (pattern.endsWith('.*')) {
+        const prefix = pattern.slice(0, -2);
+        return permission.startsWith(prefix + '.');
+    }
+    if (pattern.endsWith('.**')) {
+        const prefix = pattern.slice(0, -3);
+        return permission.startsWith(prefix + '.');
+    }
+    return false;
+}
 ```
 
-### 4.3 权限计算流程
+### 8.3 Vue 指令
+
+```vue
+<template>
+  <!-- 按钮权限 -->
+  <el-button v-permission="'system.user.delete'" @click="handleDelete">删除</el-button>
+  
+  <!-- 权限组判断 -->
+  <AdminPanel v-if="inGroup('admin')" />
+  
+  <!-- 字段权限 -->
+  <el-table-column v-if="hasPermission('field.user.salary.read')" prop="salary" label="薪资" />
+</template>
+
+<script setup>
+import { hasPermission, inGroup } from '@/utils/permission'
+</script>
+```
+
+---
+
+## 九、权限计算流程
 
 ```
 用户登录
     ↓
-获取用户关联的所有权限组
+查询用户关联的权限组
     ↓
 合并所有权限组的 permissions 字段
     ↓
 处理权限继承（父权限组）
     ↓
-缓存到 Redis（Set<String>）
+存入 LoginUser.permissions
     ↓
-请求时纯字符串匹配
+存入 Redis（UserSession）
+    ↓
+请求时从 SecurityContext 获取
+    ↓
+PermissionMatcher 进行字符串匹配
 ```
 
 ---
 
-## 五、使用示例
-
-### 5.1 后端使用
-
-```java
-// 1. 注解方式
-@Permission("system.user.delete")
-@DeleteMapping("/{id}")
-public R<?> deleteUser(@PathVariable Long id) {
-    // ...
-}
-
-// 2. 多权限（OR 关系）
-@Permission(value = {"system.user.view", "system.admin"}, logical = Logical.OR)
-public R<?> getUser() { }
-
-// 3. 编程方式
-if (PermissionHelper.hasPermission("system.user.delete")) {
-    // 有权限
-}
-
-// 4. 数据范围
-@DataScope(scopeType = DataScopeType.DEPT)
-public List<User> listUsers() {
-    // SQL 自动追加数据范围条件
-}
-```
-
-### 5.2 前端使用
-
-```javascript
-// 登录后获取用户权限列表
-const permissions = ['system.user.*', 'system.role.view', '-system.user.delete']
-
-// 判断是否有权限
-function hasPermission(permission) {
-    // 1. 检查黑名单
-    if (permissions.includes('-' + permission)) return false
-    // 2. 精确匹配
-    if (permissions.includes(permission)) return true
-    // 3. 通配符匹配
-    return permissions.some(p => matchWildcard(p, permission))
-}
-```
-
----
-
-## 六、配置项
-
-```yaml
-junoyi:
-  permission:
-    enable: true
-    cache:
-      enable: true
-      expire: 3600          # 缓存过期时间（秒）
-    super-admin:
-      enable: true
-      user-ids: [1]         # 超级管理员用户ID
-```
-
----
-
-## 七、总结
+## 十、总结
 
 JunoYi 权限系统的核心优势：
 
@@ -228,3 +460,4 @@ JunoYi 权限系统的核心优势：
 4. **黑名单支持** - `-system.user.delete` 精确禁止
 5. **高性能** - Redis 缓存 + 纯字符串匹配
 6. **动态权限** - 修改即生效，无需重启
+7. **多维度控制** - API/菜单/按钮/组件/行/字段 全覆盖
