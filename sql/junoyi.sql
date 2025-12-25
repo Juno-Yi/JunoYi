@@ -11,31 +11,11 @@
  Target Server Version : 80404 (8.4.4)
  File Encoding         : 65001
 
- Date: 25/12/2025 19:21:00
+ Date: 25/12/2025 20:42:22
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for sys_group_permission
--- ----------------------------
-DROP TABLE IF EXISTS `sys_group_permission`;
-CREATE TABLE `sys_group_permission` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `group_id` bigint NOT NULL COMMENT '权限组ID',
-  `permission_id` bigint DEFAULT NULL COMMENT '权限ID',
-  `effect` varchar(10) DEFAULT 'ALLOW' COMMENT 'ALLOW/DENY (支持黑名单）',
-  `conditions` json DEFAULT NULL COMMENT '状况',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='权限组-权限关联表';
-
--- ----------------------------
--- Records of sys_group_permission
--- ----------------------------
-BEGIN;
-COMMIT;
 
 -- ----------------------------
 -- Table structure for sys_perm_group
@@ -49,6 +29,7 @@ CREATE TABLE `sys_perm_group` (
   `priority` int DEFAULT NULL COMMENT '优先级（数值越大优先级越高）',
   `description` varchar(500) DEFAULT NULL COMMENT '权限组描述',
   `status` int DEFAULT '1' COMMENT '状态（0停用，1启用）',
+  `permission` text COMMENT '权限标识符',
   `create_by` varchar(64) DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` varchar(64) DEFAULT NULL COMMENT '更新者',
@@ -59,35 +40,6 @@ CREATE TABLE `sys_perm_group` (
 
 -- ----------------------------
 -- Records of sys_perm_group
--- ----------------------------
-BEGIN;
-COMMIT;
-
--- ----------------------------
--- Table structure for sys_permission
--- ----------------------------
-DROP TABLE IF EXISTS `sys_permission`;
-CREATE TABLE `sys_permission` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `node` varchar(200) DEFAULT NULL COMMENT '权限节点',
-  `name` varchar(100) DEFAULT NULL COMMENT '权限名称',
-  `type` varchar(20) DEFAULT NULL COMMENT '权限类型',
-  `parent_id` bigint NOT NULL COMMENT '父节点ID（构建权限树）',
-  `resource` varchar(100) DEFAULT NULL COMMENT '资源标识符',
-  `action` varchar(50) DEFAULT NULL COMMENT '操作标识',
-  `description` varchar(500) DEFAULT NULL COMMENT '描述',
-  `sort` int DEFAULT '0' COMMENT '排序',
-  `status` tinyint DEFAULT '1' COMMENT '状态（0停用，1启用）',
-  `create_by` varchar(64) DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) DEFAULT NULL COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) NOT NULL COMMENT '备注',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='系统权限节点表';
-
--- ----------------------------
--- Records of sys_permission
 -- ----------------------------
 BEGIN;
 COMMIT;
