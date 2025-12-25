@@ -1,5 +1,6 @@
 package com.junoyi.framework.web.interceptor;
 
+import com.junoyi.framework.core.utils.IPUtils;
 import com.junoyi.framework.web.properties.AccessLogProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -98,7 +99,7 @@ public class AccessLogInterceptor implements HandlerInterceptor {
         String method = request.getMethod();
         String uri = request.getRequestURI();
         String queryString = request.getQueryString();
-        String clientIp = getClientIp(request);
+        String clientIp = IPUtils.getIpAddr(request);
 
         StringBuilder sb = new StringBuilder();
         sb.append("[Request Start] ").append(method).append(" ").append(uri);
@@ -186,23 +187,5 @@ public class AccessLogInterceptor implements HandlerInterceptor {
             }
         }
         return false;
-    }
-
-    /**
-     * 获取客户端 IP
-     */
-    private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("X-Real-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        // 多个代理时取第一个
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-        return ip;
     }
 }
