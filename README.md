@@ -125,63 +125,6 @@ JunoYi（钧逸）是一个基于 **Spring Boot 3.3.5** 和 **Java 21** 打造�
 
 ---
 
-## 🚀 快速开始
-
-### 环境要求
-
-- **JDK**: 21+
-- **Maven**: 3.6+
-- **MySQL**: 8.0+
-- **Redis**: 6.0+ (可选)
-
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/yourusername/JunoYi.git
-cd JunoYi
-```
-
-### 2. 初始化数据库
-
-```bash
-# 创建数据库
-mysql -u root -p
-CREATE DATABASE junoyi DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-# 导入数据库脚本
-mysql -u root -p junoyi < sql/junoyi.sql
-```
-
-### 3. 修改配置
-
-编辑 `junoyi-server/src/main/resources/application-local.yml`:
-
-```yaml
-spring:
-  datasource:
-    dynamic:
-      datasource:
-        master:
-          url: jdbc:mysql://localhost:3306/junoyi?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-          username: root
-          password: your_password
-
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
-      # password: your_redis_password
-```
-
-### 4. 构建项目
-
-```bash
-# 完整构建
-mvn clean install
-
-# 跳过测试构建
-mvn clean install -DskipTests
-```
 
 ### 5. 启动项目
 
@@ -209,20 +152,6 @@ java -jar target/junoyi-server.jar --spring.profiles.active=local
 
 ## 📚 文档
 
-### 核心文档
-
-- [项目架构说明](docs/项目架构说明.md) - 了解项目整体架构和设计理念
-- [模块开发指南](docs/模块开发指南.md) - 学习如何创建和开发新模块
-- [快速参考](docs/快速参考.md) - 快速查找常用配置和命令
-- [JunoYi日志框架使用说明](docs/JunoYi日志框架使用说明.md) - 日志框架详细使用指南
-
-### 模块文档
-
-- **日志框架** - 自研彩色日志、链路追踪、性能监控
-- **安全模块** - JWT 认证、API 加密、权限控制
-- **Redis 模块** - 缓存操作、分布式锁、发布订阅
-- **事件模块** - 事件总线、异步事件、Spring 事件桥接
-- **数据源模块** - 多数据源、读写分离、事务管理
 
 ---
 
@@ -238,188 +167,11 @@ JunoYi 内置了一套强大的日志框架，提供：
 - ✅ **异步日志** - 支持异步写入，不阻塞主线程
 - ✅ **MDC 上下文** - 自动记录用户、请求等上下文信息
 
-```java
-private final JunoYiLog log = JunoYiLogFactory.getLogger(UserService.class);
-
-// 基础日志
-log.info("用户登录成功");
-log.error("登录失败", exception);
-
-// 带分类的日志
-log.info("UserLogin", "用户 admin 登录成功");
-
-// 性能监控
-log.performance("queryUsers", 150);
-
-// 业务日志
-log.business("用户模块", "登录", "成功");
-```
-
-### 2. 统一响应封装
-
-所有 API 返回统一的响应格式：
-
-```json
-{
-  "code": 200,
-  "msg": "操作成功",
-  "data": {
-    "id": 1,
-    "username": "admin"
-  },
-  "timestamp": 1703001234567
-}
-```
-
-```java
-@RestController
-public class UserController {
-
-    @GetMapping("/user/{id}")
-    public Result<User> getUser(@PathVariable Long id) {
-        User user = userService.getById(id);
-        return Result.success(user);
-    }
-}
-```
-
-### 3. 全局异常处理
-
-统一捕获和处理异常，返回友好的错误信息：
-
-```java
-@RestControllerAdvice
-public class GlobalExceptionHandler {
-
-    @ExceptionHandler(BusinessException.class)
-    public Result handleBusinessException(BusinessException e) {
-        return Result.error(e.getMessage());
-    }
-}
-```
-
-### 4. 安全认证
-
-内置 JWT + Sa-Token 双重认证机制：
-
-```java
-// 登录
-@PostMapping("/login")
-public Result<LoginVO> login(@RequestBody LoginDTO loginDTO) {
-    String token = authService.login(loginDTO);
-    return Result.success(new LoginVO(token));
-}
-
-// 获取当前用户
-@GetMapping("/current")
-public Result<User> getCurrentUser() {
-    LoginUser loginUser = SecurityUtils.getLoginUser();
-    return Result.success(loginUser);
-}
-
-// 权限检查
-@GetMapping("/admin/data")
-@PreAuthorize("hasPermission('admin:data:view')")
-public Result getData() {
-    return Result.success(data);
-}
-```
-
-### 5. Redis 缓存
-
-简化的 Redis 操作：
-
-```java
-// 缓存对象
-RedisUtils.setCacheObject("user:1", user, Duration.ofMinutes(30));
-
-// 获取对象
-User user = RedisUtils.getCacheObject("user:1");
-
-// 分布式锁
-@Lock4j(keys = {"#userId"}, expire = 60000)
-public void processOrder(Long userId) {
-    // 业务逻辑
-}
-
-// 发布订阅
-RedisUtils.publish("order:created", orderEvent);
-RedisUtils.subscribe("order:created", OrderEvent.class, event -> {
-        // 处理事件
-        });
-```
-
-### 6. 事件总线
-
-轻量级事件驱动：
-
-```java
-// 定义事件
-public class UserRegisteredEvent extends BaseEvent {
-    private Long userId;
-    private String username;
-}
-
-// 发布事件
-eventBus.callEvent(new UserRegisteredEvent(userId, username));
-
-// 监听事件
-@EventListener
-public class UserEventListener {
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onUserRegistered(UserRegisteredEvent event) {
-        // 发送欢迎邮件
-    }
-}
-```
 
 ---
 
 ## 🔧 配置说明
 
-### 主配置文件
-
-`application.yml` - 主配置文件
-
-```yaml
-# JunoYi 框架配置
-junoyi:
-  version: 1.0.0
-  name: JunoYi
-
-  # 日志配置
-  log:
-    console:
-      enabled: true
-      color-enabled: true
-    level:
-      junoyi: DEBUG
-
-  # 数据源配置
-  datasource:
-    sql-beautify-enabled: true
-    slow-sql-enabled: true
-    slow-sql-threshold: 3000
-
-  # 安全配置
-  security:
-    whitelist:
-      - /auth/**
-      - /public/**
-    token:
-      header: Authorization
-      secret: your-secret-key
-```
-
-### 环境配置
-
-- `application-local.yml` - 本地开发环境
-- `application-dev.yml` - 开发环境
-- `application-test.yml` - 测试环境
-- `application-prod.yml` - 生产环境
-
----
 
 ## 📝 开发规范
 
@@ -494,9 +246,9 @@ com.junoyi.module.xxx                # 模块实现
 
 ## 📮 联系方式
 
-- **项目主页**: https://github.com/yourusername/JunoYi
-- **问题反馈**: https://github.com/yourusername/JunoYi/issues
-- **邮箱**: your-email@example.com
+- **项目主页**: https://github.com/Juno-Yi/JunoYi
+- **问题反馈**: https://github.com/Juno-Yi/JunoYi/issues
+- **邮箱**: eatfan0921@gmail.com
 
 ---
 
