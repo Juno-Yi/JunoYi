@@ -29,13 +29,7 @@ public class JunoYiLoggingAutoConfig implements ApplicationContextAware, Initial
 
     public JunoYiLoggingAutoConfig(JunoYiLogProperties logProperties) {
         this.logProperties = logProperties;
-        // 在构造函数中立即初始化日志系统
-        initializeLoggingSystem();
-    }
-
-    private void initializeLoggingSystem() {
-        // 初始化日志级别
-        initLoggingLevels();
+        // 延迟初始化，不在构造函数中调用
     }
 
     /**
@@ -43,7 +37,13 @@ public class JunoYiLoggingAutoConfig implements ApplicationContextAware, Initial
      */
     private void initLoggingLevels() {
         if (loggingSystem == null) {
-            loggingSystem = LoggingSystem.get(ClassLoader.getSystemClassLoader());
+            // 使用当前线程的 ClassLoader，兼容 fat jar 环境
+            loggingSystem = LoggingSystem.get(Thread.currentThread().getContextClassLoader());
+        }
+        
+        if (loggingSystem == null) {
+            System.err.println("无法获取 LoggingSystem，跳过日志级别配置");
+            return;
         }
 
         // 设置根日志级别
