@@ -64,7 +64,6 @@ public class SessionHelperImpl implements SessionHelper {
                 .userName(loginUser.getUserName())
                 .nickName(loginUser.getNickName())
                 .platformType(loginUser.getPlatformType())
-                .permissions(loginUser.getPermissions())
                 .roles(loginUser.getRoles())
                 .loginIp(loginIp)
                 .loginTime(now)
@@ -259,7 +258,6 @@ public class SessionHelperImpl implements SessionHelper {
                 .userName(session.getUserName())
                 .nickName(session.getNickName())
                 .platformType(session.getPlatformType())
-                .permissions(session.getPermissions())
                 .roles(session.getRoles())
                 .loginIp(session.getLoginIp())
                 .loginTime(session.getLoginTime())
@@ -300,7 +298,6 @@ public class SessionHelperImpl implements SessionHelper {
                 .userName(oldSession.getUserName())
                 .nickName(oldSession.getNickName())
                 .platformType(oldSession.getPlatformType())
-                .permissions(oldSession.getPermissions())
                 .roles(oldSession.getRoles())
                 .loginIp(oldSession.getLoginIp())
                 .loginTime(oldSession.getLoginTime())
@@ -338,7 +335,6 @@ public class SessionHelperImpl implements SessionHelper {
         // 更新会话信息
         session.setUserName(loginUser.getUserName());
         session.setNickName(loginUser.getNickName());
-        session.setPermissions(loginUser.getPermissions());
         session.setRoles(loginUser.getRoles());
         session.setLastAccessTime(new Date());
 

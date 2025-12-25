@@ -1,12 +1,11 @@
 package com.junoyi.framework.permission.helper;
 
-import com.junoyi.framework.permission.core.PermissionContext;
-import com.junoyi.framework.permission.core.PermissionContextHolder;
 import com.junoyi.framework.permission.enums.Logical;
 import com.junoyi.framework.permission.matcher.PermissionMatcher;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * 权限工具类
@@ -30,7 +29,33 @@ import java.util.Set;
  */
 public class PermissionHelper {
 
+    /**
+     * 权限信息提供者（由 Security 模块注入）
+     */
+    private static Supplier<Set<String>> permissionsSupplier;
+    private static Supplier<Set<String>> groupsSupplier;
+    private static Supplier<Long> userIdSupplier;
+    private static Supplier<Long> deptIdSupplier;
+    private static Supplier<Boolean> superAdminSupplier;
+
     private PermissionHelper() {
+    }
+
+    /**
+     * 初始化权限信息提供者
+     * <p>
+     * 由 Security 模块在启动时调用，注入获取权限信息的方法
+     */
+    public static void init(Supplier<Set<String>> permissions,
+                            Supplier<Set<String>> groups,
+                            Supplier<Long> userId,
+                            Supplier<Long> deptId,
+                            Supplier<Boolean> superAdmin) {
+        permissionsSupplier = permissions;
+        groupsSupplier = groups;
+        userIdSupplier = userId;
+        deptIdSupplier = deptId;
+        superAdminSupplier = superAdmin;
     }
 
     /**
@@ -40,6 +65,10 @@ public class PermissionHelper {
      * @return true 有权限，false 无权限
      */
     public static boolean hasPermission(String permission) {
+        // 超级管理员拥有所有权限
+        if (isSuperAdmin()) {
+            return true;
+        }
         Set<String> userPermissions = getCurrentUserPermissions();
         return PermissionMatcher.hasPermission(userPermissions, permission);
     }
@@ -51,6 +80,9 @@ public class PermissionHelper {
      * @return true 拥有所有权限，false 缺少权限
      */
     public static boolean hasAllPermissions(String... permissions) {
+        if (isSuperAdmin()) {
+            return true;
+        }
         Set<String> userPermissions = getCurrentUserPermissions();
         return PermissionMatcher.hasAllPermissions(userPermissions, permissions);
     }
@@ -62,6 +94,9 @@ public class PermissionHelper {
      * @return true 拥有任意一个权限，false 无任何权限
      */
     public static boolean hasAnyPermission(String... permissions) {
+        if (isSuperAdmin()) {
+            return true;
+        }
         Set<String> userPermissions = getCurrentUserPermissions();
         return PermissionMatcher.hasAnyPermission(userPermissions, permissions);
     }
@@ -90,8 +125,11 @@ public class PermissionHelper {
      * @return true 是超级管理员，false 不是
      */
     public static boolean isSuperAdmin() {
-        PermissionContext context = PermissionContextHolder.getContext();
-        return context != null && context.isSuperAdmin();
+        if (superAdminSupplier == null) {
+            return false;
+        }
+        Boolean result = superAdminSupplier.get();
+        return result != null && result;
     }
 
     /**
@@ -101,11 +139,8 @@ public class PermissionHelper {
      * @return true 在权限组中，false 不在
      */
     public static boolean inGroup(String groupCode) {
-        PermissionContext context = PermissionContextHolder.getContext();
-        if (context == null || context.getGroups() == null) {
-            return false;
-        }
-        return context.getGroups().contains(groupCode);
+        Set<String> groups = getCurrentUserGroups();
+        return groups != null && groups.contains(groupCode);
     }
 
     /**
@@ -132,11 +167,11 @@ public class PermissionHelper {
      * @return 权限集合，如果未登录返回空集合
      */
     public static Set<String> getCurrentUserPermissions() {
-        PermissionContext context = PermissionContextHolder.getContext();
-        if (context == null || context.getPermissions() == null) {
+        if (permissionsSupplier == null) {
             return Set.of();
         }
-        return context.getPermissions();
+        Set<String> permissions = permissionsSupplier.get();
+        return permissions != null ? permissions : Set.of();
     }
 
     /**
@@ -145,11 +180,11 @@ public class PermissionHelper {
      * @return 权限组集合，如果未登录返回空集合
      */
     public static Set<String> getCurrentUserGroups() {
-        PermissionContext context = PermissionContextHolder.getContext();
-        if (context == null || context.getGroups() == null) {
+        if (groupsSupplier == null) {
             return Set.of();
         }
-        return context.getGroups();
+        Set<String> groups = groupsSupplier.get();
+        return groups != null ? groups : Set.of();
     }
 
     /**
@@ -158,8 +193,7 @@ public class PermissionHelper {
      * @return 用户ID，如果未登录返回 null
      */
     public static Long getCurrentUserId() {
-        PermissionContext context = PermissionContextHolder.getContext();
-        return context != null ? context.getUserId() : null;
+        return userIdSupplier != null ? userIdSupplier.get() : null;
     }
 
     /**
@@ -168,8 +202,7 @@ public class PermissionHelper {
      * @return 部门ID，如果未登录返回 null
      */
     public static Long getCurrentDeptId() {
-        PermissionContext context = PermissionContextHolder.getContext();
-        return context != null ? context.getDeptId() : null;
+        return deptIdSupplier != null ? deptIdSupplier.get() : null;
     }
 
     /**

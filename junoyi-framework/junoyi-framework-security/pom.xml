@@ -50,6 +50,12 @@
             <groupId>com.junoyi</groupId>
             <artifactId>junoyi-framework-redis</artifactId>
         </dependency>
+
+        <!--   permission权限模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-permission</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -1,6 +1,5 @@
 package com.junoyi.framework.permission.handler;
 
-import com.junoyi.framework.permission.core.PermissionContext;
 
 /**
  * 权限加载器接口
@@ -13,15 +12,6 @@ import com.junoyi.framework.permission.core.PermissionContext;
  */
 public interface PermissionLoader {
 
-    /**
-     * 加载用户权限上下文
-     * <p>
-     * 实现此方法从数据库/缓存加载用户的权限信息
-     *
-     * @param userId 用户ID
-     * @return 权限上下文
-     */
-    PermissionContext loadPermissionContext(Long userId);
 
     /**
      * 刷新用户权限缓存

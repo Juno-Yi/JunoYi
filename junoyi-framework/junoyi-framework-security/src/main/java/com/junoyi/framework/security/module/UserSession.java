@@ -51,15 +51,31 @@ public class UserSession implements Serializable {
      */
     private PlatformType platformType;
 
-    /**
-     * 用户权限列表
-     */
-    private Set<String> permissions;
 
     /**
      * 用户角色ID列表
      */
     private Set<Long> roles;
+
+    /**
+     * 用户权限节点集合
+     */
+    private Set<String> permissions;
+
+    /**
+     * 用户权限组编码集合
+     */
+    private Set<String> groups;
+
+    /**
+     * 用户部门ID
+     */
+    private Long deptId;
+
+    /**
+     * 是否为超级管理员
+     */
+    private boolean superAdmin;
 
     /**
      * 登录IP地址

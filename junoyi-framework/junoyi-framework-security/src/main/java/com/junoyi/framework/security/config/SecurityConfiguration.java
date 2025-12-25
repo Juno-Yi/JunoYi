@@ -2,12 +2,16 @@ package com.junoyi.framework.security.config;
 
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
+import com.junoyi.framework.permission.helper.PermissionHelper;
+import com.junoyi.framework.security.context.SecurityContext;
 import com.junoyi.framework.security.crypto.RsaCryptoHelper;
 import com.junoyi.framework.security.filter.ApiEncryptFilter;
 import com.junoyi.framework.security.filter.TokenAuthenticationTokenFilter;
+import com.junoyi.framework.security.module.LoginUser;
 import com.junoyi.framework.security.properties.SecurityProperties;
 import com.junoyi.framework.security.helper.SessionHelper;
 import com.junoyi.framework.security.helper.JwtTokenHelper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -31,6 +35,36 @@ public class SecurityConfiguration {
     private final SessionHelper sessionHelper;
     private final SecurityProperties securityProperties;
     private final RsaCryptoHelper rsaCryptoHelper;
+
+    /**
+     * 初始化 PermissionHelper，注入从 SecurityContext 获取权限信息的方法
+     */
+    @PostConstruct
+    public void initPermissionHelper() {
+        PermissionHelper.init(
+                () -> {
+                    LoginUser user = SecurityContext.get();
+                    return user != null ? user.getPermissions() : null;
+                },
+                () -> {
+                    LoginUser user = SecurityContext.get();
+                    return user != null ? user.getGroups() : null;
+                },
+                () -> {
+                    LoginUser user = SecurityContext.get();
+                    return user != null ? user.getUserId() : null;
+                },
+                () -> {
+                    LoginUser user = SecurityContext.get();
+                    return user != null ? user.getDeptId() : null;
+                },
+                () -> {
+                    LoginUser user = SecurityContext.get();
+                    return user != null && user.isSuperAdmin();
+                }
+        );
+        log.info("PermissionHelperInit", "PermissionHelper initialized with SecurityContext.");
+    }
 
     /**
      * 注册 API 加密过滤器

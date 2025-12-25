@@ -1,8 +1,6 @@
 package com.junoyi.framework.permission.aspect;
 
 import com.junoyi.framework.permission.annotation.Permission;
-import com.junoyi.framework.permission.core.PermissionContext;
-import com.junoyi.framework.permission.core.PermissionContextHolder;
 import com.junoyi.framework.permission.enums.Logical;
 import com.junoyi.framework.permission.exception.PermissionException;
 import com.junoyi.framework.permission.helper.PermissionHelper;
@@ -84,8 +82,8 @@ public class PermissionAspect {
 
         // 检查是否需要登录
         if (permission.requireLogin()) {
-            PermissionContext context = PermissionContextHolder.getContext();
-            if (context == null || context.getUserId() == null) {
+            Long userId = PermissionHelper.getCurrentUserId();
+            if (userId == null) {
                 throw PermissionException.notLogin();
             }
         }
