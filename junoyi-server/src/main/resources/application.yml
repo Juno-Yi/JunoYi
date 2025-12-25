@@ -43,7 +43,7 @@ junoyi:
       # 根日志级别
       root: INFO
       # JunoYi 框架日志级别（设置为 DEBUG 以查看所有日志）
-      junoyi: DEBUG
+      junoyi: INFO
       # Spring 框架日志级别
       spring: WARN
       # MyBatis 日志级别

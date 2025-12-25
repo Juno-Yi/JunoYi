@@ -1,5 +1,3 @@
-# 未开发完工（开发测试中）
-
 <div align="center">
     <img width="160" height="160" alt="Image" src="https://junoyi.eatfan.top/LOGO.png" />
 </div>
@@ -66,45 +64,28 @@ JunoYi（钧逸）是一个基于 **Spring Boot 3.3.5** 和 **Java 21** 打造�
 
 ### 核心框架
 
-| 技术 | 版本 | 说明 |
-|-----|------|------|
-| Java | 21 | JDK 版本 |
-| Spring Boot | 3.3.5 | 基础框架 |
-| Spring Boot Starter Web | 3.3.5 | Web 开发 |
-| Spring Boot Starter AOP | 3.3.5 | 面向切面编程 |
+| 技术 | 版本    | 说明 |
+|-----|-------|------|
+| Java | 21    | JDK 版本 |
+| Spring Boot | 3.5.0 | 基础框架 |
+| Spring Boot Starter Web | 3.5.0 | Web 开发 |
+| Spring Boot Starter AOP | 3.5.0 | 面向切面编程 |
 
 ### 数据访问
 
 | 技术 | 版本 | 说明 |
 |-----|------|------|
-| MyBatis Plus | 3.5.9 | ORM 框架 |
-| Dynamic Datasource | 4.3.1 | 动态数据源 |
-| Druid | 1.2.23 | 数据库连接池 |
-| MySQL Connector | 8.0.33 | MySQL 驱动 |
 
 ### 缓存与分布式
 
 | 技术 | 版本 | 说明 |
 |-----|------|------|
-| Redisson | 3.37.0 | Redis 客户端 |
-| Lock4j | 2.2.7 | 分布式锁 |
-| Spring Boot Starter Data Redis | 3.3.5 | Redis 集成 |
+
 
 ### 安全认证
 
-| 技术 | 版本 | 说明 |
-|-----|------|------|
-| JJWT | 0.13.0 | JWT 实现 |
 
 ### 工具库
-
-| 技术 | 版本 | 说明 |
-|-----|------|------|
-| Lombok | 1.18.34 | 代码简化 |
-| Hutool | 5.8.32 | Java 工具类库 |
-| FastJson2 | 2.0.53 | JSON 处理 |
-| MapStruct | 1.5.5.Final | 对象映射 |
-| Knife4j | 4.3.0 | 接口文档 |
 
 ---
 
@@ -113,64 +94,7 @@ JunoYi（钧逸）是一个基于 **Spring Boot 3.3.5** 和 **Java 21** 打造�
 ### 模块结构
 
 ```
-JunoYi/
-├── junoyi-dependencies/         # 📦 依赖管理模块
-│   └── pom.xml                 #    统一版本控制
-│
-├── junoyi-common/              # 🔧 公共模块
-│   ├── constant/               #    常量定义
-│   ├── enums/                  #    枚举类
-│   ├── exception/              #    异常定义
-│   └── utils/                  #    工具类
-│
-├── junoyi-framework/           # 🏗️ 框架核心模块
-│   ├── framework-core/         #    核心功能（统一响应、异常处理）
-│   ├── framework-log/          #    日志框架（彩色输出、链路追踪）
-│   ├── framework-web/          #    Web 配置（跨域、拦截器）
-│   ├── framework-datasource/   #    数据源配置（多数据源、事务）
-│   ├── framework-redis/        #    Redis 封装（缓存、分布式锁）
-│   ├── framework-security/     #    安全模块（认证、授权、加密）
-│   ├── framework-excel/        #    Excel 导入导出
-│   ├── framework-json/         #    JSON 配置
-│   ├── framework-event/        #    事件总线
-│   └── framework-starter/      #    启动器
-│
-├── junoyi-module-api/          # 📋 功能模块 API
-│   ├── module-system-api/      #    系统模块 API
-│   │   ├── domain/            #    领域对象
-│   │   │   ├── entity/        #    实体类（数据库映射）
-│   │   │   ├── vo/            #    视图对象（返回前端）
-│   │   │   ├── dto/           #    数据传输对象
-│   │   │   └── bo/            #    业务对象
-│   │   ├── service/           #    服务接口
-│   │   └── mapper/            #    数据访问接口
-│   ├── module-demo-api/        #    示例模块 API
-│   └── module-generation-api/  #    代码生成模块 API
-│
-├── junoyi-module/              # 💼 功能模块实现
-│   ├── module-system/          #    系统模块实现
-│   │   ├── controller/        #    控制器
-│   │   ├── service/impl/      #    服务实现
-│   │   └── convert/           #    对象转换
-│   ├── module-demo/            #    示例模块实现
-│   └── module-generation/      #    代码生成模块实现
-│
-├── junoyi-server/              # 🚀 启动模块
-│   ├── src/main/java/         #    应用入口
-│   └── src/main/resources/    #    配置文件
-│       ├── application.yml    #    主配置
-│       └── application-local.yml  # 本地环境配置
-│
-├── junoyi-ui/                  # 🎨 前端项目（可选）
-│
-├── sql/                        # 💾 数据库脚本
-│
-└── docs/                       # 📚 项目文档
-    ├── 项目架构说明.md
-    ├── 模块开发指南.md
-    ├── 快速参考.md
-    ├── 开发日志.md
-    └── JunoYi日志框架使用说明.md
+
 ```
 
 ### 模块依赖关系
