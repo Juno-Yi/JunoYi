@@ -54,7 +54,7 @@ public class PermissionMatcher {
             return false;
         }
 
-        // 1. 检查黑名单（优先级最高）
+        // 检查黑名单（优先级最高）
         String denyPermission = DENY_PREFIX + requiredPermission;
         if (userPermissions.contains(denyPermission)) {
             return false;
@@ -70,17 +70,17 @@ public class PermissionMatcher {
             }
         }
 
-        // 2. 精确匹配
+        // 精确匹配
         if (userPermissions.contains(requiredPermission)) {
             return true;
         }
 
-        // 3. 全局通配符
+        // 全局通配符
         if (userPermissions.contains(SINGLE_WILDCARD) || userPermissions.contains(MULTI_WILDCARD)) {
             return true;
         }
 
-        // 4. 通配符匹配
+        // 通配符匹配
         for (String pattern : userPermissions) {
             // 跳过黑名单
             if (pattern.startsWith(DENY_PREFIX)) {
