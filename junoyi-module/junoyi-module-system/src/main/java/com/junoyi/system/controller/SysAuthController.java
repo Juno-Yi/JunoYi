@@ -21,6 +21,7 @@ import com.junoyi.system.mapper.SysUserMapper;
 import com.junoyi.system.service.ISysAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class SysAuthController extends BaseController {
 
     private final ISysAuthService sysAuthService;
@@ -75,7 +77,7 @@ public class SysAuthController extends BaseController {
      * @return R<AuthVo> 统一响应结果，包含新的 accessToken
      */
     @PostMapping("/refresh")
-    public R<AuthVo> refresh(@RequestParam String refreshToken) {
+    public R<AuthVo> refresh(@RequestParam("refreshToken") String refreshToken) {
         TokenPair tokenPair = authHelper.refresh(refreshToken);
         AuthVo authVo = new AuthVo();
         authVo.setAccessToken(tokenPair.getAccessToken());
