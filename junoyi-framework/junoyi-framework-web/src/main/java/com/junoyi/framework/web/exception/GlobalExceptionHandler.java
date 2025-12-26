@@ -74,16 +74,6 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 权限校验异常（Spring Security）
-     * TODO:
-     */
-    @ExceptionHandler(AccessDeniedException.class)
-    public R<?> handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
-        log.warn("[权限异常] 请求地址: {}, 异常信息: {}", request.getRequestURI(), e.getMessage());
-        return R.fail(HttpStatus.FORBIDDEN, "没有权限访问该资源");
-    }
-
-    /**
      * 请求方式不支持
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

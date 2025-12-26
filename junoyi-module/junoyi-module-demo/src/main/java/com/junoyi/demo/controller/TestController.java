@@ -62,6 +62,7 @@ public class TestController {
 
     @GetMapping("/permission")
     @Permission("system.demo.permission")
+    @PlatformScope(PlatformType.APP)
     public R<String> testPermission(){
         return R.ok("Hello World");
     }
