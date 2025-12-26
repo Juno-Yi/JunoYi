@@ -5,6 +5,7 @@ import com.junoyi.framework.captcha.enums.CaptchaType;
 import com.junoyi.framework.captcha.generator.CaptchaGenerator;
 import com.junoyi.framework.captcha.properties.CaptchaProperties;
 import com.junoyi.framework.core.exception.captcha.CaptchaUnsupportedTypeException;
+import com.junoyi.framework.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,8 @@ public class CaptchaHelperImpl implements CaptchaHelper {
      */
     @Override
     public boolean validate(String captchaId, String code) {
-        if (captchaId == null || code == null) return false;
+        if (StringUtils.isBlank(captchaId) || StringUtils.isBlank(code))
+            return false;
         // 默认使用图片验证码生成器验证
         CaptchaGenerator generator = getGenerator(CaptchaType.IMAGE);
         return generator.validate(captchaId, code);

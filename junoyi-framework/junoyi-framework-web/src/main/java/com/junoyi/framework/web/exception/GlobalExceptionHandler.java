@@ -3,6 +3,7 @@ package com.junoyi.framework.web.exception;
 import com.junoyi.framework.core.constant.HttpStatus;
 import com.junoyi.framework.core.domain.base.BaseException;
 import com.junoyi.framework.core.domain.module.R;
+import com.junoyi.framework.core.exception.captcha.CaptchaException;
 import com.junoyi.framework.permission.exception.NoPermissionException;
 import com.junoyi.framework.permission.exception.NotLoginException;
 import com.junoyi.framework.permission.exception.PermissionException;
@@ -37,6 +38,15 @@ public class GlobalExceptionHandler {
     public R<?> handleBaseException(BaseException e, HttpServletRequest request) {
         log.warn("[业务异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), e.getFullDomain(), e.getMessage());
         return R.fail(e.getCode(), e.getMessage());
+    }
+
+    /**
+     *  人机验证（验证码）异常
+     */
+    @ExceptionHandler(CaptchaException.class)
+    public R<?> handleCaptchaException(CaptchaException e, HttpServletRequest request){
+        log.warn("验证码验证失败，请求URI: {}, 异常信息: {}", request.getRequestURI(), e.getMessage(), e);
+        return R.fail(e.getCode(),e.getMessage());
     }
 
     /**
