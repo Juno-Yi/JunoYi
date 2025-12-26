@@ -1,31 +1,37 @@
 package com.junoyi.system.domain.dto;
 
-
 import com.junoyi.framework.security.enums.PlatformType;
 import lombok.Data;
 
 /**
- * 登录请求数据传输对象
+ * 登录请求传输对象
  * 用于封装用户登录时所需的各种认证信息
+ *
+ * @author Fan
  */
 @Data
-public class LoginRequest {
+public class LoginDTO {
+
+    /**
+     * 验证码唯一标识符
+     */
+    private String captchaId;
 
     /**
      * 用户名
-     * 用于用户身份标识
+     * 用户名作为账号进行登录
      */
     private String username;
 
     /**
-     * 邮箱地址
-     * 用户注册或登录使用的电子邮箱
+     * 邮箱
+     * 邮箱作为账号进行登录
      */
     private String email;
 
     /**
-     * 手机号码
-     * 用户注册或登录使用的手机号码
+     * 手机号
+     * 手机号作为账号进行登录
      */
     private String phonenumber;
 
@@ -36,14 +42,8 @@ public class LoginRequest {
     private String password;
 
     /**
-     * 唯一标识符
-     * 用于设备或会话的唯一性标识
-     */
-    private String captchaId;
-
-    /**
      * 验证码
-     * 短信或邮件验证码，用于二次验证
+     * 验证码的值，用于人机验证
      */
     private String code;
 
@@ -51,6 +51,7 @@ public class LoginRequest {
      * 登录平台类型
      * 用于区分不同平台的登录，决定 Token 有效期
      * 可选值：ADMIN_WEB(后台)、FRONT_DESK_WEB(前台)、MINI_PROGRAM(小程序)、APP、DESKTOP_APP(桌面)
+     * 如果没有默认就是 ADMIN_WEB后台
      */
     private PlatformType platformType;
 }
