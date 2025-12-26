@@ -1,6 +1,7 @@
 package com.junoyi.framework.permission.field;
 
 import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.permission.enums.MaskPattern;
 
 /**
  * 数据脱敏工具类
@@ -19,20 +20,19 @@ public class MaskUtils {
      * @param customRule  自定义规则（格式：startKeep,endKeep,maskChar）
      * @return 脱敏后的值
      */
-    public static String mask(String value, String maskPattern, String customRule) {
+    public static String mask(String value, MaskPattern maskPattern, String customRule) {
         if (StringUtils.isBlank(value)) {
             return value;
         }
 
-        return switch (maskPattern.toUpperCase()) {
-            case "PHONE" -> maskPhone(value);
-            case "ID_CARD" -> maskIdCard(value);
-            case "EMAIL" -> maskEmail(value);
-            case "BANK_CARD" -> maskBankCard(value);
-            case "NAME" -> maskName(value);
-            case "ADDRESS" -> maskAddress(value);
-            case "CUSTOM" -> maskCustom(value, customRule);
-            default -> maskAll(value);
+        return switch (maskPattern) {
+            case PHONE -> maskPhone(value);
+            case ID_CARD -> maskIdCard(value);
+            case EMAIL -> maskEmail(value);
+            case BANK_CARD -> maskBankCard(value);
+            case NAME -> maskName(value);
+            case ADDRESS -> maskAddress(value);
+            case CUSTOM -> maskCustom(value, customRule);
         };
     }
 

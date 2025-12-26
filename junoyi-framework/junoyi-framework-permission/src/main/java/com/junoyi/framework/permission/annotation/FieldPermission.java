@@ -1,5 +1,7 @@
 package com.junoyi.framework.permission.annotation;
 
+import com.junoyi.framework.permission.enums.MaskPattern;
+
 import java.lang.annotation.*;
 
 /**
@@ -70,7 +72,7 @@ public @interface FieldPermission {
      *   <li>CUSTOM - 自定义脱敏规则</li>
      * </ul>
      */
-    String maskPattern() default "CUSTOM";
+    MaskPattern maskPattern() default MaskPattern.CUSTOM;
 
     /**
      * 自定义脱敏规则

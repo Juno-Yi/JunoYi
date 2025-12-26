@@ -47,7 +47,8 @@ public class JacksonConfig {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
             javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
-            builder.modules(javaTimeModule);
+            // 使用 modulesToInstall 追加模块，而不是 modules 覆盖
+            builder.modulesToInstall(javaTimeModule);
             builder.timeZone(TimeZone.getDefault());
             log.info("Initialization jackson configuration completed.");
         };

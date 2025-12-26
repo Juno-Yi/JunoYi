@@ -3,8 +3,10 @@ package com.junoyi.framework.permission.config;
 import com.junoyi.framework.permission.aspect.PermissionAspect;
 import com.junoyi.framework.permission.field.FieldPermissionModule;
 import com.junoyi.framework.permission.properties.PermissionProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Fan
  */
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(PermissionProperties.class)
 public class PermissionConfiguration {
@@ -34,12 +37,14 @@ public class PermissionConfiguration {
     /**
      * 字段权限 Jackson 模块
      * <p>
-     * 自动注册到 Spring Boot 的 ObjectMapper，处理 @FieldPermission 注解
+     * 通过 Jackson2ObjectMapperBuilderCustomizer 注册，确保与其他模块兼容
      */
     @Bean
-    @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "junoyi.permission", name = "field-permission-enable", havingValue = "true", matchIfMissing = true)
-    public FieldPermissionModule fieldPermissionModule() {
-        return new FieldPermissionModule();
+    public Jackson2ObjectMapperBuilderCustomizer fieldPermissionCustomizer() {
+        log.info("Register FieldPermissionModule with Jackson.");
+        return builder -> {
+            builder.modulesToInstall(new FieldPermissionModule());
+        };
     }
 }
