@@ -59,13 +59,6 @@
             </dependency>
 
             <!-- ========== 内部模块版本管理 ========== -->
-            <!-- Common 公共模块 -->
-            <dependency>
-                <groupId>com.junoyi</groupId>
-                <artifactId>junoyi-common</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
             <!-- Framework 框架核心模块 -->
             <dependency>
                 <groupId>com.junoyi</groupId>
