@@ -223,6 +223,16 @@ public class SysAuthServiceImpl implements ISysAuthService {
     }
 
     /**
+     * 获取用户部门 ID 列表
+     * @param userId 用户 ID
+     * @return 返回用户部门 ID 列表
+     */
+    private Set<Long> getUserDept(Long userId) {
+
+        return new HashSet<>();
+    }
+
+    /**
      * 获取用户信息
      * @param loginUser 用户会话信息
      * @return 返回用户信息
@@ -243,6 +253,7 @@ public class SysAuthServiceImpl implements ISysAuthService {
 
         Set<String> userPermissions = getUserPermissions(userId);
         Set<Long> userRoles = getUserRoles(userId);
+        Set<Long> userDept = getUserDept(userId);
 
         return UserInfoVo.builder()
                 .userId(userId)
@@ -252,6 +263,7 @@ public class SysAuthServiceImpl implements ISysAuthService {
                 .avatar(avatar)
                 .permissions(userPermissions)
                 .roles(userRoles)
+                .depts(userDept)
                 .build();
     }
 

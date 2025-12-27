@@ -51,4 +51,9 @@ public class UserInfoVo {
      */
     private Set<Long> roles;
 
+    /**
+     * 部门
+     */
+    private Set<Long> depts;
+
 }
