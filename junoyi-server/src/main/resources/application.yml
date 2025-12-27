@@ -127,7 +127,7 @@ junoyi:
       # 允许跨域访问的源（Origin）
       allowed-origins:
         - https://admin.junoyi.com
-        - http://127.0.0.1:5500
+        - http://localhost:3006
       # 允许跨域的方法
       allowed-methods:
         - GET

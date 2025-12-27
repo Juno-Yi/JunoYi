@@ -16,16 +16,39 @@ import java.util.List;
 @Builder
 public class UserInfoVo {
 
+    /**
+     * 用户 ID
+     */
     private Long userId;
 
+    /**
+     * 用户名
+     */
     private String userName;
 
+    /**
+     * 用户昵称
+     */
     private String nickName;
 
+    /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
+     * 头像
+     */
     private String avatar;
 
-    private List<?> permissions;
+    /**
+     * 权限列表
+     */
+    private List<String> permissions;
 
-    private List<?> roles;
+    /**
+     * 角色
+     */
+    private List<Long> roles;
 
 }

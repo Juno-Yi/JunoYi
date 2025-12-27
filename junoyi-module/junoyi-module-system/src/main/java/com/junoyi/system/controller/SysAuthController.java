@@ -6,18 +6,14 @@ import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.framework.core.exception.captcha.CaptchaExpiredException;
 import com.junoyi.framework.core.exception.captcha.CaptchaInvalidException;
 import com.junoyi.framework.core.utils.StringUtils;
-import com.junoyi.framework.security.context.SecurityContext;
 import com.junoyi.framework.security.helper.AuthHelper;
 import com.junoyi.framework.security.module.LoginUser;
 import com.junoyi.framework.security.module.TokenPair;
 import com.junoyi.system.convert.LoginConverter;
-import com.junoyi.system.convert.SysUserConverter;
 import com.junoyi.system.domain.dto.LoginDTO;
 import com.junoyi.system.domain.bo.LoginBO;
-import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.vo.AuthVo;
-import com.junoyi.system.domain.vo.SysUserVO;
-import com.junoyi.system.mapper.SysUserMapper;
+import com.junoyi.system.domain.vo.UserInfoVo;
 import com.junoyi.system.service.ISysAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,9 +35,7 @@ public class SysAuthController extends BaseController {
     private final ISysAuthService sysAuthService;
     private final CaptchaHelper captchaHelper;
     private final AuthHelper authHelper;
-    private final SysUserMapper sysUserMapper;
     private final LoginConverter loginConverter;
-    private final SysUserConverter sysUserConverter;
 
     /**
      * 用户登录接口
@@ -102,20 +96,9 @@ public class SysAuthController extends BaseController {
      * @return R<SysUserVO> 统一响应结果，包含用户信息数据
      */
     @GetMapping("/info")
-    public R<SysUserVO> getUserInfo() {
-        LoginUser loginUser = SecurityContext.get();
-        if (loginUser == null) {
-            return R.fail("用户未登录");
-        }
+    public R<UserInfoVo> getUserInfo() {
+        LoginUser loginUser = getLoginUser();
 
-        // 查询用户详细信息
-        SysUser user = sysUserMapper.selectById(loginUser.getUserId());
-        if (user == null) {
-            return R.fail("用户不存在");
-        }
-
-        // 转换为 VO 返回
-        SysUserVO userVO = sysUserConverter.toVo(user);
-        return R.ok(userVO);
+        return R.ok();
     }
 }
