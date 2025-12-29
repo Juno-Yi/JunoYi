@@ -66,7 +66,7 @@ public class SessionHelperImpl implements SessionHelper {
                 .platformType(loginUser.getPlatformType())
                 .permissions(loginUser.getPermissions())
                 .groups(loginUser.getGroups())
-                .deptId(loginUser.getDeptId())
+                .depts(loginUser.getDepts())
                 .superAdmin(loginUser.isSuperAdmin())
                 .roles(loginUser.getRoles())
                 .loginIp(loginIp)
@@ -264,7 +264,7 @@ public class SessionHelperImpl implements SessionHelper {
                 .platformType(session.getPlatformType())
                 .permissions(session.getPermissions())
                 .groups(session.getGroups())
-                .deptId(session.getDeptId())
+                .depts(session.getDepts())
                 .superAdmin(session.isSuperAdmin())
                 .roles(session.getRoles())
                 .loginIp(session.getLoginIp())
@@ -308,7 +308,7 @@ public class SessionHelperImpl implements SessionHelper {
                 .platformType(oldSession.getPlatformType())
                 .permissions(oldSession.getPermissions())
                 .groups(oldSession.getGroups())
-                .deptId(oldSession.getDeptId())
+                .depts(oldSession.getDepts())
                 .superAdmin(oldSession.isSuperAdmin())
                 .roles(oldSession.getRoles())
                 .loginIp(oldSession.getLoginIp())
@@ -349,7 +349,7 @@ public class SessionHelperImpl implements SessionHelper {
         session.setNickName(loginUser.getNickName());
         session.setPermissions(loginUser.getPermissions());
         session.setGroups(loginUser.getGroups());
-        session.setDeptId(loginUser.getDeptId());
+        session.setDepts(loginUser.getDepts());
         session.setSuperAdmin(loginUser.isSuperAdmin());
         session.setRoles(loginUser.getRoles());
         session.setLastAccessTime(new Date());

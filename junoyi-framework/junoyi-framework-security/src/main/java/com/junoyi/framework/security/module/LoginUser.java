@@ -59,9 +59,9 @@ public class LoginUser {
     private Set<String> groups;
 
     /**
-     * 用户部门ID
+     * 用户部门列表
      */
-    private Long deptId;
+    private Set<Long> depts;
 
     /**
      * 是否为超级管理员

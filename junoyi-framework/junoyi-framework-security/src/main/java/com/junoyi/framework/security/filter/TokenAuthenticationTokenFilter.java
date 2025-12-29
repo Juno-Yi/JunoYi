@@ -97,7 +97,7 @@ public class TokenAuthenticationTokenFilter extends OncePerRequestFilter {
                     .platformType(session.getPlatformType())
                     .permissions(session.getPermissions())
                     .groups(session.getGroups())
-                    .deptId(session.getDeptId())
+                    .depts(session.getDepts())
                     .superAdmin(session.isSuperAdmin())
                     .roles(session.getRoles())
                     .loginIp(session.getLoginIp())

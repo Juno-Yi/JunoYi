@@ -56,7 +56,11 @@ public class SecurityConfiguration {
                 },
                 () -> {
                     LoginUser user = SecurityContext.get();
-                    return user != null ? user.getDeptId() : null;
+                    return user != null ? user.getRoles() : null;
+                },
+                () -> {
+                    LoginUser user = SecurityContext.get();
+                    return user != null ? user.getDepts() : null;
                 },
                 () -> {
                     LoginUser user = SecurityContext.get();

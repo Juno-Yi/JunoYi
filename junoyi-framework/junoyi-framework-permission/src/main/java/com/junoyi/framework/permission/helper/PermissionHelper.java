@@ -35,7 +35,8 @@ public class PermissionHelper {
     private static Supplier<Set<String>> permissionsSupplier;
     private static Supplier<Set<String>> groupsSupplier;
     private static Supplier<Long> userIdSupplier;
-    private static Supplier<Long> deptIdSupplier;
+    private static Supplier<Set<Long>> rolesSupplier;
+    private static Supplier<Set<Long>> deptsSupplier;
     private static Supplier<Boolean> superAdminSupplier;
 
     private PermissionHelper() {
@@ -49,12 +50,14 @@ public class PermissionHelper {
     public static void init(Supplier<Set<String>> permissions,
                             Supplier<Set<String>> groups,
                             Supplier<Long> userId,
-                            Supplier<Long> deptId,
+                            Supplier<Set<Long>> roles,
+                            Supplier<Set<Long>> depts,
                             Supplier<Boolean> superAdmin) {
         permissionsSupplier = permissions;
         groupsSupplier = groups;
         userIdSupplier = userId;
-        deptIdSupplier = deptId;
+        rolesSupplier = roles;
+        deptsSupplier = depts;
         superAdminSupplier = superAdmin;
     }
 
@@ -197,12 +200,20 @@ public class PermissionHelper {
     }
 
     /**
-     * 获取当前用户部门ID
-     *
-     * @return 部门ID，如果未登录返回 null
+     * 获取当前用户角色列表
+     * @return 角色列表，如果未登录返回 null
      */
-    public static Long getCurrentDeptId() {
-        return deptIdSupplier != null ? deptIdSupplier.get() : null;
+    public static Set<Long> getCurrentRoles() {
+        return rolesSupplier != null ? rolesSupplier.get() : null;
+    }
+
+    /**
+     * 获取当前用户部门列表
+     *
+     * @return 部门列表，如果未登录返回 null
+     */
+    public static Set<Long> getCurrentDeptId() {
+        return deptsSupplier != null ? deptsSupplier.get() : null;
     }
 
     /**

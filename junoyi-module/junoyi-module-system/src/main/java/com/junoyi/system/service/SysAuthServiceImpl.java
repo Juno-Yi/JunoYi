@@ -163,7 +163,8 @@ public class SysAuthServiceImpl implements ISysAuthService {
         Set<String> permissions = getUserPermissions(user.getUserId());
         Set<String> groups = getUserGroups(user.getUserId());
         Set<Long> roles = getUserRoles(user.getUserId());
-        
+        Set<Long> userDept = getUserDept(user.getUserId());
+
         // 判断是否为超级管理员（userId=1 或拥有 * 权限）
         boolean isSuperAdmin = user.getUserId() == 1L || permissions.contains("*");
 
@@ -171,7 +172,7 @@ public class SysAuthServiceImpl implements ISysAuthService {
                 .userId(user.getUserId())
                 .userName(user.getUserName())
                 .nickName(user.getNickName())
-                .deptId(user.getDeptId())
+                .depts(userDept)
                 .superAdmin(isSuperAdmin)
                 // platformType 不在这里设置，由 authService.login() 参数传入
                 .permissions(permissions)
@@ -195,10 +196,11 @@ public class SysAuthServiceImpl implements ISysAuthService {
         // 计算用户最终权限合集
 
         // 权限合并
-        // 1 用户直绑的权限组
-        // 2 角色绑定的权限组
-        // 3 部门绑定的权限组
-
+        // 1 从sys_user_perm获取所有用户单独的权限
+        // 2 用户sys_user_group直绑的权限组
+        // 3 sys_role_group角色绑定的权限组
+        // 4 sys_dept_group部门绑定的权限组
+        // 通过这些权限组获取所有的权限，
         // 最后得到一个权限的集合
         // return sysPermissionMapper.selectPermissionsByUserId(userId);
         return new HashSet<>();
