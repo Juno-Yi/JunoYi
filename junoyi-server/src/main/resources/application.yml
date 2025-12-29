@@ -105,13 +105,13 @@ junoyi:
   # ==================== 数据源配置 ====================
   datasource:
     # 启用 SQL 美化输出
-    sql-beautify-enabled: true
+    sql-beautify-enabled: false
     # 启用慢 SQL 监控
     slow-sql-enabled: true
     # 慢 SQL 阈值（毫秒）
     slow-sql-threshold: 3000
     # 启用 SQL 日志
-    sql-log-enabled: true
+    sql-log-enabled: false
 
   # ==================== 事件配置 ====================
   event:

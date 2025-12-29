@@ -19,17 +19,26 @@ import com.junoyi.system.domain.bo.LoginBO;
 import com.junoyi.system.domain.po.LoginIdentity;
 import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.po.SysUserDept;
+import com.junoyi.system.domain.po.SysDeptGroup;
+import com.junoyi.system.domain.po.SysPermGroup;
+import com.junoyi.system.domain.po.SysRoleGroup;
+import com.junoyi.system.domain.po.SysUserGroup;
 import com.junoyi.system.domain.vo.AuthVo;
 import com.junoyi.system.domain.po.SysUserRole;
 import com.junoyi.system.domain.vo.UserInfoVO;
 import com.junoyi.system.enums.LoginType;
 import com.junoyi.system.enums.SysUserStatus;
+import com.junoyi.system.mapper.SysDeptGroupMapper;
+import com.junoyi.system.mapper.SysPermGroupMapper;
+import com.junoyi.system.mapper.SysRoleGroupMapper;
 import com.junoyi.system.mapper.SysUserDeptMapper;
+import com.junoyi.system.mapper.SysUserGroupMapper;
 import com.junoyi.system.mapper.SysUserMapper;
 import com.junoyi.system.mapper.SysUserRoleMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,6 +56,10 @@ public class SysAuthServiceImpl implements ISysAuthService {
     private final SysUserMapper sysUserMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
     private final SysUserDeptMapper sysUserDeptMapper;
+    private final SysUserGroupMapper sysUserGroupMapper;
+    private final SysRoleGroupMapper sysRoleGroupMapper;
+    private final SysDeptGroupMapper sysDeptGroupMapper;
+    private final SysPermGroupMapper sysPermGroupMapper;
 
     @Override
     public AuthVo login(LoginBO loginBO) {
@@ -215,7 +228,10 @@ public class SysAuthServiceImpl implements ISysAuthService {
 
     /**
      * 获取用户权限组列表
-     * TODO: 实现从数据库查询
+     * 合并来源：用户直绑 + 角色绑定 + 部门绑定
+     *
+     * @param userId 用户ID
+     * @return 权限组 code 集合
      */
     private Set<String> getUserGroups(Long userId) {
         // 超级管理员
@@ -224,11 +240,56 @@ public class SysAuthServiceImpl implements ISysAuthService {
             groups.add("super_admin");
             return groups;
         }
-        // TODO: 从数据库查询用户权限组
-        // 1 用户独立绑定的权限组
-        // 2 角色绑定的权限组
-        // 3 部门绑定的权限组
-        return new HashSet<>();
+
+        Set<Long> groupIds = new HashSet<>();
+        Date now = new Date();
+
+        // 1. 用户直接绑定的权限组
+        sysUserGroupMapper.selectList(
+                new LambdaQueryWrapper<SysUserGroup>()
+                        .select(SysUserGroup::getGroupId)
+                        .eq(SysUserGroup::getUserId, userId)
+                        .and(w -> w.isNull(SysUserGroup::getExpireTime)
+                                .or().gt(SysUserGroup::getExpireTime, now))
+        ).forEach(ug -> groupIds.add(ug.getGroupId()));
+
+        // 2. 用户角色绑定的权限组
+        Set<Long> roleIds = getUserRoles(userId);
+        if (!roleIds.isEmpty()) {
+            sysRoleGroupMapper.selectList(
+                    new LambdaQueryWrapper<SysRoleGroup>()
+                            .select(SysRoleGroup::getGroupId)
+                            .in(SysRoleGroup::getRoleId, roleIds)
+                            .and(w -> w.isNull(SysRoleGroup::getExpireTime)
+                                    .or().gt(SysRoleGroup::getExpireTime, now))
+            ).forEach(rg -> groupIds.add(rg.getGroupId()));
+        }
+
+        // 3. 用户部门绑定的权限组
+        Set<Long> deptIds = getUserDept(userId);
+        if (!deptIds.isEmpty()) {
+            sysDeptGroupMapper.selectList(
+                    new LambdaQueryWrapper<SysDeptGroup>()
+                            .select(SysDeptGroup::getGroupId)
+                            .in(SysDeptGroup::getDeptId, deptIds)
+                            .and(w -> w.isNull(SysDeptGroup::getExpireTime)
+                                    .or().gt(SysDeptGroup::getExpireTime, now))
+            ).forEach(dg -> groupIds.add(dg.getGroupId()));
+        }
+
+        // 根据 groupId 查询权限组 code
+        if (groupIds.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        return sysPermGroupMapper.selectList(
+                new LambdaQueryWrapper<SysPermGroup>()
+                        .select(SysPermGroup::getCode)
+                        .in(SysPermGroup::getId, groupIds)
+                        .eq(SysPermGroup::getStatus, 1)
+        ).stream()
+                .map(SysPermGroup::getCode)
+                .collect(Collectors.toSet());
     }
 
     /**

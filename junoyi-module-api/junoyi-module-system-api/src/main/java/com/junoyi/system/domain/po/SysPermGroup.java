@@ -1,20 +1,23 @@
 package com.junoyi.system.domain.po;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.Date;
 import java.util.Set;
 
 /**
- * 系统权限组实体类
- * 用于表示系统中的权限组信息，包含权限组的基本属性和相关权限集合
+ * 权限组实体
+ *
+ * @author Fan
  */
 @Data
+@TableName("sys_perm_group")
 public class SysPermGroup {
 
-    /**
-     * 权限组唯一标识ID
-     */
+    @TableId
     private Long id;
 
     /**
@@ -48,8 +51,9 @@ public class SysPermGroup {
     private int status;
 
     /**
-     * 权限集合，包含该权限组所拥有的具体权限标识
+     * 权限集合（非数据库字段，需要单独查询）
      */
+    @TableField(exist = false)
     private Set<String> permissions;
 
     /**

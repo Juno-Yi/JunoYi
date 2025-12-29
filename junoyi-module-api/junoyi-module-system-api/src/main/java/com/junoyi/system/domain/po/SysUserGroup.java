@@ -1,21 +1,21 @@
 package com.junoyi.system.domain.po;
 
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.Date;
 
 /**
- * 系统用户与权限组关联数据实体
- * 用于维护系统中用户与权限组之间的关联关系，包含关联ID、用户ID、权限组ID、过期时间等信息
+ * 用户与权限组关联实体
  *
  * @author Fan
  */
 @Data
+@TableName("sys_user_group")
 public class SysUserGroup {
 
-    /**
-     * 关联记录的唯一标识ID
-     */
+    @TableId
     private Long id;
 
     /**
