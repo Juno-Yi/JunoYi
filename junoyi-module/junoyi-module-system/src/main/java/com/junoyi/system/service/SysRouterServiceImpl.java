@@ -87,6 +87,7 @@ public class SysRouterServiceImpl implements ISysRouterService {
                 .filter(menu -> Objects.equals(menu.getParentId(), parentId))
                 .map(menu -> {
                     RouterItemVo item = new RouterItemVo();
+                    item.setId(menu.getId());
                     item.setName(menu.getName());
                     item.setPath(menu.getPath());
                     item.setComponent(menu.getComponent());
@@ -110,16 +111,17 @@ public class SysRouterServiceImpl implements ISysRouterService {
         RouterMetaVo meta = new RouterMetaVo();
         meta.setTitle(menu.getTitle());
         meta.setIcon(menu.getIcon());
-        meta.setHidden(menu.getIsHide() != null && menu.getIsHide() == 1);
-        meta.setHideTab(menu.getIsHideTab() != null && menu.getIsHideTab() == 1);
-        meta.setKeepAlive(menu.getKeepAlive() != null && menu.getKeepAlive() == 1);
-        meta.setIframe(menu.getIsIframe() != null && menu.getIsIframe() == 1);
+        meta.setShowBadge(menu.getShowBadge() != null && menu.getShowBadge() == 1);
+        meta.setShowTextBadge(menu.getShowTextBadge());
+        meta.setIsHide(menu.getIsHide() != null && menu.getIsHide() == 1);
+        meta.setIsHideTab(menu.getIsHideTab() != null && menu.getIsHideTab() == 1);
         meta.setLink(menu.getLink());
-        meta.setFullPage(menu.getIsFullPage() != null && menu.getIsFullPage() == 1);
+        meta.setIsIframe(menu.getIsIframe() != null && menu.getIsIframe() == 1);
+        meta.setKeepAlive(menu.getKeepAlive() != null && menu.getKeepAlive() == 1);
         meta.setFixedTab(menu.getFixedTab() != null && menu.getFixedTab() == 1);
         meta.setActivePath(menu.getActivePath());
-        meta.setShowBadge(menu.getShowBadge() != null && menu.getShowBadge() == 1);
-        meta.setBadgeText(menu.getShowTextBadge());
+        meta.setIsFullPage(menu.getIsFullPage() != null && menu.getIsFullPage() == 1);
+        meta.setAuthMark(menu.getPermission());
         return meta;
     }
 }

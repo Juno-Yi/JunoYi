@@ -21,24 +21,24 @@ public class RouterMetaVo {
     private String icon;
 
     /**
+     * 是否显示徽章
+     */
+    private Boolean showBadge;
+
+    /**
+     * 文本徽章内容
+     */
+    private String showTextBadge;
+
+    /**
      * 是否隐藏菜单
      */
-    private Boolean hidden;
+    private Boolean isHide;
 
     /**
      * 是否隐藏标签页
      */
-    private Boolean hideTab;
-
-    /**
-     * 是否缓存
-     */
-    private Boolean keepAlive;
-
-    /**
-     * 是否 iframe
-     */
-    private Boolean iframe;
+    private Boolean isHideTab;
 
     /**
      * 外部链接地址
@@ -46,9 +46,14 @@ public class RouterMetaVo {
     private String link;
 
     /**
-     * 是否全屏页面
+     * 是否 iframe
      */
-    private Boolean fullPage;
+    private Boolean isIframe;
+
+    /**
+     * 是否缓存
+     */
+    private Boolean keepAlive;
 
     /**
      * 是否固定标签页
@@ -61,12 +66,12 @@ public class RouterMetaVo {
     private String activePath;
 
     /**
-     * 是否显示徽章
+     * 是否全屏页面
      */
-    private Boolean showBadge;
+    private Boolean isFullPage;
 
     /**
-     * 文本徽章内容
+     * 权限标识
      */
-    private String badgeText;
+    private String authMark;
 }

@@ -13,6 +13,11 @@ import java.util.List;
 public class RouterItemVo {
 
     /**
+     * 菜单ID
+     */
+    private Long id;
+
+    /**
      * 路由名称
      */
     private String name;
