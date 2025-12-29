@@ -45,6 +45,7 @@ public class SysUserController {
      */
     @GetMapping("/{id}")
     @Permission("system.user.data.id")
+    @PlatformScope(PlatformType.ADMIN_WEB)
     public R<?> getUserById(@PathVariable Long id){
         return R.ok(id);
     }
@@ -54,6 +55,7 @@ public class SysUserController {
      * 添加用户
      */
     @PostMapping
+    @PlatformScope(PlatformType.ADMIN_WEB)
     public void addUser(){
 
     }
@@ -62,6 +64,7 @@ public class SysUserController {
      * 删除用户
      */
     @DeleteMapping
+    @PlatformScope(PlatformType.ADMIN_WEB)
     public void delUser(){
 
     }
@@ -70,6 +73,7 @@ public class SysUserController {
      * 删除用户
      */
     @PutMapping
+    @PlatformScope(PlatformType.ADMIN_WEB)
     public void updateUser(){
     }
 }
