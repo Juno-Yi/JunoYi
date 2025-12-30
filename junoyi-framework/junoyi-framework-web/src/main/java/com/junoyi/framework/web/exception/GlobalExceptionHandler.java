@@ -4,6 +4,7 @@ import com.junoyi.framework.core.constant.HttpStatus;
 import com.junoyi.framework.core.domain.base.BaseException;
 import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.framework.core.exception.captcha.CaptchaException;
+import com.junoyi.framework.core.exception.menu.MenuException;
 import com.junoyi.framework.permission.exception.NoPermissionException;
 import com.junoyi.framework.permission.exception.NotLoginException;
 import com.junoyi.framework.permission.exception.PermissionException;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.awt.*;
 
 
 /**
@@ -80,6 +83,16 @@ public class GlobalExceptionHandler {
         log.warn("[权限异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), e.getFullDomain(), e.getMessage());
         return R.fail(e.getCode(), e.getMessage());
     }
+
+    /**
+     * 菜单异常
+     */
+    @ExceptionHandler(MenuException.class)
+    public R<?> handleMenuException(MenuException e, HttpServletRequest request){
+        log.warn("[菜单异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), e.getFullDomain(), e.getMessage());
+        return R.fail(e.getCode(), e.getMessage());
+    }
+
 
     /**
      * 请求方式不支持

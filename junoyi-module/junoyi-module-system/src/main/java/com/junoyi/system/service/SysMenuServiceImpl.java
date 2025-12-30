@@ -3,6 +3,7 @@ package com.junoyi.system.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.core.exception.menu.MenuHasChildrenException;
 import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
@@ -141,7 +142,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
                         .eq(SysMenu::getParentId, id)
         );
         if (childCount > 0)
-            throw new RuntimeException("存在子菜单，无法删除");
+            throw new MenuHasChildrenException("存在子菜单，无法删除");
         return sysMenuMapper.deleteById(id) > 0;
     }
 
@@ -161,7 +162,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
                         .in(SysMenu::getParentId, ids)
         );
         if (childCount > 0)
-            throw new RuntimeException("存在子菜单，无法删除");
+            throw new MenuHasChildrenException("存在子菜单，无法删除");
         return sysMenuMapper.deleteBatchIds(ids) > 0;
     }
 
