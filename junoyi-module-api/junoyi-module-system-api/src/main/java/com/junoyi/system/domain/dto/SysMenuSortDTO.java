@@ -5,8 +5,10 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 系统菜单排序数据传输对象
- * 用于批量更新菜单排序，支持拖拽排序场景
+ * 系统菜单排序请求对象
+ * 支持两种格式：
+ * 1. 直接传列表: [{ "id": 1, "parentId": 0, "sort": 1 }, ...]
+ * 2. 包装对象: { "items": [{ "id": 1, "parentId": 0, "sort": 1 }, ...] }
  *
  * @author Fan
  */
@@ -14,28 +16,7 @@ import java.util.List;
 public class SysMenuSortDTO {
 
     /**
-     * 菜单排序项列表
+     * 排序项列表（用于包装格式）
      */
-    private List<SortItem> items;
-
-    /**
-     * 单个菜单排序项
-     */
-    @Data
-    public static class SortItem {
-        /**
-         * 菜单ID
-         */
-        private Long id;
-
-        /**
-         * 父级菜单ID（支持拖拽改变层级）
-         */
-        private Long parentId;
-
-        /**
-         * 排序值
-         */
-        private Integer sort;
-    }
+    private List<SysMenuSortItem> items;
 }

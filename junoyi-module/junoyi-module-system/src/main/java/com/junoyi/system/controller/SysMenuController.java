@@ -104,8 +104,8 @@ public class SysMenuController extends BaseController {
             value = {"system.ui.menu.view", "system.api.menu.update"},
             logical = Logical.OR
     )
-    public R<Void> updateMenuSort(@RequestBody SysMenuSortDTO menuSortDTO){
-        return sysMenuService.updateMenuSort(menuSortDTO.getItems()) ? R.ok() : R.fail("排序更新失败");
+    public R<Void> updateMenuSort(@RequestBody SysMenuSortDTO sortDTO){
+        return sysMenuService.updateMenuSort(sortDTO.getItems()) ? R.ok() : R.fail("排序更新失败");
     }
 
     /**

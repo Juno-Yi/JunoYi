@@ -28,8 +28,7 @@ public class SysUserController {
     @GetMapping
     @Permission(
             // 需要拥有什么权限
-            value = {"system.user.data.list", "system.user.ui.view"},
-            // 权限逻辑计算（OR两者拥有一个，AND两者必须都要有）
+            value = {"system.ui.user.view", "system.api.user.get"},
             logical = Logical.OR
     )
     @PlatformScope(PlatformType.ADMIN_WEB)

@@ -12,6 +12,7 @@ import com.junoyi.system.convert.SysMenuConverter;
 import com.junoyi.system.domain.dto.SysMenuDTO;
 import com.junoyi.system.domain.dto.SysMenuQueryDTO;
 import com.junoyi.system.domain.dto.SysMenuSortDTO;
+import com.junoyi.system.domain.dto.SysMenuSortItem;
 import com.junoyi.system.domain.po.SysMenu;
 import com.junoyi.system.domain.vo.SysMenuVO;
 import com.junoyi.system.mapper.SysMenuMapper;
@@ -224,18 +225,18 @@ public class SysMenuServiceImpl implements ISysMenuService {
     /**
      * 批量更新菜单排序
      *
-     * @param sortItems 排序项列表
+     * @param sortList 排序列表
      * @return 是否成功
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateMenuSort(List<SysMenuSortDTO.SortItem> sortItems) {
-        if (sortItems == null || sortItems.isEmpty()) {
+    public boolean updateMenuSort(List<SysMenuSortItem> sortList) {
+        if (sortList == null || sortList.isEmpty()) {
             return false;
         }
-        log.debug("批量更新菜单排序, 数量: {}", sortItems.size());
+        log.debug("批量更新菜单排序, 数量: {}", sortList.size());
         
-        for (SysMenuSortDTO.SortItem item : sortItems) {
+        for (SysMenuSortItem item : sortList) {
             if (item.getId() == null) {
                 continue;
             }
@@ -243,6 +244,13 @@ public class SysMenuServiceImpl implements ISysMenuService {
             menu.setId(item.getId());
             menu.setParentId(item.getParentId());
             menu.setSort(item.getSort());
+            // 可选字段：path 和 component
+            if (item.getPath() != null) {
+                menu.setPath(item.getPath());
+            }
+            if (item.getComponent() != null) {
+                menu.setComponent(item.getComponent());
+            }
             menu.setUpdateTime(DateUtils.getNowDate());
             sysMenuMapper.updateById(menu);
         }
