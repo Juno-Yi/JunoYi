@@ -2,6 +2,8 @@ package com.junoyi.system.controller;
 
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
+import com.junoyi.framework.permission.annotation.Permission;
+import com.junoyi.framework.permission.enums.Logical;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,9 @@ public class SysRoleController {
      */
     @GetMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"system.ui.role.view", "system.api.role.get"}
+    )
     public void getRoleList(){
 
     }
@@ -32,6 +37,9 @@ public class SysRoleController {
      * 获取角色下拉列表选项
      */
     @GetMapping("/options")
+    @Permission(
+            value = {"system.ui.role.view", "system.api.role.get"}
+    )
     public void getRoleOptions(){
 
     }
@@ -41,7 +49,10 @@ public class SysRoleController {
      */
     @GetMapping("/{id}")
     @PlatformScope(PlatformType.ADMIN_WEB)
-    public void getRoleById(@PathVariable Long id){
+    @Permission(
+            value = {"system.ui.role.view", "system.api.role.get"}
+    )
+    public void getRoleById(@PathVariable("id") Long id){
 
     }
 
@@ -50,6 +61,9 @@ public class SysRoleController {
      */
     @PostMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"system.ui.role.view", "system.api.role.add"}
+    )
     public void addRole(){
 
     }
@@ -59,6 +73,9 @@ public class SysRoleController {
      */
     @PutMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"system.ui.role.view", "system.api.role.update"}
+    )
     public void updateRole(){
 
     }
@@ -68,6 +85,9 @@ public class SysRoleController {
      */
     @DeleteMapping
     @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"system.ui.role.view", "system.api.role.delete"}
+    )
     public void delRole(){
 
     }
