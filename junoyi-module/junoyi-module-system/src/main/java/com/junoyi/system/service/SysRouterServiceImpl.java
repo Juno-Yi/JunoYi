@@ -31,7 +31,7 @@ public class SysRouterServiceImpl implements ISysRouterService {
     public List<RouterItemVo> getUserRouter(LoginUser loginUser) {
         log.debug("[路由加载] 开始加载用户路由, userId={}", loginUser.getUserId());
         
-        // 查询所有启用的菜单（目录+菜单，不含按钮）
+        // 查询所有启用的菜单（目录+菜单）
         List<SysMenu> allMenus = sysMenuMapper.selectList(
                 new LambdaQueryWrapper<SysMenu>()
                         .eq(SysMenu::getStatus, 1)
