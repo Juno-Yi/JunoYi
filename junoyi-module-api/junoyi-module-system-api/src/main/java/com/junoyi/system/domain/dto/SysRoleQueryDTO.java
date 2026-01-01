@@ -25,9 +25,4 @@ public class SysRoleQueryDTO {
      */
     private Integer status;
 
-    /**
-     * 是否删除
-     */
-    private Boolean delFlag;
-
 }
