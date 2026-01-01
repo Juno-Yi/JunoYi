@@ -15,6 +15,7 @@ import com.junoyi.system.domain.dto.SysMenuSortDTO;
 import com.junoyi.system.domain.dto.SysMenuSortItem;
 import com.junoyi.system.domain.po.SysMenu;
 import com.junoyi.system.domain.vo.SysMenuVO;
+import com.junoyi.system.enums.SysMenuStatus;
 import com.junoyi.system.mapper.SysMenuMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -113,7 +114,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
         if (menu.getSort() == null)
             menu.setSort(0);
         if (menu.getStatus() == null)
-            menu.setStatus(1);
+            menu.setStatus(SysMenuStatus.ENABLE.getCode());
         menu.setCreateTime(DateUtils.getNowDate());
         sysMenuMapper.insert(menu);
         return menu.getId();

@@ -7,6 +7,8 @@ import com.junoyi.framework.security.module.LoginUser;
 import com.junoyi.system.domain.po.SysMenu;
 import com.junoyi.system.domain.vo.RouterItemVO;
 import com.junoyi.system.domain.vo.RouterMetaVO;
+import com.junoyi.system.enums.SysMenuStatus;
+import com.junoyi.system.enums.SysMenuType;
 import com.junoyi.system.mapper.SysMenuMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,8 +36,8 @@ public class SysRouterServiceImpl implements ISysRouterService {
         // 查询所有启用的菜单（目录+菜单）
         List<SysMenu> allMenus = sysMenuMapper.selectList(
                 new LambdaQueryWrapper<SysMenu>()
-                        .eq(SysMenu::getStatus, 1)
-                        .in(SysMenu::getMenuType, 0, 1)
+                        .eq(SysMenu::getStatus, SysMenuStatus.ENABLE.getCode())
+                        .in(SysMenu::getMenuType, SysMenuType.DIRECTORY.getCode(),SysMenuType.MENU.getCode())
                         .orderByAsc(SysMenu::getSort)
         );
         
