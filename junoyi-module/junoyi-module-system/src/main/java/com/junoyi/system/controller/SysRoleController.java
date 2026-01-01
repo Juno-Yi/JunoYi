@@ -1,17 +1,20 @@
 package com.junoyi.system.controller;
 
+import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.framework.permission.annotation.Permission;
-import com.junoyi.framework.permission.enums.Logical;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
+import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.system.domain.dto.SysRoleQueryDTO;
 import com.junoyi.system.domain.vo.SysRoleVo;
 import com.junoyi.system.service.ISysRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 系统角色管理控制类
@@ -21,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/system/role")
 @RequiredArgsConstructor
-public class SysRoleController {
+public class SysRoleController extends BaseController {
 
     private final JunoYiLog log = JunoYiLogFactory.getLogger(SysUserController.class);
 
@@ -35,8 +38,8 @@ public class SysRoleController {
     @Permission(
             value = {"system.ui.role.view", "system.api.role.get"}
     )
-    public PageResult<SysRoleVo> getRoleList(@RequestBody SysRoleQueryDTO queryDTO){
-        return sysRoleService.getRoleList(queryDTO);
+    public R<PageResult<SysRoleVo>> getRoleList(SysRoleQueryDTO queryDTO){
+        return R.ok(sysRoleService.getRoleList(queryDTO, buildPage()));
     }
 
     /**
@@ -46,8 +49,8 @@ public class SysRoleController {
     @Permission(
             value = {"system.ui.role.view", "system.api.role.get"}
     )
-    public void getRoleOptions(){
-
+    public R<List<SysRoleVo>> getRoleOptions(){
+        return R.ok();
     }
 
     /**
@@ -58,8 +61,8 @@ public class SysRoleController {
     @Permission(
             value = {"system.ui.role.view", "system.api.role.get"}
     )
-    public void getRoleById(@PathVariable("id") Long id){
-
+    public R<SysRoleVo> getRoleById(@PathVariable("id") Long id){
+        return R.ok();
     }
 
     /**
@@ -70,8 +73,8 @@ public class SysRoleController {
     @Permission(
             value = {"system.ui.role.view", "system.api.role.add"}
     )
-    public void addRole(){
-
+    public R<Void> addRole(){
+        return R.ok();
     }
 
     /**
@@ -82,8 +85,8 @@ public class SysRoleController {
     @Permission(
             value = {"system.ui.role.view", "system.api.role.update"}
     )
-    public void updateRole(){
-
+    public R<Void> updateRole(){
+        return R.ok();
     }
 
     /**
@@ -94,7 +97,19 @@ public class SysRoleController {
     @Permission(
             value = {"system.ui.role.view", "system.api.role.delete"}
     )
-    public void delRole(){
+    public R<Void> deleteRole(){
+        return R.ok();
+    }
 
+    /**
+     * 批量删除角色
+     */
+    @DeleteMapping("/batch")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"system.ui.role.view", "system.api.role.delete"}
+    )
+    public R<Void> deleteRoleBatch(){
+        return R.ok();
     }
 }

@@ -1,10 +1,13 @@
 package com.junoyi.system.domain.dto;
 
+import lombok.Data;
+
 /**
  * 系统角色查询传输数据
  *
  * @author Fan
  */
+@Data
 public class SysRoleQueryDTO {
 
     /**
@@ -20,11 +23,11 @@ public class SysRoleQueryDTO {
     /**
      * 状态
      */
-    private int status;
+    private Integer status;
 
     /**
      * 是否删除
      */
-    private boolean delFlag;
+    private Boolean delFlag;
 
 }
