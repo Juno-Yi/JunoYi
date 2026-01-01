@@ -1,11 +1,14 @@
 package com.junoyi.system.controller;
 
+import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.framework.permission.annotation.Permission;
 import com.junoyi.framework.permission.enums.Logical;
 import com.junoyi.framework.security.annotation.PlatformScope;
 import com.junoyi.framework.security.enums.PlatformType;
+import com.junoyi.system.domain.dto.SysRoleQueryDTO;
+import com.junoyi.system.domain.vo.SysRoleVo;
 import com.junoyi.system.service.ISysRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +35,8 @@ public class SysRoleController {
     @Permission(
             value = {"system.ui.role.view", "system.api.role.get"}
     )
-    public void getRoleList(){
-
+    public PageResult<SysRoleVo> getRoleList(@RequestBody SysRoleQueryDTO queryDTO){
+        return sysRoleService.getRoleList(queryDTO);
     }
 
     /**

@@ -22,7 +22,7 @@ public class SysRole {
     private String roleName;
 
     /**
-     * 角色权限标识
+     * 角色标识
      */
     private String roleKey;
 
