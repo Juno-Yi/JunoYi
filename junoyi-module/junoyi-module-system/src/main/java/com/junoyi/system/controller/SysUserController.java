@@ -92,7 +92,7 @@ public class SysUserController extends BaseController {
     @Permission(
             value = {"system.ui.user.view", "system.api.user.delete"}
     )
-    public R<Void> deleteUser(@PathVariable Long id){
+    public R<Void> deleteUser(@PathVariable("id") Long id){
         sysUserService.deleteUser(id);
         return R.ok();
     }
