@@ -47,13 +47,13 @@ public class SysUserVO {
     /**
      * 邮箱（脱敏）
      */
-    @FieldPermission(read = "system.user.email", mask = true, maskPattern = MaskPattern.EMAIL)
+    @FieldPermission(read = "system.data.user.field.email", mask = true, maskPattern = MaskPattern.EMAIL)
     private String email;
 
     /**
      * 手机号（脱敏）
      */
-    @FieldPermission(read = "system.user.phone", mask = true, maskPattern = MaskPattern.PHONE)
+    @FieldPermission(read = "system.data.user.field.phone", mask = true, maskPattern = MaskPattern.PHONE)
     private String phonenumber;
 
     /**
@@ -70,4 +70,9 @@ public class SysUserVO {
      * 创建时间
      */
     private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
 }
