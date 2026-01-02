@@ -1,6 +1,7 @@
 package com.junoyi.system.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.junoyi.framework.core.exception.dept.DeptHasChildrenException;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.system.convert.SysDeptConverter;
@@ -96,6 +97,31 @@ public class SysDeptServiceImpl implements ISysDeptService {
     @Override
     public void updateDept(SysDeptDTO deptDTO) {
         SysDept sysDept = sysDeptConverter.toPo(deptDTO);
+        sysDept.setUpdateTime(DateUtils.getNowDate());
+        sysDept.setUpdateBy(SecurityUtils.getUserName());
+        sysDeptMapper.updateById(sysDept);
+    }
+
+    /**
+     * 删除部门（逻辑删除）
+     * 如果存在子部门则无法删除
+     *
+     * @param id 部门ID
+     */
+    @Override
+    public void deleteDept(Long id) {
+        // 检查是否存在子部门
+        LambdaQueryWrapper<SysDept> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysDept::getParentId, id)
+               .eq(SysDept::isDelFlag, false);
+        Long childCount = sysDeptMapper.selectCount(wrapper);
+        if (childCount > 0) {
+            throw new DeptHasChildrenException("存在子部门，无法删除");
+        }
+        // 逻辑删除
+        SysDept sysDept = new SysDept();
+        sysDept.setId(id);
+        sysDept.setDelFlag(true);
         sysDept.setUpdateTime(DateUtils.getNowDate());
         sysDept.setUpdateBy(SecurityUtils.getUserName());
         sysDeptMapper.updateById(sysDept);

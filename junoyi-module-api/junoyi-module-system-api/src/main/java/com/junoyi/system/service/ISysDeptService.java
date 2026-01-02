@@ -38,4 +38,10 @@ public interface ISysDeptService {
      * @param deptDTO 部门信息
      */
     void updateDept(SysDeptDTO deptDTO);
+
+    /**
+     * 删除部门（逻辑删除）
+     * @param id 部门ID
+     */
+    void deleteDept(Long id);
 }

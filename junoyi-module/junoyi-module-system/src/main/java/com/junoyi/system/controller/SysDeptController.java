@@ -79,4 +79,17 @@ public class SysDeptController extends BaseController {
         sysDeptService.updateDept(sysDeptDTO);
         return R.ok();
     }
+
+    /**
+     * 删除部门
+     */
+    @DeleteMapping("/{id}")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"system.ui.dept.view","system.api.dept.delete"}
+    )
+    public R<Void> deleteDept(@PathVariable("id") Long id) {
+        sysDeptService.deleteDept(id);
+        return R.ok();
+    }
 }
