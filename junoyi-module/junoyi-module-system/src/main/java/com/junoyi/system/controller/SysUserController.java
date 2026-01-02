@@ -1,5 +1,6 @@
 package com.junoyi.system.controller;
 
+import cn.hutool.log.Log;
 import com.junoyi.framework.core.domain.module.R;
 import com.junoyi.framework.core.domain.page.PageResult;
 import com.junoyi.framework.log.core.JunoYiLog;
@@ -11,6 +12,7 @@ import com.junoyi.framework.security.enums.PlatformType;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.system.domain.dto.SysUserDTO;
 import com.junoyi.system.domain.dto.SysUserQueryDTO;
+import com.junoyi.system.domain.vo.SysRoleVO;
 import com.junoyi.system.domain.vo.SysUserVO;
 import com.junoyi.system.service.ISysUserService;
 import lombok.RequiredArgsConstructor;
@@ -110,4 +112,28 @@ public class SysUserController extends BaseController {
         return R.ok();
     }
 
+    /**
+     * 获取用户绑定的角色列表
+     */
+    @GetMapping("/{id}/roles")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"system.ui.user.view", "system.api.user.get"}
+    )
+    public R<List<SysRoleVO>> getUserRoles(@PathVariable("id") Long id){
+        return R.ok(sysUserService.getUserRoles(id));
+    }
+
+    /**
+     * 用户绑定角色
+     */
+    @PutMapping("/{id}/roles")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"system.ui.user.view", "system.api.user.update"}
+    )
+    public R<Void> updateUserRoles(@PathVariable("id") Long id, @RequestBody List<Long> roleIds){
+        sysUserService.updateUserRoles(id, roleIds);
+        return R.ok();
+    }
 }
