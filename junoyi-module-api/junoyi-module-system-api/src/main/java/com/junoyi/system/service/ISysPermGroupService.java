@@ -52,4 +52,11 @@ public interface ISysPermGroupService {
      * @param id 权限组ID
      */
     void deletePermGroup(Long id);
+
+    /**
+     * 批量删除权限组
+     *
+     * @param ids 权限组ID列表
+     */
+    void deletePermGroupBatch(List<Long> ids);
 }

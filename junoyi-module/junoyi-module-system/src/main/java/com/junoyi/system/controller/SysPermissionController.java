@@ -94,12 +94,13 @@ public class SysPermissionController extends BaseController {
     /**
      * 批量删除权限组
      */
-    @DeleteMapping("/{id}/batch")
+    @DeleteMapping("/batch")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
             value = {"system.ui.permission.view", "system.api.permission.delete"}
     )
-    public R<Void> deletePermissionBatch(){
+    public R<Void> deletePermissionBatch(@RequestBody List<Long> ids){
+        sysPermGroupService.deletePermGroupBatch(ids);
         return R.ok();
     }
 }

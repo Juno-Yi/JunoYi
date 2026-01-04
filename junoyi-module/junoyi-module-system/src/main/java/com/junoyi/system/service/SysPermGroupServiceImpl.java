@@ -156,4 +156,25 @@ public class SysPermGroupServiceImpl implements ISysPermGroupService {
         sysPermGroupMapper.deleteById(id);
     }
 
+    /**
+     * 批量删除权限组
+     * 如果任一权限组存在子权限组则无法删除
+     * @param ids 权限组ID列表
+     */
+    @Override
+    public void deletePermGroupBatch(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        // 检查是否存在子权限组
+        LambdaQueryWrapper<SysPermGroup> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(SysPermGroup::getParentId, ids);
+        Long childCount = sysPermGroupMapper.selectCount(wrapper);
+        if (childCount > 0) {
+            throw new PermGroupHasChildrenException("选中的权限组中存在子权限组，无法删除");
+        }
+        // 批量物理删除
+        sysPermGroupMapper.deleteBatchIds(ids);
+    }
+
 }
