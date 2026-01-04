@@ -45,4 +45,11 @@ public interface ISysPermGroupService {
      * @param dto 权限组数据
      */
     void updatePermGroup(SysPermGroupDTO dto);
+
+    /**
+     * 删除权限组
+     *
+     * @param id 权限组ID
+     */
+    void deletePermGroup(Long id);
 }

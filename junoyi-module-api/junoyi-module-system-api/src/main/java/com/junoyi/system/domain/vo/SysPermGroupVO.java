@@ -34,6 +34,11 @@ public class SysPermGroupVO {
     private Long parentId;
 
     /**
+     * 父级权限组名称
+     */
+    private String parentName;
+
+    /**
      * 优先级
      */
     private Integer priority;

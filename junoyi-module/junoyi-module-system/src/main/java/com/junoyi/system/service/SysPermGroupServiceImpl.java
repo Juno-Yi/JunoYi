@@ -3,6 +3,7 @@ package com.junoyi.system.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.junoyi.framework.core.domain.page.PageResult;
+import com.junoyi.framework.core.exception.permission.PermGroupHasChildrenException;
 import com.junoyi.framework.core.utils.DateUtils;
 import com.junoyi.framework.security.utils.SecurityUtils;
 import com.junoyi.system.convert.SysPermGroupConverter;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 权限组服务实现
@@ -49,10 +53,50 @@ public class SysPermGroupServiceImpl implements ISysPermGroupService {
         wrapper.orderByAsc(SysPermGroup::getPriority);
 
         Page<SysPermGroup> resultPage = sysPermGroupMapper.selectPage(page, wrapper);
-        return PageResult.of(sysPermGroupConverter.toVoList(resultPage.getRecords()),
+        List<SysPermGroupVO> voList = sysPermGroupConverter.toVoList(resultPage.getRecords());
+        
+        // 填充父权限组名称
+        fillParentName(voList);
+        
+        return PageResult.of(voList,
                 resultPage.getTotal(),
                 (int) resultPage.getCurrent(),
                 (int) resultPage.getSize());
+    }
+
+    /**
+     * 填充父权限组名称
+     */
+    private void fillParentName(List<SysPermGroupVO> voList) {
+        if (voList == null || voList.isEmpty()) {
+            return;
+        }
+        // 收集所有非空的 parentId
+        Set<Long> parentIds = voList.stream()
+                .map(SysPermGroupVO::getParentId)
+                .filter(id -> id != null && id > 0)
+                .collect(Collectors.toSet());
+        
+        if (parentIds.isEmpty()) {
+            return;
+        }
+        
+        // 批量查询父权限组
+        LambdaQueryWrapper<SysPermGroup> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(SysPermGroup::getId, parentIds)
+                .select(SysPermGroup::getId, SysPermGroup::getGroupName);
+        List<SysPermGroup> parents = sysPermGroupMapper.selectList(wrapper);
+        
+        // 构建 id -> name 映射
+        Map<Long, String> parentNameMap = parents.stream()
+                .collect(Collectors.toMap(SysPermGroup::getId, SysPermGroup::getGroupName));
+        
+        // 填充 parentName
+        for (SysPermGroupVO vo : voList) {
+            if (vo.getParentId() != null && vo.getParentId() > 0) {
+                vo.setParentName(parentNameMap.get(vo.getParentId()));
+            }
+        }
     }
 
     /**
@@ -92,6 +136,24 @@ public class SysPermGroupServiceImpl implements ISysPermGroupService {
         permGroup.setUpdateBy(SecurityUtils.getUserName());
         permGroup.setUpdateTime(DateUtils.getNowDate());
         sysPermGroupMapper.updateById(permGroup);
+    }
+
+    /**
+     * 删除权限组
+     * 如果存在子权限组则无法删除
+     * @param id 权限组ID
+     */
+    @Override
+    public void deletePermGroup(Long id) {
+        // 检查是否存在子权限组
+        LambdaQueryWrapper<SysPermGroup> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysPermGroup::getParentId, id);
+        Long childCount = sysPermGroupMapper.selectCount(wrapper);
+        if (childCount > 0) {
+            throw new PermGroupHasChildrenException("存在子权限组，无法删除");
+        }
+        // 物理删除
+        sysPermGroupMapper.deleteById(id);
     }
 
 }

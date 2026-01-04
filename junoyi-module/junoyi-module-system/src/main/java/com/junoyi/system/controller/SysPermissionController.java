@@ -87,6 +87,7 @@ public class SysPermissionController extends BaseController {
             value = {"system.ui.permission.view", "system.api.permission.delete"}
     )
     public R<Void> deletePermission(@PathVariable("id") Long id){
+        sysPermGroupService.deletePermGroup(id);
         return R.ok();
     }
 
