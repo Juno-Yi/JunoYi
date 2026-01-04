@@ -43,7 +43,7 @@ public class SysPermGroupDTO {
     private String description;
 
     /**
-     * 状态（0-正常，1-禁用）
+     * 状态
      */
     private Integer status;
 
