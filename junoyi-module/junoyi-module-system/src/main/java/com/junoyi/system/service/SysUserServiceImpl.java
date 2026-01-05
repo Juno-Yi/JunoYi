@@ -257,6 +257,12 @@ public class SysUserServiceImpl implements ISysUserService {
                 sysUserRoleMapper.insert(userRole);
             }
         }
+
+        // 发布用户角色变更事件，同步用户会话权限
+        EventBus.get().callEvent(new PermissionChangedEvent(
+                PermissionChangedEvent.ChangeType.USER_ROLE_CHANGE,
+                userId
+        ));
     }
 
     /**
@@ -312,6 +318,12 @@ public class SysUserServiceImpl implements ISysUserService {
                 sysUserDeptMapper.insert(userDept);
             }
         }
+
+        // 发布用户部门变更事件，同步用户会话权限
+        EventBus.get().callEvent(new PermissionChangedEvent(
+                PermissionChangedEvent.ChangeType.USER_DEPT_CHANGE,
+                userId
+        ));
     }
 
     /**
