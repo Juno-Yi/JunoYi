@@ -21,7 +21,7 @@
     </modules>
 
     <properties>
-        <revision>0.1.9-alpha</revision>
+        <revision>0.2.0-alpha</revision>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <java.version>21</java.version>
