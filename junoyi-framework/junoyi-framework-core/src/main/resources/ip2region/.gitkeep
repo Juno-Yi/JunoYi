@@ -1,0 +1,5 @@
+# ip2region 数据库文件目录
+# 请将 ip2region.xdb 文件放置在此目录下
+# 
+# 下载地址: https://github.com/lionsoul2014/ip2region/blob/master/data/ip2region.xdb
+# 或者使用 Maven 仓库中的数据文件

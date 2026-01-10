@@ -89,6 +89,12 @@
             <artifactId>mapstruct</artifactId>
         </dependency>
 
+        <!-- IP地址解析 -->
+        <dependency>
+            <groupId>org.lionsoul</groupId>
+            <artifactId>ip2region</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

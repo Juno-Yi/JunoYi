@@ -1,7 +1,12 @@
 package com.junoyi.framework.core.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.lionsoul.ip2region.xdb.Searcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -11,6 +16,102 @@ import java.net.UnknownHostException;
  * @author Fan
  */
 public class IPUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(IPUtils.class);
+
+    /**
+     * ip2region 搜索器（内存模式）
+     */
+    private static Searcher searcher;
+
+    /**
+     * 初始化标志
+     */
+    private static volatile boolean initialized = false;
+
+    /**
+     * 初始化 ip2region 搜索器
+     */
+    private static void initSearcher() {
+        if (initialized) {
+            return;
+        }
+        synchronized (IPUtils.class) {
+            if (initialized) {
+                return;
+            }
+            try {
+                ClassPathResource resource = new ClassPathResource("ip2region/ip2region.xdb");
+                try (InputStream inputStream = resource.getInputStream()) {
+                    byte[] cBuff = inputStream.readAllBytes();
+                    searcher = Searcher.newWithBuffer(cBuff);
+                    initialized = true;
+                    log.info("ip2region 数据库加载成功");
+                }
+            } catch (Exception e) {
+                log.warn("ip2region 数据库加载失败，IP地区查询功能将不可用: {}", e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * 根据IP地址获取地区信息
+     *
+     * @param ip IP地址
+     * @return 地区信息，格式如: "中国|0|广东省|深圳市|电信"，失败返回null
+     */
+    public static String getIpRegion(String ip) {
+        if (StringUtils.isBlank(ip) || "127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
+            return "内网IP";
+        }
+
+        // 内网IP直接返回
+        if (internalIp(ip)) {
+            return "内网IP";
+        }
+
+        // 延迟初始化
+        if (!initialized) {
+            initSearcher();
+        }
+
+        if (searcher == null) {
+            return null;
+        }
+
+        try {
+            String region = searcher.search(ip);
+            return formatRegion(region);
+        } catch (Exception e) {
+            log.debug("IP地区查询失败: ip={}, error={}", ip, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 格式化地区信息
+     * 原始格式: "中国|0|广东省|深圳市|电信"
+     * 格式化后: "中国 广东省 深圳市 电信" (去除0和重复项)
+     */
+    private static String formatRegion(String region) {
+        if (StringUtils.isBlank(region)) {
+            return null;
+        }
+
+        String[] parts = region.split("\\|");
+        StringBuilder sb = new StringBuilder();
+
+        for (String part : parts) {
+            if (StringUtils.isNotBlank(part) && !"0".equals(part)) {
+                if (sb.length() > 0) {
+                    sb.append(" ");
+                }
+                sb.append(part);
+            }
+        }
+
+        return sb.length() > 0 ? sb.toString() : null;
+    }
 
     public static final String REGX_0_255 = "(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)";
     public static final String REGX_IP = "((" + REGX_0_255 + "\\.){3}" + REGX_0_255 + ")";
