@@ -7,7 +7,7 @@
 
     <groupId>com.junoyi</groupId>
     <artifactId>junoyi-dependencies</artifactId>
-    <version>0.2.2-alpha</version>
+    <version>0.2.3-alpha</version>
     <packaging>pom</packaging>
     <name>junoyi-dependencies</name>
     <description>
@@ -16,7 +16,7 @@
 
     <properties>
         <!-- 项目版本 -->
-        <revision>0.2.2-alpha</revision>
+        <revision>0.2.3-alpha</revision>
         <!-- 统一依赖版本号 -->
         <spring.boot.version>3.5.0</spring.boot.version>
 
