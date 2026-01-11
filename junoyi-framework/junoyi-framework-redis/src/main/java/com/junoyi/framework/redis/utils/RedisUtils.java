@@ -518,4 +518,76 @@ public class RedisUtils {
     public static long getDbSize() {
         return CLIENT.getKeys().count();
     }
+
+    /**
+     * 获取键的类型。
+     *
+     * @param key 键名
+     * @return 类型：string、list、set、zset、hash、none
+     */
+    public static String getType(String key) {
+        RType type = CLIENT.getKeys().getType(key);
+        if (type == null) {
+            return "none";
+        }
+        return type.name().toLowerCase();
+    }
+
+    /**
+     * 获取键的 TTL（秒）。
+     *
+     * @param key 键名
+     * @return TTL（秒），-1 表示永不过期，-2 表示不存在
+     */
+    public static long getTtl(String key) {
+        long ttl = CLIENT.getBucket(key).remainTimeToLive();
+        if (ttl == -1) {
+            return -1; // 永不过期
+        } else if (ttl == -2) {
+            return -2; // 不存在
+        }
+        return ttl / 1000; // 毫秒转秒
+    }
+
+    /**
+     * 获取键的内存占用（字节）。
+     * 使用 MEMORY USAGE 命令。
+     *
+     * @param key 键名
+     * @return 内存占用（字节），null 表示键不存在或命令不支持
+     */
+    public static Long getMemoryUsage(String key) {
+        try {
+            Object result = CLIENT.getScript().eval(
+                    RScript.Mode.READ_ONLY,
+                    "return redis.call('MEMORY', 'USAGE', KEYS[1])",
+                    RScript.ReturnType.INTEGER,
+                    List.of(key)
+            );
+            return result != null ? (Long) result : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取键的元素数量/大小。
+     * 根据类型调用不同命令：STRLEN/LLEN/SCARD/ZCARD/HLEN
+     *
+     * @param key 键名
+     * @return 大小，null 表示键不存在
+     */
+    public static Long getSize(String key) {
+        RType type = CLIENT.getKeys().getType(key);
+        if (type == null) {
+            return null;
+        }
+        return switch (type) {
+            case OBJECT -> (long) CLIENT.getBucket(key).size();
+            case LIST -> (long) CLIENT.getList(key).size();
+            case SET -> (long) CLIENT.getSet(key).size();
+            case ZSET -> (long) CLIENT.getScoredSortedSet(key).size();
+            case MAP -> (long) CLIENT.getMap(key).size();
+        };
+    }
 }
