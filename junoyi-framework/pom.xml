@@ -27,6 +27,7 @@
         <module>junoyi-framework-permission</module>
         <module>junoyi-framework-captcha</module>
         <module>junoyi-framework-quartz</module>
+        <module>junoyi-framework-api-doc</module>
     </modules>
 
 </project>
