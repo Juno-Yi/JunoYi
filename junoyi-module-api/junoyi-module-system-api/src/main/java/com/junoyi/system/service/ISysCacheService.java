@@ -7,6 +7,8 @@ import com.junoyi.system.domain.vo.CacheKeyDetailVO;
 import com.junoyi.system.domain.vo.CacheKeyVO;
 import com.junoyi.system.domain.vo.RedisInfoVO;
 
+import java.util.List;
+
 /**
  * 系统缓存服务接口
  *
@@ -45,4 +47,11 @@ public interface ISysCacheService {
      * @return 是否删除成功
      */
     boolean deleteCacheKey(String key);
+
+    /**
+     * 批量删除缓存
+     *
+     * @param keys 键名列表
+     */
+    void deleteCacheBatch(List<String> keys);
 }

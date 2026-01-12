@@ -14,6 +14,8 @@ import com.junoyi.system.service.ISysCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 系统缓存监控控制类
  *
@@ -70,8 +72,21 @@ public class SysCacheController extends BaseController {
     @Permission(
             value = {"system.ui.cache.view", "system.api.cache.delete"}
     )
-    public R<Void> deleteCacheKey(@RequestParam("key") String key) {
+    public R<Void> deleteCache(@RequestParam("key") String key) {
         sysCacheService.deleteCacheKey(key);
+        return R.ok();
+    }
+
+    /**
+     * 批量删除缓存
+     */
+    @DeleteMapping("/batch")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(
+            value = {"system.ui.cache.view", "system.api.cache.delete"}
+    )
+    public R<Void> deleteCacheBatch(@RequestBody List<String> keys) {
+        sysCacheService.deleteCacheBatch(keys);
         return R.ok();
     }
 
