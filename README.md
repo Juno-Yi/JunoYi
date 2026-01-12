@@ -8,7 +8,7 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![MyBatis Plus](https://img.shields.io/badge/MyBatis%20Plus-3.5.9-blue.svg)](https://baomidou.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-0.2.5--alpha-yellow.svg)](https://github.com/Juno-Yi/JunoYi)
+[![Version](https://img.shields.io/badge/Version-0.3.0--alpha-yellow.svg)](https://github.com/Juno-Yi/JunoYi)
 
 ## JunoYi 企业级开发框架
 **一个安全内建、简洁优雅的 Java 企业级开发框架**
