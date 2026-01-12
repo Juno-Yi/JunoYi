@@ -35,7 +35,7 @@ public class SysRoleController extends BaseController {
     /**
      * 获取角色列表（分页）
      */
-    @GetMapping
+    @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
             value = {"system.ui.role.view", "system.api.role.get"}
