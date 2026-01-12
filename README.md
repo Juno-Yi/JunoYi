@@ -29,6 +29,14 @@
 > - 🌐 官网：https://framework.junoyi.com
 > - 📖 文档站：https://doc.framework.junoyi.com  
 > - 🎮 演示站：https://demo.junoyi.com
+> 
+> 演示站账号：
+> 
+> 超级管理员 - 账号：super_admin 密码：admin123
+> 
+> 用户管理员 - 账号：admin 密码：admin123
+> 
+> 用户1 - 账号：user1 密码：admin123
 
 ---
 
