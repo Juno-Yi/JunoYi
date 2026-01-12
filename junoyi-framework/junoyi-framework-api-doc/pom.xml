@@ -13,27 +13,34 @@
     <artifactId>junoyi-framework-api-doc</artifactId>
 
     <description>
-        API 文档集成核心模块
+        API 文档集成核心模块（基于 Knife4j + SpringDoc OpenAPI 3）
     </description>
 
     <dependencies>
-        <!-- SpringBoot 基础 -->
+        <!-- SpringBoot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Spring Configuration -->
+        <!-- Spring Configuration Processor -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!--    Swagger3    -->
+        <!-- Knife4j OpenAPI 3 (Spring Boot 3.x) -->
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-boot-starter</artifactId>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>

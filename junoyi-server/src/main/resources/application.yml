@@ -239,6 +239,10 @@ junoyi:
       - /auth/refresh
       - /system/info
       - /captcha/**
+      # API 文档相关路径 (Knife4j)
+      - /doc.html
+      - /v3/api-docs/**
+      - /webjars/**
     # 登录机制
     login:
       # 最大登录失败次数
@@ -285,6 +289,28 @@ junoyi:
   # ==================== API 文档配置 ====================
   api-doc:
     enable: true
+    title: JunoYi API 文档
+    description: JunoYi 后台管理系统 API 接口文档
+    version: ${junoyi.version}
+    contact:
+      name: JunoYi
+      email: support@junoyi.com
+      url: https://junoyi.com
+    license:
+      name: Apache 2.0
+      url: https://www.apache.org/licenses/LICENSE-2.0
+    # API 分组配置
+    groups:
+      - name: system
+        displayName: 系统管理
+        pathsToMatch:
+          - /system/**
+          - /auth/**
+          - /captcha/**
+      - name: demo
+        displayName: 示例模块
+        pathsToMatch:
+          - /demo/**
 
 # Spring Boot服务器配置
 server:

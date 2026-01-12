@@ -82,6 +82,12 @@
             <artifactId>junoyi-framework-web</artifactId>
         </dependency>
 
+        <!--   API 文档模块     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-api-doc</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
