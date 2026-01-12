@@ -282,6 +282,9 @@ junoyi:
     # 是否启用字段权限功能
     field-permission-enable: true
 
+  # ==================== API 文档配置 ====================
+  api-doc:
+    enable: true
 
 # Spring Boot服务器配置
 server:
