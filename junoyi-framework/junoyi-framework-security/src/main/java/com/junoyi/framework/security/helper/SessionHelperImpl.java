@@ -1,6 +1,6 @@
 package com.junoyi.framework.security.helper;
 
-import com.junoyi.framework.core.exception.auth.TokenExpiredException;
+import com.junoyi.framework.security.exception.TokenExpiredException;
 import com.junoyi.framework.core.utils.IPUtils;
 import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.core.utils.UserAgentUtils;

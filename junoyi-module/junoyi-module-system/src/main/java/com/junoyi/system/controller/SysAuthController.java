@@ -5,8 +5,8 @@ import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.framework.web.domain.BaseController;
 import com.junoyi.framework.core.domain.module.R;
-import com.junoyi.framework.core.exception.captcha.CaptchaExpiredException;
-import com.junoyi.framework.core.exception.captcha.CaptchaInvalidException;
+import com.junoyi.framework.captcha.exception.CaptchaExpiredException;
+import com.junoyi.framework.captcha.exception.CaptchaInvalidException;
 import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.security.helper.AuthHelper;
 import com.junoyi.framework.security.module.LoginUser;
@@ -17,7 +17,6 @@ import com.junoyi.system.domain.bo.LoginBO;
 import com.junoyi.system.domain.vo.AuthVO;
 import com.junoyi.system.domain.vo.UserInfoVO;
 import com.junoyi.system.service.ISysAuthService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

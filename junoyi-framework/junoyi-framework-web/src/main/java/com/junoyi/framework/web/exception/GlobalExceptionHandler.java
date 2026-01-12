@@ -3,10 +3,6 @@ package com.junoyi.framework.web.exception;
 import com.junoyi.framework.core.constant.HttpStatus;
 import com.junoyi.framework.core.domain.base.BaseException;
 import com.junoyi.framework.core.domain.module.R;
-import com.junoyi.framework.core.exception.auth.AuthException;
-import com.junoyi.framework.core.exception.captcha.CaptchaException;
-import com.junoyi.framework.core.exception.dept.DeptException;
-import com.junoyi.framework.core.exception.menu.MenuException;
 import com.junoyi.framework.permission.exception.NoPermissionException;
 import com.junoyi.framework.permission.exception.NotLoginException;
 import com.junoyi.framework.permission.exception.PermissionException;
@@ -23,11 +19,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.awt.*;
-
 
 /**
  * 全局异常处理类
+ * <p>
+ * 异常处理优先级（从高到低）：
+ * 1. 权限相关异常（NotLoginException、NoPermissionException、PermissionException）
+ * 2. 业务异常（BaseException 及其子类，包括 AuthException、CaptchaException、各业务模块异常）
+ * 3. Spring MVC 异常（参数校验、请求方式等）
+ * 4. 运行时异常和系统异常（兜底）
  *
  * @author Fan
  */
@@ -36,23 +36,7 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    /**
-     * 业务异常
-     */
-    @ExceptionHandler(BaseException.class)
-    public R<?> handleBaseException(BaseException e, HttpServletRequest request) {
-        log.warn("[业务异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), e.getFullDomain(), e.getMessage());
-        return R.fail(e.getCode(), e.getMessage());
-    }
-
-    /**
-     *  人机验证（验证码）异常
-     */
-    @ExceptionHandler(CaptchaException.class)
-    public R<?> handleCaptchaException(CaptchaException e, HttpServletRequest request){
-        log.warn("验证码验证失败，请求URI: {}, 异常信息: {}", request.getRequestURI(), e.getMessage(), e);
-        return R.fail(e.getCode(),e.getMessage());
-    }
+    // ==================== 权限相关异常 ====================
 
     /**
      * 未登录异常
@@ -86,33 +70,34 @@ public class GlobalExceptionHandler {
         return R.fail(e.getCode(), e.getMessage());
     }
 
+    // ==================== 业务异常（统一处理 BaseException） ====================
+
     /**
-     * 菜单异常
+     * 业务异常统一处理
+     * <p>
+     * 处理所有继承自 BaseException 的业务异常，包括：
+     * - AuthException（认证异常：Token过期、登录失败等）
+     * - CaptchaException（验证码异常）
+     * - DeptException、MenuException、UserException 等业务模块异常
      */
-    @ExceptionHandler(MenuException.class)
-    public R<?> handleMenuException(MenuException e, HttpServletRequest request){
-        log.warn("[菜单异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), e.getFullDomain(), e.getMessage());
+    @ExceptionHandler(BaseException.class)
+    public R<?> handleBaseException(BaseException e, HttpServletRequest request) {
+        String domain = e.getFullDomain();
+        String prefix = e.getDomainPrefix();
+        
+        // 根据领域前缀区分日志级别和格式
+        if ("AUTH".equals(prefix) || prefix.startsWith("AUTH.")) {
+            log.warn("[认证异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), domain, e.getMessage());
+        } else if ("CAPTCHA".equals(prefix)) {
+            log.warn("[验证码异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), domain, e.getMessage());
+        } else {
+            log.warn("[业务异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), domain, e.getMessage());
+        }
+        
         return R.fail(e.getCode(), e.getMessage());
     }
 
-    /**
-     * 部门异常
-     */
-    @ExceptionHandler(DeptException.class)
-    public R<?> handleDeptException(DeptException e, HttpServletRequest request){
-        log.warn("[部门异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), e.getFullDomain(), e.getMessage());
-        return R.fail(e.getCode(), e.getMessage());
-    }
-
-    /**
-     * 认证异常（Token过期、登录失败等）
-     */
-    @ExceptionHandler(AuthException.class)
-    public R<?> handleAuthException(AuthException e, HttpServletRequest request) {
-        log.warn("[认证异常] 请求地址: {}, 领域: {}, 异常信息: {}", request.getRequestURI(), e.getFullDomain(), e.getMessage());
-        return R.fail(e.getCode(), e.getMessage());
-    }
-
+    // ==================== Spring MVC 异常 ====================
 
     /**
      * 请求方式不支持
@@ -171,6 +156,8 @@ public class GlobalExceptionHandler {
         log.warn("[参数类型错误] 参数名: {}, 期望类型: {}", e.getName(), e.getRequiredType());
         return R.fail(HttpStatus.BAD_REQUEST, "参数类型错误: " + e.getName());
     }
+
+    // ==================== 系统异常（兜底） ====================
 
     /**
      * 运行时异常

@@ -4,7 +4,7 @@ import com.junoyi.framework.captcha.domain.CaptchaResult;
 import com.junoyi.framework.captcha.enums.CaptchaType;
 import com.junoyi.framework.captcha.generator.CaptchaGenerator;
 import com.junoyi.framework.captcha.properties.CaptchaProperties;
-import com.junoyi.framework.core.exception.captcha.CaptchaUnsupportedTypeException;
+import com.junoyi.framework.captcha.exception.CaptchaUnsupportedTypeException;
 import com.junoyi.framework.core.utils.StringUtils;
 
 import java.util.List;

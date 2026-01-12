@@ -1,13 +1,13 @@
 package com.junoyi.system.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.junoyi.framework.core.exception.auth.LoginAccountIsNullException;
-import com.junoyi.framework.core.exception.auth.LoginFailedAccountLockedException;
-import com.junoyi.framework.core.exception.auth.LoginPasswordIsNullException;
-import com.junoyi.framework.core.exception.auth.LoginPasswordWrongException;
-import com.junoyi.framework.core.exception.user.UserNotExistException;
-import com.junoyi.framework.core.exception.user.UserStatusIsDisableException;
-import com.junoyi.framework.core.exception.user.UserStatusIsLockedException;
+import com.junoyi.framework.security.exception.LoginAccountIsNullException;
+import com.junoyi.framework.security.exception.LoginFailedAccountLockedException;
+import com.junoyi.framework.security.exception.LoginPasswordIsNullException;
+import com.junoyi.framework.security.exception.LoginPasswordWrongException;
+import com.junoyi.system.exception.UserNotExistException;
+import com.junoyi.system.exception.UserStatusIsDisableException;
+import com.junoyi.system.exception.UserStatusIsLockedException;
 import com.junoyi.framework.core.utils.ServletUtils;
 import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.log.core.JunoYiLog;
