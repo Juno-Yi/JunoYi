@@ -34,9 +34,6 @@ spring:
         # 监控统计（简化配置）
         filters: stat,wall
 
-      # 数据范围
-      data-scope:
-        enabled: true  # 默认启用
   # ==================== Redis 配置 ====================
   data:
     redis:
