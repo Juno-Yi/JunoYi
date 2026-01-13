@@ -73,6 +73,9 @@ public class DataScopeInterceptor implements Interceptor {
 
     /**
      * 获取 Mapper 方法上的 @DataScope 注解
+     *
+     * @param ms MappedStatement对象
+     * @return DataScope注解对象，如果未找到则返回null
      */
     private DataScope getDataScopeAnnotation(MappedStatement ms) {
         try {
@@ -94,6 +97,10 @@ public class DataScopeInterceptor implements Interceptor {
 
     /**
      * 构建数据范围过滤条件
+     *
+     * @param dataScope 数据范围注解配置
+     * @param context   当前数据范围上下文
+     * @return 构建好的SQL过滤条件字符串
      */
     private String buildScopeCondition(DataScope dataScope, DataScopeContext context) {
         String tableAlias = dataScope.tableAlias();
@@ -130,12 +137,22 @@ public class DataScopeInterceptor implements Interceptor {
         }
     }
 
+    /**
+     * 将ID集合转换为逗号分隔的字符串
+     *
+     * @param ids ID集合
+     * @return 逗号分隔的ID字符串
+     */
     private String joinIds(Set<Long> ids) {
         return ids.stream().map(String::valueOf).collect(Collectors.joining(", "));
     }
 
     /**
      * 在 SQL 中添加数据范围条件
+     *
+     * @param sql       原始SQL语句
+     * @param condition 要添加的数据范围条件
+     * @return 添加条件后的SQL语句
      */
     private String addScopeCondition(String sql, String condition) {
         String lowerSql = sql.toLowerCase();
@@ -154,6 +171,12 @@ public class DataScopeInterceptor implements Interceptor {
         }
     }
 
+    /**
+     * 查找WHERE子句的插入位置
+     *
+     * @param lowerSql 转换为小写的SQL语句
+     * @return WHERE子句应该插入的位置索引
+     */
     private int findInsertPosition(String lowerSql) {
         String[] keywords = {" group by ", " order by ", " limit ", " having "};
         int minPos = -1;
@@ -166,6 +189,13 @@ public class DataScopeInterceptor implements Interceptor {
         return minPos;
     }
 
+    /**
+     * 复制MappedStatement并替换SQL源
+     *
+     * @param ms          原始MappedStatement对象
+     * @param newSqlSource 新的SQL源对象
+     * @return 复制后的新MappedStatement对象
+     */
     private MappedStatement copyMappedStatement(MappedStatement ms, SqlSource newSqlSource) {
         MappedStatement.Builder builder = new MappedStatement.Builder(
                 ms.getConfiguration(), ms.getId(), newSqlSource, ms.getSqlCommandType());
@@ -191,6 +221,9 @@ public class DataScopeInterceptor implements Interceptor {
         return Plugin.wrap(target, this);
     }
 
+    /**
+     * 自定义SQL源实现类，用于包装修改后的SQL语句
+     */
     private static class BoundSqlSqlSource implements SqlSource {
         private final BoundSql originalBoundSql;
         private final String newSql;
