@@ -132,6 +132,7 @@ SQL执行时:
 | `datascope/DataScopeType.java` | 数据范围类型枚举，定义 ALL/DEPT/DEPT_AND_CHILD/SELF |
 | `datascope/DataScopeContextHolder.java` | ThreadLocal 上下文持有者，存储当前请求的数据范围信息 |
 | `datascope/annotation/DataScope.java` | @DataScope 注解，标记需要数据范围过滤的 Mapper 方法 |
+| `datascope/annotation/IgnoreDataScope.java` | @IgnoreDataScope 注解，标记忽略数据范围过滤的 Mapper 类或方法 |
 | `datascope/handler/DataScopeHandler.java` | MyBatis-Plus DataPermissionHandler 实现，自动修改 SQL |
 | `config/MyBatisPlusConfig.java` | 配置类，注册 DataPermissionInterceptor |
 | `properties/DataSourceProperties.java` | 配置属性，包含数据范围开关和模式设置 |
@@ -190,7 +191,41 @@ junoyi:
 | 老项目迁移 | 注解模式 | 逐步添加注解，风险可控 |
 | 混合场景 | 注解模式 | 精确控制哪些查询需要过滤 |
 
-### 4.3 配置角色数据范围
+### 4.3 全局模式下的系统表排除
+
+> **重要说明**：全局模式下，框架会**自动排除系统管理相关的表**，不对其应用数据范围过滤。
+
+**排除的 Mapper 列表**：
+- `SysUserMapper` - 用户管理
+- `SysRoleMapper` - 角色管理
+- `SysDeptMapper` - 部门管理
+- `SysMenuMapper` - 菜单管理
+- `SysPermissionMapper` - 权限管理
+- `SysSessionMapper` - 会话管理
+- `SysPermGroupMapper` - 权限组管理
+- `SysUserRoleMapper` - 用户角色关联
+- `SysUserDeptMapper` - 用户部门关联
+- `SysUserGroupMapper` - 用户权限组关联
+- `SysUserPermMapper` - 用户独立权限
+- `SysRoleGroupMapper` - 角色权限组关联
+- `SysDeptGroupMapper` - 部门权限组关联
+
+**设计原因**：
+- 系统管理功能（用户/角色/部门/菜单等）是**管理员专用**的功能
+- 这些功能通过**菜单权限**控制访问，而非数据范围
+- 管理员需要看到所有用户、所有角色才能正常管理系统
+- 数据范围主要用于**业务数据**（如订单、客户、合同等）的行级权限控制
+
+**如果你的业务 Mapper 也需要排除**，可以使用 `@IgnoreDataScope` 注解：
+```java
+@IgnoreDataScope
+@Mapper
+public interface YourSpecialMapper extends BaseMapper<YourEntity> {
+    // 该 Mapper 的所有方法都不会应用数据范围
+}
+```
+
+### 4.4 配置角色数据范围
 
 在数据库中设置角色的 `data_scope` 字段：
 
@@ -220,7 +255,7 @@ CREATE TABLE biz_order (
     amount DECIMAL(10,2) COMMENT '金额',
     -- 数据范围必需字段
     dept_id BIGINT COMMENT '所属部门ID',
-    create_by BIGINT COMMENT '创建人ID',
+    create_by VARCHAR(64) COMMENT '创建人用户名',
     -- 其他字段
     create_time DATETIME,
     update_time DATETIME
@@ -230,6 +265,8 @@ CREATE TABLE biz_order (
 CREATE INDEX idx_order_dept ON biz_order(dept_id);
 CREATE INDEX idx_order_creator ON biz_order(create_by);
 ```
+
+> **注意**：`create_by` 字段存储的是**用户名（userName）**而非用户ID，这与系统的 BaseEntity 设计保持一致。SELF 模式会生成 `WHERE create_by = 'admin'` 这样的字符串比较条件。
 
 ### 5.2 注解模式使用
 
@@ -351,7 +388,33 @@ LEFT JOIN sys_user u ON o.create_by = u.user_id
 WHERE (o.dept_id IN (1, 2, 3)) AND o.del_flag = 0
 ```
 
-### 6.3 临时跳过数据范围
+### 6.3 使用 @IgnoreDataScope 忽略数据范围
+
+对于不需要数据范围过滤的 Mapper，可以使用 `@IgnoreDataScope` 注解：
+
+```java
+// 方式1：在 Mapper 类上标注，整个 Mapper 的所有方法都忽略数据范围
+@IgnoreDataScope
+@Mapper
+public interface SysConfigMapper extends BaseMapper<SysConfig> {
+    // 所有方法都不会应用数据范围过滤
+}
+
+// 方式2：在方法上标注，只忽略特定方法
+@Mapper
+public interface BizOrderMapper extends BaseMapper<BizOrder> {
+
+    @DataScope
+    List<BizOrder> selectOrderList(BizOrderQuery query);
+
+    @IgnoreDataScope
+    OrderStatVO selectOrderStat();  // 统计查询不过滤
+}
+```
+
+> **注意**：全局模式下，系统表（`sys_*`）的 Mapper 会自动忽略数据范围，无需手动添加注解。
+
+### 6.4 临时跳过数据范围
 
 某些场景需要临时跳过数据范围过滤（如统计报表）：
 
@@ -379,7 +442,7 @@ public class ReportServiceImpl {
 }
 ```
 
-### 6.4 手动设置数据范围
+### 6.5 手动设置数据范围
 
 在非 HTTP 请求场景（如定时任务、消息消费）中手动设置：
 
@@ -392,6 +455,7 @@ public class OrderSyncTask {
         // 以超级管理员身份执行
         DataScopeContextHolder.set(DataScopeContextHolder.DataScopeContext.builder()
                 .userId(1L)
+                .userName("admin")  // SELF 模式需要用户名
                 .superAdmin(true)
                 .build());
         
@@ -405,7 +469,7 @@ public class OrderSyncTask {
 }
 ```
 
-### 6.5 动态数据范围
+### 6.6 动态数据范围
 
 某些场景需要根据业务动态调整数据范围：
 
@@ -430,6 +494,7 @@ public class OrderServiceImpl {
         // 临时设置只查看指定部门
         DataScopeContextHolder.set(DataScopeContextHolder.DataScopeContext.builder()
                 .userId(ctx.getUserId())
+                .userName(ctx.getUserName())  // 保留用户名
                 .deptIds(Set.of(targetDeptId))
                 .scopeType(DataScopeType.DEPT)
                 .accessibleDeptIds(Set.of(targetDeptId))
@@ -477,7 +542,7 @@ SELECT * FROM biz_order WHERE (dept_id IN (5, 10, 11, 12)) AND status = 1 ORDER 
 
 **SELF (仅本人)**
 ```sql
--- 用户名: admin
+-- 用户名: admin（create_by 存储的是用户名，不是用户ID）
 SELECT * FROM biz_order WHERE (create_by = 'admin') AND status = 1 ORDER BY create_time DESC
 ```
 
