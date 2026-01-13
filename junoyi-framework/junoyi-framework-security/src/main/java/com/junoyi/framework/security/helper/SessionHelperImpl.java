@@ -77,6 +77,8 @@ public class SessionHelperImpl implements SessionHelper {
                 .permissions(loginUser.getPermissions())
                 .groups(loginUser.getGroups())
                 .depts(loginUser.getDepts())
+                .dataScope(loginUser.getDataScope())
+                .accessibleDeptIds(loginUser.getAccessibleDeptIds())
                 .superAdmin(loginUser.isSuperAdmin())
                 .roles(loginUser.getRoles())
                 .loginIp(loginIp)
@@ -281,6 +283,8 @@ public class SessionHelperImpl implements SessionHelper {
                 .permissions(session.getPermissions())
                 .groups(session.getGroups())
                 .depts(session.getDepts())
+                .dataScope(session.getDataScope())
+                .accessibleDeptIds(session.getAccessibleDeptIds())
                 .superAdmin(session.isSuperAdmin())
                 .roles(session.getRoles())
                 .loginIp(session.getLoginIp())
@@ -338,6 +342,8 @@ public class SessionHelperImpl implements SessionHelper {
                 .permissions(session.getPermissions())
                 .groups(session.getGroups())
                 .depts(session.getDepts())
+                .dataScope(session.getDataScope())
+                .accessibleDeptIds(session.getAccessibleDeptIds())
                 .superAdmin(session.isSuperAdmin())
                 .roles(session.getRoles())
                 .loginIp(session.getLoginIp())
@@ -399,6 +405,8 @@ public class SessionHelperImpl implements SessionHelper {
         session.setPermissions(loginUser.getPermissions());
         session.setGroups(loginUser.getGroups());
         session.setDepts(loginUser.getDepts());
+        session.setDataScope(loginUser.getDataScope());
+        session.setAccessibleDeptIds(loginUser.getAccessibleDeptIds());
         session.setSuperAdmin(loginUser.isSuperAdmin());
         session.setRoles(loginUser.getRoles());
         session.setLastAccessTime(new Date());

@@ -31,9 +31,14 @@ import com.junoyi.system.domain.po.SysUserRole;
 import com.junoyi.system.domain.vo.UserInfoVO;
 import com.junoyi.system.enums.LoginType;
 import com.junoyi.system.enums.SysUserStatus;
+import com.junoyi.framework.datasource.datascope.DataScopeType;
+import com.junoyi.system.domain.po.SysDept;
+import com.junoyi.system.domain.po.SysRole;
 import com.junoyi.system.mapper.SysDeptGroupMapper;
+import com.junoyi.system.mapper.SysDeptMapper;
 import com.junoyi.system.mapper.SysPermGroupMapper;
 import com.junoyi.system.mapper.SysRoleGroupMapper;
+import com.junoyi.system.mapper.SysRoleMapper;
 import com.junoyi.system.mapper.SysUserDeptMapper;
 import com.junoyi.system.mapper.SysUserGroupMapper;
 import com.junoyi.system.mapper.SysUserMapper;
@@ -68,6 +73,8 @@ public class SysAuthServiceImpl implements ISysAuthService {
     private final SysDeptGroupMapper sysDeptGroupMapper;
     private final SysPermGroupMapper sysPermGroupMapper;
     private final SysUserPermMapper sysUserPermMapper;
+    private final SysRoleMapper sysRoleMapper;
+    private final SysDeptMapper sysDeptMapper;
 
     @Override
     public AuthVO login(LoginBO loginBO) {
@@ -200,6 +207,8 @@ public class SysAuthServiceImpl implements ISysAuthService {
                 .userName(user.getUserName())
                 .nickName(user.getNickName())
                 .depts(ctx.deptIds)
+                .dataScope(ctx.dataScope)
+                .accessibleDeptIds(ctx.accessibleDeptIds)
                 .superAdmin(isSuperAdmin)
                 .permissions(ctx.permissions)
                 .groups(ctx.groupCodes)
@@ -221,6 +230,10 @@ public class SysAuthServiceImpl implements ISysAuthService {
         Set<String> groupCodes = new HashSet<>();
         // 用户权限集合
         Set<String> permissions = new HashSet<>();
+        // 数据范围类型（取用户所有角色中权限最大的）
+        String dataScope;
+        // 可访问的部门ID集合（用于数据范围过滤）
+        Set<Long> accessibleDeptIds = new HashSet<>();
     }
 
     /**
@@ -237,6 +250,7 @@ public class SysAuthServiceImpl implements ISysAuthService {
         if (userId == 1L) {
             ctx.permissions.add("*");
             ctx.groupCodes.add("super_admin");
+            ctx.dataScope = DataScopeType.ALL.getValue();  // 超级管理员默认全部数据权限
             log.debug("[权限加载] 超级管理员, 直接返回");
             return ctx;
         }
@@ -258,6 +272,9 @@ public class SysAuthServiceImpl implements ISysAuthService {
                         .eq(SysUserDept::getUserId, userId)
         ).stream().map(SysUserDept::getDeptId).collect(Collectors.toSet());
         log.debug("[权限加载] 用户部门: {}", ctx.deptIds);
+
+        // 计算数据范围（从角色中取最大权限，需要在查询角色和部门之后）
+        calculateDataScope(ctx);
 
         // 收集所有权限组ID（用户直绑 + 角色绑定 + 部门绑定）
         // 用户直绑权限组
@@ -379,6 +396,90 @@ public class SysAuthServiceImpl implements ISysAuthService {
         ).stream()
                 .map(SysUserDept::getDeptId)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * 计算用户数据范围
+     * 从用户所有角色中取权限最大的数据范围，并计算可访问的部门ID集合
+     *
+     * @param ctx 用户权限上下文
+     */
+    private void calculateDataScope(UserPermissionContext ctx) {
+        // 默认为仅本人数据
+        DataScopeType maxScope = DataScopeType.SELF;
+
+        // 查询用户所有角色的 dataScope
+        if (!ctx.roleIds.isEmpty()) {
+            List<SysRole> roles = sysRoleMapper.selectList(
+                    new LambdaQueryWrapper<SysRole>()
+                            .select(SysRole::getDataScope)
+                            .in(SysRole::getId, ctx.roleIds)
+                            .eq(SysRole::getStatus, 0)  // 只查启用的角色
+                            .eq(SysRole::isDelFlag, false)
+            );
+
+            // 取最大权限（多角色取并集）
+            for (SysRole role : roles) {
+                if (role.getDataScope() != null) {
+                    DataScopeType roleScope = DataScopeType.fromValue(role.getDataScope());
+                    maxScope = DataScopeType.max(maxScope, roleScope);
+                }
+            }
+        }
+
+        ctx.dataScope = maxScope != null ? maxScope.getValue() : DataScopeType.SELF.getValue();
+        log.debug("[权限加载] 数据范围: {} ({})", ctx.dataScope, maxScope != null ? maxScope.getDesc() : "仅本人数据");
+
+        // 根据数据范围类型计算可访问的部门ID集合
+        ctx.accessibleDeptIds = new HashSet<>();
+        if (maxScope != null) {
+            switch (maxScope) {
+                case ALL:
+                    // 全部数据，不需要设置部门ID
+                    break;
+                case DEPT_AND_CHILD:
+                    // 本部门及下级部门
+                    for (Long deptId : ctx.deptIds) {
+                        ctx.accessibleDeptIds.add(deptId);
+                        ctx.accessibleDeptIds.addAll(getChildDeptIds(deptId));
+                    }
+                    break;
+                case DEPT:
+                    // 仅本部门
+                    ctx.accessibleDeptIds.addAll(ctx.deptIds);
+                    break;
+                case SELF:
+                    // 仅本人，不需要部门ID
+                    break;
+            }
+        }
+        log.debug("[权限加载] 可访问部门: {}", ctx.accessibleDeptIds);
+    }
+
+    /**
+     * 递归获取部门的所有下级部门ID
+     *
+     * @param parentId 父部门ID
+     * @return 所有下级部门ID集合
+     */
+    private Set<Long> getChildDeptIds(Long parentId) {
+        Set<Long> childIds = new HashSet<>();
+        
+        // 查询直接子部门
+        List<SysDept> children = sysDeptMapper.selectList(
+                new LambdaQueryWrapper<SysDept>()
+                        .select(SysDept::getId)
+                        .eq(SysDept::getParentId, parentId)
+                        .eq(SysDept::isDelFlag, false)
+        );
+
+        for (SysDept child : children) {
+            childIds.add(child.getId());
+            // 递归获取下级部门
+            childIds.addAll(getChildDeptIds(child.getId()));
+        }
+
+        return childIds;
     }
 
     /**

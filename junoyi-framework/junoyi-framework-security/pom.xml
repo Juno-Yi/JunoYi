@@ -56,6 +56,12 @@
             <groupId>com.junoyi</groupId>
             <artifactId>junoyi-framework-permission</artifactId>
         </dependency>
+
+        <!--   datasource数据源模块（数据范围）     -->
+        <dependency>
+            <groupId>com.junoyi</groupId>
+            <artifactId>junoyi-framework-datasource</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

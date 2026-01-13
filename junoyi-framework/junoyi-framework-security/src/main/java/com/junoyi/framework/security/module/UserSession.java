@@ -73,6 +73,18 @@ public class UserSession implements Serializable {
     private Set<Long> depts;
 
     /**
+     * 数据范围类型（取用户所有角色中权限最大的）
+     * 值：1-全部数据，2-本部门数据，3-本部门及下级数据，4-仅本人数据
+     */
+    private String dataScope;
+
+    /**
+     * 可访问的部门ID集合（用于数据范围过滤）
+     * 包含用户所属部门及其下级部门（根据 dataScope 计算）
+     */
+    private Set<Long> accessibleDeptIds;
+
+    /**
      * 是否为超级管理员
      */
     private boolean superAdmin;

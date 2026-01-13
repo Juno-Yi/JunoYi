@@ -1,6 +1,8 @@
 package com.junoyi.framework.security.filter;
 
 import com.junoyi.framework.core.utils.StringUtils;
+import com.junoyi.framework.datasource.datascope.DataScopeContextHolder;
+import com.junoyi.framework.datasource.datascope.DataScopeType;
 import com.junoyi.framework.log.core.JunoYiLog;
 import com.junoyi.framework.log.core.JunoYiLogFactory;
 import com.junoyi.framework.security.context.SecurityContext;
@@ -98,6 +100,8 @@ public class TokenAuthenticationTokenFilter extends OncePerRequestFilter {
                     .permissions(session.getPermissions())
                     .groups(session.getGroups())
                     .depts(session.getDepts())
+                    .dataScope(session.getDataScope())
+                    .accessibleDeptIds(session.getAccessibleDeptIds())
                     .superAdmin(session.isSuperAdmin())
                     .roles(session.getRoles())
                     .loginIp(session.getLoginIp())
@@ -106,6 +110,15 @@ public class TokenAuthenticationTokenFilter extends OncePerRequestFilter {
 
             // 将用户信息存储到上下文中
             SecurityContext.set(loginUser);
+
+            // 设置数据范围上下文
+            DataScopeContextHolder.set(DataScopeContextHolder.DataScopeContext.builder()
+                    .userId(loginUser.getUserId())
+                    .deptIds(loginUser.getDepts())
+                    .scopeType(DataScopeType.fromValue(loginUser.getDataScope()))
+                    .accessibleDeptIds(loginUser.getAccessibleDeptIds())
+                    .superAdmin(loginUser.isSuperAdmin())
+                    .build());
 
             // 更新最后访问时间
             String tokenId = tokenService.getTokenId(token);
@@ -121,6 +134,7 @@ public class TokenAuthenticationTokenFilter extends OncePerRequestFilter {
         } finally {
             // 清理上下文
             SecurityContext.clear();
+            DataScopeContextHolder.clear();
         }
     }
 
