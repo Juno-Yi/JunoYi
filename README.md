@@ -94,9 +94,6 @@ git clone https://github.com/Juno-Yi/JunoYi.git
 mvn spring-boot:run -pl junoyi-server
 ```
 
-启动成功后访问：
-- API 文档：http://localhost:7588/doc.html
-
 ---
 
 ## 📚 文档
