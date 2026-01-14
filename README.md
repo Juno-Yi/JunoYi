@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-0.3.1--alpha-yellow.svg)](https://github.com/Juno-Yi/JunoYi)
 
-## JunoYi 企业级开发框架
+## JunoYi 后台管理系统脚手架框架
 **一个安全内建、简洁优雅的 Java 企业级开发框架**
 
 [特性](#-核心特性) • [快速开始](#-快速开始) • [文档](#-文档) • [架构](#-项目架构) • [贡献](#-贡献指南) • [联系我们](#-联系我们)
