@@ -14,12 +14,6 @@
 
     <!--  依赖  -->
     <dependencies>
-        <!--   JunoYi框架模块     -->
-        <dependency>
-            <groupId>com.junoyi</groupId>
-            <artifactId>junoyi-framework-boot-starter</artifactId>
-        </dependency>
-
         <!-- 系统模块 -->
         <dependency>
             <groupId>com.junoyi</groupId>
