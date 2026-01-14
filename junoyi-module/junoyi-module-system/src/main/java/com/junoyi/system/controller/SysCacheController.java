@@ -34,7 +34,7 @@ public class SysCacheController extends BaseController {
     @GetMapping("/info")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = {"system.ui.cache.view", "system.api.cache.get"}
+            value = {"system.ui.cache.view", "system.api.cache.get.info"}
     )
     public R<RedisInfoVO> getRedisInfo() {
         return R.ok(sysCacheService.getRedisInfo());
@@ -46,7 +46,7 @@ public class SysCacheController extends BaseController {
     @GetMapping("/keys")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = {"system.ui.cache.view", "system.api.cache.get"}
+            value = {"system.ui.cache.view", "system.api.cache.get.keys"}
     )
     public R<PageResult<CacheKeyVO>> getCacheKeyList(CacheKeyQueryDTO query) {
         return R.ok(sysCacheService.getCacheKeyList(query, getPageQuery()));
@@ -58,7 +58,7 @@ public class SysCacheController extends BaseController {
     @GetMapping("/key")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = {"system.ui.cache.view", "system.api.cache.get"}
+            value = {"system.ui.cache.view", "system.api.cache.get.key"}
     )
     public R<CacheKeyDetailVO> getCacheKeyDetail(@RequestParam("key") String key) {
         return R.ok(sysCacheService.getCacheKeyDetail(key));
@@ -70,7 +70,7 @@ public class SysCacheController extends BaseController {
     @DeleteMapping("/key")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = {"system.ui.cache.view", "system.api.cache.delete"}
+            value = {"system.ui.cache.view", "system.api.cache.delete.key"}
     )
     public R<Void> deleteCache(@RequestParam("key") String key) {
         sysCacheService.deleteCacheKey(key);
@@ -83,7 +83,7 @@ public class SysCacheController extends BaseController {
     @DeleteMapping("/batch")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = {"system.ui.cache.view", "system.api.cache.delete"}
+            value = {"system.ui.cache.view", "system.api.cache.delete.batch"}
     )
     public R<Void> deleteCacheBatch(@RequestBody List<String> keys) {
         sysCacheService.deleteCacheBatch(keys);
@@ -96,7 +96,7 @@ public class SysCacheController extends BaseController {
     @DeleteMapping("/clear")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = {"system.ui.cache.view", "system.api.cache.delete"}
+            value = {"system.ui.cache.view", "system.api.cache.clear"}
     )
     public R<Void> clearAllCache() {
         sysCacheService.clearAllCache();
