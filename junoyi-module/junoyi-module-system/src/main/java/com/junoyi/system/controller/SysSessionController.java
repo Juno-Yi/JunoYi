@@ -36,7 +36,7 @@ public class SysSessionController extends BaseController {
     @GetMapping("/list")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = {"system.ui.session.view"}
+            value = {"system.ui.session.view", "system.api.session.get.list"}
     )
     public R<PageResult<SysSession>> getSessionList(SysSessionQueryDTO queryDTO) {
         return R.ok(sysSessionService.getSessionList(queryDTO, getPageQuery()));
@@ -48,7 +48,7 @@ public class SysSessionController extends BaseController {
     @DeleteMapping("/{sessionId}")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = {"system.ui.session.view", "system.api.session.kickout"}
+            value = {"system.ui.session.view", "system.api.session.logout.id"}
     )
     public R<Void> kickOut(@PathVariable("sessionId") String sessionId) {
         sysSessionService.kickOut(sessionId);
@@ -63,7 +63,7 @@ public class SysSessionController extends BaseController {
     @DeleteMapping("/batch")
     @PlatformScope(PlatformType.ADMIN_WEB)
     @Permission(
-            value = {"system.ui.session.view", "system.api.session.kickout"}
+            value = {"system.ui.session.view", "system.api.session.logout.batcha"}
     )
     public R<Void> kickOutBatch(@RequestBody List<String> sessionIds) {
         sysSessionService.kickOutBatch(sessionIds);
