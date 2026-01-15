@@ -257,7 +257,7 @@ public class SysAuthServiceImpl implements ISysAuthService {
 
         Date now = new Date();
 
-        // 查询用户角色（只查一次）
+        // 查询用户角色
         ctx.roleIds = sysUserRoleMapper.selectList(
                 new LambdaQueryWrapper<SysUserRole>()
                         .select(SysUserRole::getRoleId)
@@ -265,7 +265,7 @@ public class SysAuthServiceImpl implements ISysAuthService {
         ).stream().map(SysUserRole::getRoleId).collect(Collectors.toSet());
         log.debug("[权限加载] 用户角色: {}", ctx.roleIds);
 
-        // 查询用户部门（只查一次）
+        // 查询用户部门
         ctx.deptIds = sysUserDeptMapper.selectList(
                 new LambdaQueryWrapper<SysUserDept>()
                         .select(SysUserDept::getDeptId)
@@ -484,36 +484,40 @@ public class SysAuthServiceImpl implements ISysAuthService {
 
     /**
      * 获取用户信息
-     * @param loginUser 用户会话信息
+     * 优化：直接从 LoginUser（Redis Session）中获取权限信息，避免重复查询数据库
+     * 
+     * @param loginUser 用户会话信息（已包含权限、角色、部门等信息）
      * @return 返回用户信息
      */
     public UserInfoVO getUserInfo(LoginUser loginUser){
         Long userId = loginUser.getUserId();
 
+        // 只查询头像和邮箱（这两个字段不在 Session 中）
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysUser::isDelFlag, false)
                 .eq(SysUser::getUserId, userId)
                 .select(SysUser::getAvatar, SysUser::getEmail);
         SysUser sysUser = sysUserMapper.selectOne(wrapper);
-        String avatar = sysUser.getAvatar();
-        if (avatar == null || avatar.isBlank()) {
-            // 未设置头像返回默认头像
-            avatar = "/default-avatar.png";
+        
+        String avatar = "/default-avatar.png";
+        String email = null;
+        if (sysUser != null) {
+            if (sysUser.getAvatar() != null && !sysUser.getAvatar().isBlank()) {
+                avatar = sysUser.getAvatar();
+            }
+            email = sysUser.getEmail();
         }
 
-        Set<String> userPermissions = getUserPermissions(userId);
-        Set<Long> userRoles = getUserRoles(userId);
-        Set<Long> userDept = getUserDept(userId);
-
+        // 直接从 LoginUser（Redis Session）中获取权限信息，无需再查数据库
         return UserInfoVO.builder()
                 .userId(userId)
                 .userName(loginUser.getUserName())
                 .nickName(loginUser.getNickName())
-                .email(sysUser.getEmail())
+                .email(email)
                 .avatar(avatar)
-                .permissions(userPermissions)
-                .roles(userRoles)
-                .depts(userDept)
+                .permissions(loginUser.getPermissions())
+                .roles(loginUser.getRoles())
+                .depts(loginUser.getDepts())
                 .build();
     }
 

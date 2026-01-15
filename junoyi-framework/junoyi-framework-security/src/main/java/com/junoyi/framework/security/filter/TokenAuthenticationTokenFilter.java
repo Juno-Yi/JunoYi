@@ -21,6 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Token 认证过滤器
@@ -43,6 +45,12 @@ public class TokenAuthenticationTokenFilter extends OncePerRequestFilter {
     private final SecurityProperties securityProperties;
     
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
+    
+    /**
+     * 最后访问时间更新间隔（5分钟）
+     * 避免每次请求都更新 Redis，减少 Redis 写入压力
+     */
+    private static final long TOUCH_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -121,9 +129,8 @@ public class TokenAuthenticationTokenFilter extends OncePerRequestFilter {
                     .superAdmin(loginUser.isSuperAdmin())
                     .build());
 
-            // 更新最后访问时间
-            String tokenId = tokenService.getTokenId(token);
-            sessionHelper.touch(tokenId);
+            // 限频更新最后访问时间（每 5 分钟更新一次，异步执行）
+             touchIfNeeded(session);
 
             log.debug("TokenValidated", "User: " + loginUser.getUserName() + " | URI: " + requestURI);
 
@@ -188,5 +195,33 @@ public class TokenAuthenticationTokenFilter extends OncePerRequestFilter {
         if (StringUtils.isBlank(token) || token.length() < 10)
             return "***";
         return token.substring(0, 6) + "..." + token.substring(token.length() - 4);
+    }
+
+    /**
+     * 限频更新最后访问时间
+     * 只有当距离上次更新超过 5 分钟时才异步更新，避免每次请求都写 Redis
+     *
+     * @param session 用户会话
+     */
+    private void touchIfNeeded(UserSession session) {
+        if (session == null || session.getLastAccessTime() == null) {
+            return;
+        }
+        
+        long lastAccessTime = session.getLastAccessTime().getTime();
+        long now = System.currentTimeMillis();
+        
+        // 距离上次更新超过 5 分钟才更新
+        if (now - lastAccessTime > TOUCH_INTERVAL_MILLIS) {
+            // 异步更新，不阻塞请求
+            CompletableFuture.runAsync(() -> {
+                try {
+                    sessionHelper.touch(session.getSessionId());
+                    log.debug("SessionTouched", "异步更新会话访问时间 | tokenId: " + session.getSessionId().substring(0, 8) + "...");
+                } catch (Exception e) {
+                    log.warn("SessionTouchFailed", "更新会话访问时间失败: " + e.getMessage());
+                }
+            });
+        }
     }
 }
