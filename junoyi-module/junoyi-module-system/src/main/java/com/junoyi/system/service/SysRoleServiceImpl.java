@@ -26,7 +26,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -211,6 +213,8 @@ public class SysRoleServiceImpl implements ISysRoleService{
 
     /**
      * 更新角色权限组绑定
+     * <p>
+     * 优化策略：使用差量更新代替"先删后插"，减少锁竞争
      *
      * @param roleId 角色ID
      * @param groupIds 权限组ID列表
@@ -218,25 +222,45 @@ public class SysRoleServiceImpl implements ISysRoleService{
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateRolePermGroups(Long roleId, List<Long> groupIds) {
-        // 先删除原有的角色权限组关联
-        sysRoleGroupMapper.delete(new LambdaQueryWrapper<SysRoleGroup>()
-                .eq(SysRoleGroup::getRoleId, roleId));
+        // 查询现有关联（只查未过期的）
+        List<SysRoleGroup> existingGroups = sysRoleGroupMapper.selectList(
+                new LambdaQueryWrapper<SysRoleGroup>()
+                        .eq(SysRoleGroup::getRoleId, roleId)
+                        .and(w -> w.isNull(SysRoleGroup::getExpireTime)
+                                .or().gt(SysRoleGroup::getExpireTime, DateUtils.getNowDate())));
+        Set<Long> existingGroupIds = existingGroups.stream()
+                .map(SysRoleGroup::getGroupId).collect(Collectors.toSet());
+        Set<Long> newGroupIds = (groupIds != null) ? new java.util.HashSet<>(groupIds) : Set.of();
 
-        // 批量插入新的角色权限组关联
-        if (groupIds != null && !groupIds.isEmpty()) {
-            for (Long groupId : groupIds) {
-                SysRoleGroup roleGroup = new SysRoleGroup();
-                roleGroup.setRoleId(roleId);
-                roleGroup.setGroupId(groupId);
-                roleGroup.setCreateTime(DateUtils.getNowDate());
-                sysRoleGroupMapper.insert(roleGroup);
-            }
+        // 计算差量
+        Set<Long> toDelete = existingGroupIds.stream()
+                .filter(id -> !newGroupIds.contains(id)).collect(Collectors.toSet());
+        Set<Long> toInsert = newGroupIds.stream()
+                .filter(id -> !existingGroupIds.contains(id)).collect(Collectors.toSet());
+
+        // 精确删除
+        if (!toDelete.isEmpty()) {
+            sysRoleGroupMapper.delete(new LambdaQueryWrapper<SysRoleGroup>()
+                    .eq(SysRoleGroup::getRoleId, roleId)
+                    .in(SysRoleGroup::getGroupId, toDelete));
         }
 
-        // 发布角色权限变更事件，同步受影响用户的会话
-        EventBus.get().callEvent(new PermissionChangedEvent(
-                PermissionChangedEvent.ChangeType.ROLE_PERM_UPDATE,
-                roleId
-        ));
+        // 批量插入
+        Date now = DateUtils.getNowDate();
+        for (Long groupId : toInsert) {
+            SysRoleGroup roleGroup = new SysRoleGroup();
+            roleGroup.setRoleId(roleId);
+            roleGroup.setGroupId(groupId);
+            roleGroup.setCreateTime(now);
+            sysRoleGroupMapper.insert(roleGroup);
+        }
+
+        // 只有实际变更时才发布事件
+        if (!toDelete.isEmpty() || !toInsert.isEmpty()) {
+            EventBus.get().callEvent(new PermissionChangedEvent(
+                    PermissionChangedEvent.ChangeType.ROLE_PERM_UPDATE,
+                    roleId
+            ));
+        }
     }
 }

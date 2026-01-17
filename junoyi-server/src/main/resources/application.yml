@@ -119,6 +119,7 @@ junoyi:
       # 是否启用全局模式（默认 false）
       # false: 仅对标注 @DataScope 的方法生效
       # true: 对所有查询生效，包括 MyBatis-Plus 内置方法
+      # 启用全局模式，不用注解，会开销一些性能
       global-enabled: false
       # 默认部门字段名（默认 dept_id）
       default-dept-field: dept_id

@@ -11,29 +11,32 @@ spring:
         # 主库配置
         master:
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/junoyi?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
-          username: root
-          password: 123456
+          url: jdbc:mysql://121.40.119.149:3306/junoyi?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+          username: junoyi
+          password: L4PPRK2ZmGEPpL6t
       
       # Druid 连接池配置
       druid:
         # 基础连接池配置
         initial-size: 10
         min-idle: 10
-        max-active: 20
-        max-wait: 60000
-        connect-timeout: 30000
-        socket-timeout: 60000
+        max-active: 50           
+        max-wait: 5000           
+        connect-timeout: 10000   
+        socket-timeout: 30000    
         # 连接检测配置
-        time-between-eviction-runs-millis: 60000
+        time-between-eviction-runs-millis: 30000
         min-evictable-idle-time-millis: 300000
-        validation-query: SELECT 1 FROM DUAL
+        max-evictable-idle-time-millis: 600000  
+        validation-query: SELECT 1
         test-while-idle: true
-        test-on-borrow: false
+        test-on-borrow: true    
         test-on-return: false
         # 监控统计（简化配置）
         filters: wall
-        max-evictable-idle-time-millis:
+        remove-abandoned: false
+        remove-abandoned-timeout: 180
+        log-abandoned: true
 
   # ==================== Redis 配置 ====================
   data:

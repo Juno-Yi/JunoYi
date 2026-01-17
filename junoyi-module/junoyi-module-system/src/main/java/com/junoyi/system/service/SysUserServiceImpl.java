@@ -243,6 +243,8 @@ public class SysUserServiceImpl implements ISysUserService {
 
     /**
      * 更新用户的角色关联
+     * <p>
+     * 优化策略：使用差量更新代替"先删后插"，减少锁竞争和 Gap Lock 问题
      *
      * @param userId 用户ID
      * @param roleIds 角色ID列表
@@ -250,25 +252,48 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateUserRoles(Long userId, List<Long> roleIds) {
-        // 先删除原有的用户角色关联
-        sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>()
-                .eq(SysUserRole::getUserId, userId));
+        // 查询现有关联
+        List<SysUserRole> existingRoles = sysUserRoleMapper.selectList(
+                new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, userId));
+        Set<Long> existingRoleIds = existingRoles.stream()
+                .map(SysUserRole::getRoleId).collect(Collectors.toSet());
+        Set<Long> newRoleIds = (roleIds != null) ? new java.util.HashSet<>(roleIds) : Set.of();
 
-        // 批量插入新的用户角色关联
-        if (roleIds != null && !roleIds.isEmpty()) {
-            for (Long roleId : roleIds) {
+        // 计算需要删除的（存在但不在新列表中）
+        Set<Long> toDelete = existingRoleIds.stream()
+                .filter(id -> !newRoleIds.contains(id)).collect(Collectors.toSet());
+        // 计算需要新增的（在新列表中但不存在）
+        Set<Long> toInsert = newRoleIds.stream()
+                .filter(id -> !existingRoleIds.contains(id)).collect(Collectors.toSet());
+
+        // 精确删除，避免 Gap Lock
+        if (!toDelete.isEmpty()) {
+            sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>()
+                    .eq(SysUserRole::getUserId, userId)
+                    .in(SysUserRole::getRoleId, toDelete));
+        }
+
+        // 批量插入新关联
+        if (!toInsert.isEmpty()) {
+            List<SysUserRole> newUserRoles = toInsert.stream().map(roleId -> {
                 SysUserRole userRole = new SysUserRole();
                 userRole.setUserId(userId);
                 userRole.setRoleId(roleId);
+                return userRole;
+            }).collect(Collectors.toList());
+            // 使用 MyBatis-Plus 批量插入（需要开启 rewriteBatchedStatements=true）
+            for (SysUserRole userRole : newUserRoles) {
                 sysUserRoleMapper.insert(userRole);
             }
         }
 
-        // 发布用户角色变更事件，同步用户会话权限
-        EventBus.get().callEvent(new PermissionChangedEvent(
-                PermissionChangedEvent.ChangeType.USER_ROLE_CHANGE,
-                userId
-        ));
+        // 只有实际变更时才发布事件
+        if (!toDelete.isEmpty() || !toInsert.isEmpty()) {
+            EventBus.get().callEvent(new PermissionChangedEvent(
+                    PermissionChangedEvent.ChangeType.USER_ROLE_CHANGE,
+                    userId
+            ));
+        }
     }
 
     /**
@@ -304,6 +329,8 @@ public class SysUserServiceImpl implements ISysUserService {
 
     /**
      * 更新用户部门绑定
+     * <p>
+     * 优化策略：使用差量更新代替"先删后插"，减少锁竞争
      *
      * @param userId 用户ID
      * @param deptIds 部门ID列表
@@ -311,25 +338,41 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateUserDepts(Long userId, List<Long> deptIds) {
-        // 先删除原有的用户部门关联
-        sysUserDeptMapper.delete(new LambdaQueryWrapper<SysUserDept>()
-                .eq(SysUserDept::getUserId, userId));
+        // 查询现有关联
+        List<SysUserDept> existingDepts = sysUserDeptMapper.selectList(
+                new LambdaQueryWrapper<SysUserDept>().eq(SysUserDept::getUserId, userId));
+        Set<Long> existingDeptIds = existingDepts.stream()
+                .map(SysUserDept::getDeptId).collect(Collectors.toSet());
+        Set<Long> newDeptIds = (deptIds != null) ? new java.util.HashSet<>(deptIds) : Set.of();
 
-        // 批量插入新的用户部门关联
-        if (deptIds != null && !deptIds.isEmpty()) {
-            for (Long deptId : deptIds) {
-                SysUserDept userDept = new SysUserDept();
-                userDept.setUserId(userId);
-                userDept.setDeptId(deptId);
-                sysUserDeptMapper.insert(userDept);
-            }
+        // 计算差量
+        Set<Long> toDelete = existingDeptIds.stream()
+                .filter(id -> !newDeptIds.contains(id)).collect(Collectors.toSet());
+        Set<Long> toInsert = newDeptIds.stream()
+                .filter(id -> !existingDeptIds.contains(id)).collect(Collectors.toSet());
+
+        // 精确删除
+        if (!toDelete.isEmpty()) {
+            sysUserDeptMapper.delete(new LambdaQueryWrapper<SysUserDept>()
+                    .eq(SysUserDept::getUserId, userId)
+                    .in(SysUserDept::getDeptId, toDelete));
         }
 
-        // 发布用户部门变更事件，同步用户会话权限
-        EventBus.get().callEvent(new PermissionChangedEvent(
-                PermissionChangedEvent.ChangeType.USER_DEPT_CHANGE,
-                userId
-        ));
+        // 批量插入
+        for (Long deptId : toInsert) {
+            SysUserDept userDept = new SysUserDept();
+            userDept.setUserId(userId);
+            userDept.setDeptId(deptId);
+            sysUserDeptMapper.insert(userDept);
+        }
+
+        // 只有实际变更时才发布事件
+        if (!toDelete.isEmpty() || !toInsert.isEmpty()) {
+            EventBus.get().callEvent(new PermissionChangedEvent(
+                    PermissionChangedEvent.ChangeType.USER_DEPT_CHANGE,
+                    userId
+            ));
+        }
     }
 
     /**
@@ -387,6 +430,8 @@ public class SysUserServiceImpl implements ISysUserService {
 
     /**
      * 更新用户权限组绑定
+     * <p>
+     * 优化策略：使用差量更新代替"先删后插"，减少锁竞争
      *
      * @param userId 用户ID
      * @param groupIds 权限组ID列表
@@ -394,26 +439,46 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateUserPermGroups(Long userId, List<Long> groupIds) {
-        // 先删除原有的用户权限组关联
-        sysUserGroupMapper.delete(new LambdaQueryWrapper<SysUserGroup>()
-                .eq(SysUserGroup::getUserId, userId));
+        // 查询现有关联（只查未过期的）
+        List<SysUserGroup> existingGroups = sysUserGroupMapper.selectList(
+                new LambdaQueryWrapper<SysUserGroup>()
+                        .eq(SysUserGroup::getUserId, userId)
+                        .and(w -> w.isNull(SysUserGroup::getExpireTime)
+                                .or().gt(SysUserGroup::getExpireTime, DateUtils.getNowDate())));
+        Set<Long> existingGroupIds = existingGroups.stream()
+                .map(SysUserGroup::getGroupId).collect(Collectors.toSet());
+        Set<Long> newGroupIds = (groupIds != null) ? new java.util.HashSet<>(groupIds) : Set.of();
 
-        // 批量插入新的用户权限组关联
-        if (groupIds != null && !groupIds.isEmpty()) {
-            for (Long groupId : groupIds) {
-                SysUserGroup userGroup = new SysUserGroup();
-                userGroup.setUserId(userId);
-                userGroup.setGroupId(groupId);
-                userGroup.setCreateTime(DateUtils.getNowDate());
-                sysUserGroupMapper.insert(userGroup);
-            }
+        // 计算差量
+        Set<Long> toDelete = existingGroupIds.stream()
+                .filter(id -> !newGroupIds.contains(id)).collect(Collectors.toSet());
+        Set<Long> toInsert = newGroupIds.stream()
+                .filter(id -> !existingGroupIds.contains(id)).collect(Collectors.toSet());
+
+        // 精确删除
+        if (!toDelete.isEmpty()) {
+            sysUserGroupMapper.delete(new LambdaQueryWrapper<SysUserGroup>()
+                    .eq(SysUserGroup::getUserId, userId)
+                    .in(SysUserGroup::getGroupId, toDelete));
         }
 
-        // 发布权限变更事件，同步用户会话
-        EventBus.get().callEvent(new PermissionChangedEvent(
-                PermissionChangedEvent.ChangeType.USER_GROUP_CHANGE,
-                userId
-        ));
+        // 批量插入
+        Date now = DateUtils.getNowDate();
+        for (Long groupId : toInsert) {
+            SysUserGroup userGroup = new SysUserGroup();
+            userGroup.setUserId(userId);
+            userGroup.setGroupId(groupId);
+            userGroup.setCreateTime(now);
+            sysUserGroupMapper.insert(userGroup);
+        }
+
+        // 只有实际变更时才发布事件
+        if (!toDelete.isEmpty() || !toInsert.isEmpty()) {
+            EventBus.get().callEvent(new PermissionChangedEvent(
+                    PermissionChangedEvent.ChangeType.USER_GROUP_CHANGE,
+                    userId
+            ));
+        }
     }
 
     /**
