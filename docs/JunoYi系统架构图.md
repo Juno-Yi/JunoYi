@@ -121,44 +121,64 @@ sequenceDiagram
 ## 三、模块依赖关系图
 
 ```mermaid
-graph LR
+graph TB
     subgraph "启动模块"
-        A[junoyi-server]
+        A[junoyi-server<br/>启动入口]
     end
     
-    subgraph "业务模块"
-        B1[junoyi-module-system]
-        B2[junoyi-module-generation]
-        B3[junoyi-module-demo]
+    subgraph "业务模块实现层"
+        B1[junoyi-module-system<br/>系统模块实现]
+        B2[junoyi-module-generation<br/>代码生成实现]
+        B3[junoyi-module-demo<br/>示例模块实现]
     end
     
-    subgraph "API定义"
-        C1[system-api]
-        C2[generation-api]
-        C3[demo-api]
+    subgraph "业务模块API层"
+        C1[junoyi-module-system-api<br/>系统模块API]
+        C2[junoyi-module-generation-api<br/>代码生成API]
+        C3[junoyi-module-demo-api<br/>示例模块API]
     end
     
-    subgraph "框架核心"
-        D1[framework-web]
-        D2[framework-security]
-        D3[framework-permission]
-        D4[framework-datasource]
-        D5[framework-redis]
-        D6[framework-core]
+    subgraph "框架启动器"
+        D0[junoyi-framework-boot-starter<br/>框架启动核心<br/>聚合所有框架模块]
+    end
+    
+    subgraph "框架模块层"
+        D1[framework-web<br/>Web基础]
+        D2[framework-security<br/>安全认证]
+        D3[framework-permission<br/>权限控制]
+        D4[framework-datasource<br/>数据源]
+        D5[framework-redis<br/>缓存]
+        D6[framework-captcha<br/>验证码]
+        D7[framework-json<br/>JSON]
+        D8[framework-excel<br/>Excel]
+        D9[framework-event<br/>事件]
+        D10[framework-api-doc<br/>API文档]
+        D11[framework-core<br/>核心工具]
     end
     
     subgraph "依赖管理"
-        E[junoyi-dependencies]
+        E[junoyi-dependencies<br/>统一版本管理]
     end
     
     A --> B1 & B2 & B3
     B1 --> C1
     B2 --> C2
     B3 --> C3
-    C1 & C2 & C3 --> D1 & D2 & D3 & D4 & D5
-    D1 & D2 & D3 & D4 & D5 --> D6
-    D6 --> E
+    C1 & C2 & C3 --> D0
+    D0 --> D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 & D10
+    D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 & D10 --> D11
+    D11 --> E
+    
+    style D0 fill:#f9f,stroke:#333,stroke-width:3px
 ```
+
+**依赖说明**：
+1. **junoyi-server** 只依赖业务模块实现（system、demo 等）
+2. **业务模块实现** 依赖对应的 **API 模块**
+3. **API 模块** 统一依赖 **framework-boot-starter**
+4. **boot-starter** 聚合了所有框架模块，简化依赖管理
+5. 所有框架模块最终依赖 **framework-core** 核心模块
+6. **dependencies** 统一管理所有模块的版本号
 
 ---
 
