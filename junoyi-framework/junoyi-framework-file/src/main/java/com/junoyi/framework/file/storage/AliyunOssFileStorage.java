@@ -9,7 +9,8 @@ import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.junoyi.framework.file.domain.FileInfo;
 import com.junoyi.framework.file.properties.FileStorageProperties;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
@@ -24,13 +25,14 @@ import java.util.Date;
  *
  * @author Fan
  */
-@Slf4j
-public class OssFileStorage implements FileStorage {
+public class AliyunOssFileStorage implements FileStorage {
 
+    private static final Logger log = LoggerFactory.getLogger(AliyunOssFileStorage.class);
+    
     private final FileStorageProperties properties;
     private final OSS ossClient;
 
-    public OssFileStorage(FileStorageProperties properties) {
+    public AliyunOssFileStorage(FileStorageProperties properties) {
         this.properties = properties;
         FileStorageProperties.AliyunOssConfig config = properties.getAliyunOss();
         

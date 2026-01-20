@@ -4,9 +4,10 @@ import com.junoyi.framework.file.enums.StorageType;
 import com.junoyi.framework.file.properties.FileStorageProperties;
 import com.junoyi.framework.file.storage.FileStorage;
 import com.junoyi.framework.file.storage.LocalFileStorage;
-import com.junoyi.framework.file.storage.OssFileStorage;
+import com.junoyi.framework.file.storage.AliyunOssFileStorage;
+import com.junoyi.framework.log.core.JunoYiLog;
+import com.junoyi.framework.log.core.JunoYiLogFactory;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,10 +17,11 @@ import org.springframework.stereotype.Component;
  *
  * @author Fan
  */
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FileStorageFactory {
+
+    private static final JunoYiLog log = JunoYiLogFactory.getLogger(FileStorageFactory.class);
 
     private final FileStorageProperties properties;
 
@@ -39,14 +41,14 @@ public class FileStorageFactory {
      * @return 文件存储实例
      */
     public FileStorage createFileStorage(StorageType storageType) {
-        log.info("创建文件存储实例: {}", storageType.getName());
+        log.info("创建文件存储实例: "+storageType.getName());
         
         switch (storageType) {
             case LOCAL:
                 return new LocalFileStorage(properties);
                 
             case ALIYUN_OSS:
-                return new OssFileStorage(properties);
+                return new AliyunOssFileStorage(properties);
                 
             case MINIO:
                 // TODO: 实现MinIO存储

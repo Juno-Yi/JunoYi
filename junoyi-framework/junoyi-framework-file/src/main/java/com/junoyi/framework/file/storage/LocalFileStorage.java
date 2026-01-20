@@ -6,11 +6,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.junoyi.framework.file.domain.FileInfo;
 import com.junoyi.framework.file.properties.FileStorageProperties;
+import com.junoyi.framework.log.core.JunoYiLog;
+import com.junoyi.framework.log.core.JunoYiLogFactory;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -24,10 +24,11 @@ import java.time.LocalDateTime;
  *
  * @author Fan
  */
-@Slf4j
 @RequiredArgsConstructor
 public class LocalFileStorage implements FileStorage {
 
+    private static final JunoYiLog log = JunoYiLogFactory.getLogger(LocalFileStorage.class);
+    
     private final FileStorageProperties properties;
 
     @Override

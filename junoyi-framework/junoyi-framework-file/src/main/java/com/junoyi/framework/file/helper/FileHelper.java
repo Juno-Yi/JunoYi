@@ -3,8 +3,9 @@ package com.junoyi.framework.file.helper;
 import com.junoyi.framework.file.domain.FileInfo;
 import com.junoyi.framework.file.factory.FileStorageFactory;
 import com.junoyi.framework.file.storage.FileStorage;
+import com.junoyi.framework.log.core.JunoYiLog;
+import com.junoyi.framework.log.core.JunoYiLogFactory;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,10 +18,11 @@ import java.io.InputStream;
  *
  * @author Fan
  */
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FileHelper {
+
+    private static final JunoYiLog log = JunoYiLogFactory.getLogger(FileHelper.class);
 
     private final FileStorageFactory fileStorageFactory;
 
