@@ -20,7 +20,7 @@ public class UploadStrategyFactory {
         STRATEGY_MAP.put(FileBusinessType.DOCUMENT, new DocumentUploadStrategy());
         STRATEGY_MAP.put(FileBusinessType.IMAGE, new ImageUploadStrategy());
         STRATEGY_MAP.put(FileBusinessType.VIDEO, new VideoUploadStrategy());
-        STRATEGY_MAP.put(FileBusinessType.AUDIO, new DefaultUploadStrategy());
+        STRATEGY_MAP.put(FileBusinessType.AUDIO, new AudioUploadStrategy());
         STRATEGY_MAP.put(FileBusinessType.OTHER, new DefaultUploadStrategy());
     }
 
