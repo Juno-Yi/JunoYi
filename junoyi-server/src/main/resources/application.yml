@@ -294,7 +294,7 @@ junoyi:
       - /webjars/**
       - /favicon.ico
       # 资源文件地址
-      -
+      - /files/**
     # 登录机制
     login:
       # 最大登录失败次数

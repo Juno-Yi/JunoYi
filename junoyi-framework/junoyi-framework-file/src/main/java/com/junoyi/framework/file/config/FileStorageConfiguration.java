@@ -1,5 +1,6 @@
 package com.junoyi.framework.file.config;
 
+import com.junoyi.framework.file.enums.StorageType;
 import com.junoyi.framework.file.factory.FileStorageFactory;
 import com.junoyi.framework.file.helper.FileHelper;
 import com.junoyi.framework.file.properties.FileStorageProperties;
@@ -12,6 +13,10 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.io.File;
 
 /**
  * 文件存储自动配置
@@ -20,9 +25,42 @@ import org.springframework.context.annotation.Bean;
  */
 @AutoConfiguration
 @EnableConfigurationProperties(FileStorageProperties.class)
-public class FileStorageConfiguration {
+public class FileStorageConfiguration implements WebMvcConfigurer {
 
     private static final JunoYiLog log = JunoYiLogFactory.getLogger(FileStorageConfiguration.class);
+    
+    private final FileStorageProperties properties;
+    
+    public FileStorageConfiguration(FileStorageProperties properties) {
+        this.properties = properties;
+    }
+    
+    /**
+     * 配置本地文件静态资源映射
+     */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // 只有本地存储才需要配置静态资源映射
+        if (properties.getStorageType() == StorageType.LOCAL) {
+            String urlPrefix = properties.getLocal().getUrlPrefix();
+            String basePath = properties.getLocal().getBasePath();
+            
+            // 确保路径格式正确
+            if (!urlPrefix.endsWith("/")) {
+                urlPrefix = urlPrefix + "/";
+            }
+            
+            // 转换为绝对路径
+            File uploadDir = new File(basePath);
+            String absolutePath = "file:" + uploadDir.getAbsolutePath() + File.separator;
+            
+            registry.addResourceHandler(urlPrefix + "**")
+                    .addResourceLocations(absolutePath);
+            
+            log.info("File Manager", "Local file static resource mapping configured: {} -> {}", 
+                    urlPrefix + "**", absolutePath);
+        }
+    }
 
     /**
      * 文件存储实例
