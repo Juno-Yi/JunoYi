@@ -337,9 +337,11 @@ public class AliyunOssFileStorage implements FileStorage {
 
     /**
      * 构建完整的文件路径
-     * @param path 用户指定的路径
+     * 构建完整路径（按业务类型和日期分目录）
+     * 格式：bizType/yyyy/MM/dd/fileName
+     * @param path 业务类型路径（如：avatar、image、document等）
      * @param fileName 文件名
-     * @return 完整的文件路径（包含日期目录）
+     * @return 完整的文件路径（包含业务类型和日期目录）
      */
     private String buildFullPath(String path, String fileName) {
         LocalDateTime now = LocalDateTime.now();
@@ -347,8 +349,10 @@ public class AliyunOssFileStorage implements FileStorage {
                 now.getYear(), now.getMonthValue(), now.getDayOfMonth());
 
         if (StrUtil.isBlank(path)) {
-            return datePath + "/" + fileName;
+            // 如果没有指定业务类型，使用 other 目录
+            return "other/" + datePath + "/" + fileName;
         }
+        // 业务类型/日期/文件名
         return path + "/" + datePath + "/" + fileName;
     }
 
