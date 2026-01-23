@@ -1,4 +1,4 @@
-package com.junoyi.system.service;
+package com.junoyi.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.junoyi.framework.security.exception.LoginAccountIsNullException;
@@ -26,6 +26,7 @@ import com.junoyi.system.enums.LoginType;
 import com.junoyi.system.enums.SysUserStatus;
 import com.junoyi.system.helper.LoginUserBuilder;
 import com.junoyi.system.mapper.SysUserMapper;
+import com.junoyi.system.service.ISysAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
