@@ -2,7 +2,9 @@ package com.junoyi.system.domain.po;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.junoyi.framework.core.domain.base.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
@@ -11,9 +13,10 @@ import java.util.Date;
  *
  * @author Fan
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("sys_user_third_auth")
-public class SysUserThirdAuth {
+public class SysUserThirdAuth extends BaseEntity {
 
     /**
      * 主键ID
@@ -36,13 +39,4 @@ public class SysUserThirdAuth {
      */
     private String authKey;
 
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 }
