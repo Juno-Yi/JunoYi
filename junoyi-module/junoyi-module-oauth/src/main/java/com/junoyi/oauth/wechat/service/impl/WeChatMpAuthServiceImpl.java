@@ -19,13 +19,13 @@ import com.junoyi.system.domain.po.SysUser;
 import com.junoyi.system.domain.po.SysUserThirdAuth;
 import com.junoyi.system.domain.vo.AuthVO;
 import com.junoyi.system.enums.SysUserStatus;
+import com.junoyi.system.helper.LoginUserBuilder;
 import com.junoyi.system.mapper.SysUserMapper;
 import com.junoyi.system.mapper.SysUserThirdAuthMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.HashSet;
 
 /**
  * 微信小程序认证登录业务接口实现类
@@ -42,6 +42,7 @@ public class WeChatMpAuthServiceImpl implements IWeChatMpAuthService {
     private final SysUserThirdAuthMapper sysUserThirdAuthMapper;
     private final AuthHelper authHelper;
     private final PlatformManager platformManager;
+    private final LoginUserBuilder loginUserBuilder;
 
     /**
      * 微信小程序登录
@@ -110,19 +111,8 @@ public class WeChatMpAuthServiceImpl implements IWeChatMpAuthService {
             user.setNickName(userSnapshot.getNickName());
         }
 
-        // 通过用户信息，构建 LoginUser登录会话数据
-        LoginUser loginUser = LoginUser.builder()
-                .userId(user.getUserId())
-                .userName(user.getUserName())
-                .nickName(user.getNickName())
-                .platformType(PlatformType.MINI_PROGRAM)
-                .roles(new HashSet<>())
-                .permissions(new HashSet<>())
-                .groups(new HashSet<>())
-                .depts(new HashSet<>())
-                .superAdmin(false)
-                .loginIp(loginIp)
-                .build();
+        // 使用 LoginUserBuilder 构建 LoginUser
+        LoginUser loginUser = loginUserBuilder.build(user);
 
         // 构建 token 对
         TokenPair tokenPair = authHelper.login(loginUser, PlatformType.MINI_PROGRAM, loginIp, userAgent);
