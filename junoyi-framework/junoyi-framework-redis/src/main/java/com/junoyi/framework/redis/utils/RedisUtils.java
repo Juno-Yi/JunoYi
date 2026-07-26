@@ -618,4 +618,15 @@ public class RedisUtils {
             case MAP -> CLIENT.getMap(key).readAllMap();
         };
     }
+
+    /**
+     * Redis 自增
+     *
+     * @param key Redis Key
+     * @return 自增后的值
+     */
+    public static long increment(String key) {
+        RAtomicLong atomicLong = CLIENT.getAtomicLong(key);
+        return atomicLong.incrementAndGet();
+    }
 }
