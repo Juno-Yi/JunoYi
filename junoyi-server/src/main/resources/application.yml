@@ -478,4 +478,10 @@ spring:
     livereload:
       # 禁用 LiveReload 服务器（避免端口占用警告）
       enabled: false
+    restart:
+      # 排除框架安全模块，避免热重启时类加载器冲突导致 UserSession ClassCastException
+      exclude:
+        - junoyi-framework/**
+        - com.junoyi.framework.**
+
 
