@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -119,7 +120,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
         log.info("DictData", "添加字典数据: {} - {}", dictData.getDictType(), dictData.getDictLabel());
 
         // 刷新缓存
-        sysDictApi.refreshDictCache(dictData.getDictType());
+        sysDictApi.refreshDictCachesAfterCommit(Collections.singletonList(dictData.getDictType()));
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.withRawData("create", "dict_data",
@@ -167,7 +168,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
         if (dictData.getDictType() != null && !dictData.getDictType().equals(oldDictData.getDictType())) {
             typesToRefresh.add(dictData.getDictType());
         }
-        typesToRefresh.forEach(sysDictApi::refreshDictCache);
+        sysDictApi.refreshDictCachesAfterCommit(typesToRefresh);
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.withRawData("update", "dict_data",
@@ -195,7 +196,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
         log.info("DictData", "删除字典数据: {} - {}", dictData.getDictType(), dictData.getDictLabel());
 
         // 刷新缓存
-        sysDictApi.refreshDictCache(dictType);
+        sysDictApi.refreshDictCachesAfterCommit(Collections.singletonList(dictType));
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("delete", "dict_data",
@@ -211,26 +212,25 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteDictDataList(List<Long> dictCodes) {
+        if (dictCodes == null || dictCodes.isEmpty()) {
+            return;
+        }
         // 收集需要刷新缓存的字典类型
         Set<String> typesToRefresh = new HashSet<>();
-        
-        // 批量删除
-        for (Long dictCode : dictCodes) {
-            SysDictData dictData = sysDictDataMapper.selectById(dictCode);
-            if (dictData != null) {
-                typesToRefresh.add(dictData.getDictType());
-                sysDictDataMapper.deleteById(dictCode);
-            }
+        List<SysDictData> existing = sysDictDataMapper.selectBatchIds(dictCodes);
+        existing.forEach(item -> typesToRefresh.add(item.getDictType()));
+        if (!existing.isEmpty()) {
+            sysDictDataMapper.deleteBatchIds(existing.stream().map(SysDictData::getDictCode).toList());
         }
 
-        log.info("DictData", "批量删除字典数据: {} 条", dictCodes.size());
+        log.info("DictData", "批量删除字典数据: {} 条", existing.size());
 
         // 刷新所有相关字典类型的缓存
-        typesToRefresh.forEach(sysDictApi::refreshDictCache);
+        sysDictApi.refreshDictCachesAfterCommit(typesToRefresh);
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("delete", "dict_data",
-                "批量删除了 " + dictCodes.size() + " 条字典数据",
+                "批量删除了 " + existing.size() + " 条字典数据",
                 dictCodes.toString(), null));
     }
 }

@@ -76,19 +76,18 @@ public class SysDeptServiceImpl implements ISysDeptService {
         List<SysDeptVO> voList = SysDeptConverter.toVoList(deptList);
 
         // 使用字典API翻译状态标签，并获取标签类型（颜色）
+        var statusItems = sysDictApi.getDictItemMaps(List.of(DictTypeConstants.SYS_DEPT_STATUS))
+                .getOrDefault(DictTypeConstants.SYS_DEPT_STATUS, Map.of());
         for (SysDeptVO deptVO : voList) {
             if (deptVO.getStatus() != null) {
-                SysDictDataVO statusDict = sysDictApi.getDictItem(
-                    DictTypeConstants.SYS_DEPT_STATUS,
-                    String.valueOf(deptVO.getStatus())
-                );
+                SysDictDataVO statusDict = statusItems.get(String.valueOf(deptVO.getStatus()));
                 if (statusDict != null) {
                     deptVO.setStatusLabel(statusDict.getDictLabel());
                     deptVO.setStatusType(statusDict.getListClass());
                 }
             }
         }
-        
+
         // 构建树形结构并返回
         return buildTree(voList);
     }
@@ -158,7 +157,7 @@ public class SysDeptServiceImpl implements ISysDeptService {
         // 检查是否存在子部门
         LambdaQueryWrapper<SysDept> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysDept::getParentId, id)
-               .eq(SysDept::isDelFlag, false);
+                .eq(SysDept::isDelFlag, false);
         Long childCount = sysDeptMapper.selectCount(wrapper);
         if (childCount > 0) {
             throw new DeptHasChildrenException("存在子部门，无法删除");

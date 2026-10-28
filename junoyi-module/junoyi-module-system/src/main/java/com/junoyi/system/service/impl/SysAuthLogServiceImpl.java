@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import java.util.Map;
+
 /**
  * 系统登录日志业务接口实现类
  *
@@ -52,9 +54,12 @@ public class SysAuthLogServiceImpl implements ISysAuthLogService {
                 .le(queryDTO.getEndTime() != null, SysAuthLog::getLoginTime, queryDTO.getEndTime())
                 .orderByDesc(SysAuthLog::getLoginTime);
         Page<SysAuthLog> resultPage = sysAuthLogMapper.selectPage(page, wrapper);
+        Map<String, SysDictDataVO> loginTypes = sysDictApi
+                .getDictItemMaps(List.of(DictTypeConstants.SYS_LOGIN_TYPE))
+                .getOrDefault(DictTypeConstants.SYS_LOGIN_TYPE, Map.of());
 
         List<SysAuthLogVO> voList = resultPage.getRecords().stream()
-                .map(this::convertToVO)
+                .map(log -> convertToVO(log, loginTypes))
                 .collect(Collectors.toList());
 
         return PageResult.of(voList,
@@ -93,12 +98,12 @@ public class SysAuthLogServiceImpl implements ISysAuthLogService {
     }
 
 
-    private SysAuthLogVO convertToVO(SysAuthLog loginLog) {
+    private SysAuthLogVO convertToVO(SysAuthLog loginLog, Map<String, SysDictDataVO> loginTypes) {
         SysAuthLogVO vo = new SysAuthLogVO();
         BeanUtils.copyProperties(loginLog, vo);
 
         String loginType = loginLog.getLoginType();
-        SysDictDataVO loginTypeDict = sysDictApi.getDictItem(DictTypeConstants.SYS_LOGIN_TYPE, loginType);
+        SysDictDataVO loginTypeDict = loginTypes.get(loginType);
         vo.setLoginTypeName(loginTypeDict != null ? loginTypeDict.getDictLabel() : loginType);
         return vo;
     }

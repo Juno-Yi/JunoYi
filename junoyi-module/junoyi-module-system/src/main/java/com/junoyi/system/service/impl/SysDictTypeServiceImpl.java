@@ -1,7 +1,9 @@
 package com.junoyi.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.junoyi.framework.core.utils.DateUtils;
+import com.junoyi.framework.core.utils.StringUtils;
 import com.junoyi.framework.event.core.EventBus;
 import com.junoyi.framework.json.utils.JsonUtils;
 import com.junoyi.framework.log.core.JunoYiLog;
@@ -22,6 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * 字典类型服务实现类
@@ -84,9 +90,9 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
         sysDictTypeMapper.insert(dictType);
 
         log.info("DictType", "添加字典类型: {}", dictType.getDictType());
-        
+
         // 刷新缓存
-        sysDictApi.refreshDictCache(dictType.getDictType());
+        sysDictApi.refreshDictCachesAfterCommit(Collections.singletonList(dictType.getDictType()));
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.withRawData("create", "dict_type",
@@ -110,6 +116,11 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
 
         SysDictType dictType = SysDictTypeConverter.toEntity(dictTypeDTO);
         dictType.setDictId(dictTypeDTO.getDictId());
+        String newDictType = dictType.getDictType() != null ? dictType.getDictType() : oldDictType.getDictType();
+        if (StringUtils.isBlank(newDictType)) {
+            throw new IllegalArgumentException("字典类型不能为空");
+        }
+        dictType.setDictType(newDictType);
 
         // 保留原有的字段值
         if (dictType.getStatus() == null) {
@@ -119,14 +130,16 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
         dictType.setUpdateTime(DateUtils.getNowDate());
 
         sysDictTypeMapper.updateById(dictType);
+        if (!oldDictType.getDictType().equals(newDictType)) {
+            sysDictDataMapper.update(null, new LambdaUpdateWrapper<SysDictData>()
+                    .eq(SysDictData::getDictType, oldDictType.getDictType())
+                    .set(SysDictData::getDictType, newDictType));
+        }
 
         log.info("DictType", "更新字典类型: {}", dictType.getDictType());
-        
+
         // 刷新缓存(如果字典类型改变了,需要刷新新旧两个类型的缓存)
-        sysDictApi.refreshDictCache(oldDictType.getDictType());
-        if (!oldDictType.getDictType().equals(dictType.getDictType())) {
-            sysDictApi.refreshDictCache(dictType.getDictType());
-        }
+        sysDictApi.refreshDictCachesAfterCommit(Arrays.asList(oldDictType.getDictType(), newDictType));
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.withRawData("update", "dict_type",
@@ -163,9 +176,9 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
         sysDictTypeMapper.deleteById(dictId);
 
         log.info("DictType", "删除字典类型: {}", dictTypeCode);
-        
+
         // 刷新缓存
-        sysDictApi.refreshDictCache(dictTypeCode);
+        sysDictApi.refreshDictCachesAfterCommit(Collections.singletonList(dictTypeCode));
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("delete", "dict_type",
@@ -181,35 +194,25 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteDictTypes(List<Long> dictIds) {
+        if (dictIds == null || dictIds.isEmpty()) {
+            return;
+        }
         // 获取所有字典类型
         List<SysDictType> dictTypes = sysDictTypeMapper.selectBatchIds(dictIds);
-        
-        // 先删除所有关联的字典数据
-        for (SysDictType dictType : dictTypes) {
-            LambdaQueryWrapper<SysDictData> dataWrapper = new LambdaQueryWrapper<>();
-            dataWrapper.eq(SysDictData::getDictType, dictType.getDictType());
-            Long dataCount = sysDictDataMapper.selectCount(dataWrapper);
-            if (dataCount > 0) {
-                sysDictDataMapper.delete(dataWrapper);
-                log.info("DictType", "删除字典类型 {} 关联的字典数据: {} 条", dictType.getDictType(), dataCount);
-            }
+        if (!dictTypes.isEmpty()) {
+            Set<String> typeCodes = new LinkedHashSet<>();
+            dictTypes.forEach(type -> typeCodes.add(type.getDictType()));
+            sysDictDataMapper.delete(new LambdaQueryWrapper<SysDictData>()
+                    .in(SysDictData::getDictType, typeCodes));
+            sysDictTypeMapper.deleteBatchIds(dictTypes.stream().map(SysDictType::getDictId).toList());
+            sysDictApi.refreshDictCachesAfterCommit(typeCodes);
         }
 
-        // 批量删除字典类型
-        for (Long dictId : dictIds) {
-            sysDictTypeMapper.deleteById(dictId);
-        }
-
-        log.info("DictType", "批量删除字典类型: {} 条", dictIds.size());
-        
-        // 刷新所有被删除字典类型的缓存
-        for (SysDictType dictType : dictTypes) {
-            sysDictApi.refreshDictCache(dictType.getDictType());
-        }
+        log.info("DictType", "批量删除字典类型: {} 条", dictTypes.size());
 
         // 发布操作日志事件
         EventBus.get().callEvent(UserOperationEvent.of("delete", "dict_type",
-                "批量删除了 " + dictIds.size() + " 个字典类型",
+                "批量删除了 " + dictTypes.size() + " 个字典类型",
                 dictIds.toString(), null));
     }
 }

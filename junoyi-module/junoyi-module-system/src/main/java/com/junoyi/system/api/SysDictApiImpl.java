@@ -12,10 +12,17 @@ import com.junoyi.system.domain.vo.SysDictDataVO;
 import com.junoyi.system.mapper.SysDictDataMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +35,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SysDictApiImpl implements SysDictApi {
+
+    private static final String MISSING_DICT_ITEM = "\u0000__MISSING_DICT_ITEM__";
+    private static final Duration MISSING_ITEM_TTL = Duration.ofMinutes(10);
 
     private final JunoYiLog log = JunoYiLogFactory.getLogger(SysDictApiImpl.class);
 
@@ -66,7 +76,7 @@ public class SysDictApiImpl implements SysDictApi {
 
         // 存入缓存
         if (!voList.isEmpty()) {
-            RedisUtils.setCacheList(cacheKey, voList);
+            cacheDictData(dictType, voList);
             log.debug("Dictionary data cached: {}", dictType);
         }
 
@@ -91,23 +101,14 @@ public class SysDictApiImpl implements SysDictApi {
         String cacheKey = CacheConstants.DICT_LABEL + dictType + ":" + dictValue;
         String cachedLabel = RedisUtils.getCacheObject(cacheKey);
         if (cachedLabel != null) {
-            return cachedLabel;
+            return MISSING_DICT_ITEM.equals(cachedLabel) ? null : cachedLabel;
         }
 
-        // 缓存未命中,查询数据库
-        LambdaQueryWrapper<SysDictData> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysDictData::getDictType, dictType)
-                .eq(SysDictData::getDictValue, dictValue)
-                .eq(SysDictData::getStatus, "0")
-                .last("LIMIT 1");
-
-        SysDictData dictData = sysDictDataMapper.selectOne(wrapper);
-        String label = dictData != null ? dictData.getDictLabel() : null;
-
-        // 存入缓存(包括null值,避免缓存穿透)
-        if (label != null) {
-            RedisUtils.setCacheObject(cacheKey, label);
-        }
+        // 按类型加载，避免不同值在缓存未命中时逐项查询数据库。
+        SysDictDataVO item = getDictItem(dictType, dictValue);
+        String label = item != null ? item.getDictLabel() : null;
+        if (label == null) RedisUtils.setCacheObject(cacheKey, MISSING_DICT_ITEM, MISSING_ITEM_TTL);
+        else RedisUtils.setCacheObject(cacheKey, label);
 
         return label;
     }
@@ -130,23 +131,18 @@ public class SysDictApiImpl implements SysDictApi {
         String cacheKey = CacheConstants.DICT_VALUE + dictType + ":" + dictLabel;
         String cachedValue = RedisUtils.getCacheObject(cacheKey);
         if (cachedValue != null) {
-            return cachedValue;
+            return MISSING_DICT_ITEM.equals(cachedValue) ? null : cachedValue;
         }
 
-        // 缓存未命中,查询数据库
-        LambdaQueryWrapper<SysDictData> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysDictData::getDictType, dictType)
-                .eq(SysDictData::getDictLabel, dictLabel)
-                .eq(SysDictData::getStatus, "0")
-                .last("LIMIT 1");
-
-        SysDictData dictData = sysDictDataMapper.selectOne(wrapper);
-        String value = dictData != null ? dictData.getDictValue() : null;
-
-        // 存入缓存
-        if (value != null) {
-            RedisUtils.setCacheObject(cacheKey, value);
+        String value = null;
+        for (SysDictDataVO item : getDictDataByType(dictType)) {
+            if (dictLabel.equals(item.getDictLabel())) {
+                value = item.getDictValue();
+                break;
+            }
         }
+        if (value == null) RedisUtils.setCacheObject(cacheKey, MISSING_DICT_ITEM, MISSING_ITEM_TTL);
+        else RedisUtils.setCacheObject(cacheKey, value);
 
         return value;
     }
@@ -185,17 +181,65 @@ public class SysDictApiImpl implements SysDictApi {
             return new HashMap<>();
         }
 
+        Set<String> types = dictTypes.stream().filter(StringUtils::isNotBlank)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        Map<String, List<SysDictDataVO>> result = new HashMap<>();
+        List<String> missingTypes = new ArrayList<>();
+        for (String type : types) {
+            List<SysDictDataVO> cached = RedisUtils.getCacheList(CacheConstants.DICT_DATA + type);
+            if (cached != null && !cached.isEmpty()) result.put(type, cached);
+            else missingTypes.add(type);
+        }
+        if (missingTypes.isEmpty()) return result;
+
         LambdaQueryWrapper<SysDictData> wrapper = new LambdaQueryWrapper<>();
-        wrapper.in(SysDictData::getDictType, dictTypes)
+        wrapper.in(SysDictData::getDictType, missingTypes)
                 .eq(SysDictData::getStatus, "0")
                 .orderByAsc(SysDictData::getDictSort);
 
         List<SysDictData> dictDataList = sysDictDataMapper.selectList(wrapper);
         List<SysDictDataVO> voList = SysDictDataConverter.toVoList(dictDataList);
-
-        // 按字典类型分组
-        return voList.stream()
+        Map<String, List<SysDictDataVO>> loaded = voList.stream()
                 .collect(Collectors.groupingBy(SysDictDataVO::getDictType));
+        for (String type : missingTypes) {
+            List<SysDictDataVO> items = loaded.getOrDefault(type, List.of());
+            result.put(type, items);
+            if (!items.isEmpty()) cacheDictData(type, items);
+        }
+        return result;
+    }
+
+    /** 在数据库提交后刷新缓存，避免回滚或并发读造成缓存与数据库不一致。 */
+    public void refreshDictCachesAfterCommit(Collection<String> dictTypes) {
+        Set<String> types = dictTypes.stream().filter(StringUtils::isNotBlank)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (types.isEmpty()) return;
+        Runnable refresh = () -> types.forEach(this::refreshDictCache);
+        if (TransactionSynchronizationManager.isActualTransactionActive()
+                && TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    refresh.run();
+                }
+            });
+        } else {
+            refresh.run();
+        }
+    }
+
+    private void cacheDictData(String dictType, List<SysDictDataVO> items) {
+        RedisUtils.setCacheList(CacheConstants.DICT_DATA + dictType, items);
+        Map<String, String> pointValues = new HashMap<>();
+        for (SysDictDataVO item : items) {
+            if (item.getDictValue() != null && item.getDictLabel() != null) {
+                pointValues.putIfAbsent(CacheConstants.DICT_LABEL + dictType + ":" + item.getDictValue(),
+                        item.getDictLabel());
+                pointValues.putIfAbsent(CacheConstants.DICT_VALUE + dictType + ":" + item.getDictLabel(),
+                        item.getDictValue());
+            }
+        }
+        RedisUtils.setCacheObjects(pointValues);
     }
 
     /**
@@ -252,17 +296,7 @@ public class SysDictApiImpl implements SysDictApi {
             String dictType = entry.getKey();
             List<SysDictDataVO> voList = SysDictDataConverter.toVoList(entry.getValue());
 
-            // 缓存字典数据列表
-            String cacheKey = CacheConstants.DICT_DATA + dictType;
-            RedisUtils.setCacheList(cacheKey, voList);
-
-            // 缓存每个字典项的标签和值
-            for (SysDictDataVO vo : voList) {
-                String labelKey = CacheConstants.DICT_LABEL + dictType + ":" + vo.getDictValue();
-                String valueKey = CacheConstants.DICT_VALUE + dictType + ":" + vo.getDictLabel();
-                RedisUtils.setCacheObject(labelKey, vo.getDictLabel());
-                RedisUtils.setCacheObject(valueKey, vo.getDictValue());
-            }
+            cacheDictData(dictType, voList);
         }
 
         log.info("All dictionary caches refreshed, total {} dictionary types cached", groupedData.size());
@@ -283,7 +317,7 @@ public class SysDictApiImpl implements SysDictApi {
 
         // 获取该字典类型的所有数据
         List<SysDictDataVO> dictDataList = getDictDataByType(dictType);
-        
+
         // 查找匹配的字典项
         return dictDataList.stream()
                 .filter(item -> dictValue.equals(item.getDictValue()))

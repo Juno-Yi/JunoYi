@@ -53,6 +53,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -113,23 +114,27 @@ public class SysUserServiceImpl implements ISysUserService {
         List<SysUserVO> userVOList = SysUserConverter.toVoList(resultPage.getRecords());
 
         // 使用字典API翻译性别和状态标签，并获取标签类型（颜色）
+        var dictItems = sysDictApi.getDictItemMaps(List.of(
+                DictTypeConstants.SYS_USER_SEX, DictTypeConstants.SYS_USER_STATUS));
+        var sexItems = dictItems.getOrDefault(DictTypeConstants.SYS_USER_SEX, Map.of());
+        var statusItems = dictItems.getOrDefault(DictTypeConstants.SYS_USER_STATUS, Map.of());
         for (SysUserVO userVO : userVOList) {
             if (userVO.getSex() != null) {
-                SysDictDataVO sexDict = sysDictApi.getDictItem(DictTypeConstants.SYS_USER_SEX, userVO.getSex());
+                SysDictDataVO sexDict = sexItems.get(userVO.getSex());
                 if (sexDict != null) {
                     userVO.setSexLabel(sexDict.getDictLabel());
                     userVO.setSexType(sexDict.getListClass());
                 }
             }
             if (userVO.getStatus() != null) {
-                SysDictDataVO statusDict = sysDictApi.getDictItem(DictTypeConstants.SYS_USER_STATUS, String.valueOf(userVO.getStatus()));
+                SysDictDataVO statusDict = statusItems.get(String.valueOf(userVO.getStatus()));
                 if (statusDict != null) {
                     userVO.setStatusLabel(statusDict.getDictLabel());
                     userVO.setStatusType(statusDict.getListClass());
                 }
             }
         }
-        
+
         return PageResult.of(
                 userVOList,
                 resultPage.getTotal(),
@@ -519,7 +524,7 @@ public class SysUserServiceImpl implements ISysUserService {
     public void resetPassword(Long userId, String newPassword) {
         // 加密新密码，同时生成新盐值
         PasswordUtils.EncryptResult encryptResult = PasswordUtils.encrypt(newPassword);
-        
+
         // 使用 LambdaUpdateWrapper 只更新密码和盐值
         LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(SysUser::getUserId, userId)

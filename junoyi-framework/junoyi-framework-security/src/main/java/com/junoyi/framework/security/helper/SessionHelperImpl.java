@@ -124,7 +124,7 @@ public class SessionHelperImpl implements SessionHelper {
      * 检查是否开启单点登录
      */
     private boolean isSingleLoginEnabled() {
-        return securityProperties.getToken() != null 
+        return securityProperties.getToken() != null
                 && securityProperties.getToken().isSingleLogin();
     }
 
@@ -133,10 +133,10 @@ public class SessionHelperImpl implements SessionHelper {
      */
     private void checkSingleLogin(Long userId, PlatformType platformType) {
         List<UserSession> existingSessions = getUserSessions(userId);
-        
+
         for (UserSession session : existingSessions) {
             if (session.getPlatformType() == platformType) {
-                log.warn("SingleLoginBlocked", "单点登录拦截 | 用户ID: " + userId 
+                log.warn("SingleLoginBlocked", "单点登录拦截 | 用户ID: " + userId
                         + " | 平台: " + platformType.getLabel()
                         + " | 已有会话: " + session.getSessionId().substring(0, 8) + "...");
                 throw new IllegalStateException("该平台已有登录会话，请先退出后再登录");
@@ -150,7 +150,7 @@ public class SessionHelperImpl implements SessionHelper {
      */
     private void addToUserSessionIndex(Long userId, String tokenId) {
         String userSessionsKey = USER_SESSIONS + userId;
-        
+
         // 【修复】使用 Redis Set 的原子添加操作，避免并发问题
         RSet<String> tokenIdSet = RedisUtils.getClient().getSet(userSessionsKey);
         tokenIdSet.add(tokenId);
@@ -162,11 +162,11 @@ public class SessionHelperImpl implements SessionHelper {
      */
     private void removeFromUserSessionIndex(Long userId, String tokenId) {
         String userSessionsKey = USER_SESSIONS + userId;
-        
+
         // 【修复】使用 Redis Set 的原子删除操作，避免并发问题
         RSet<String> tokenIdSet = RedisUtils.getClient().getSet(userSessionsKey);
         tokenIdSet.remove(tokenId);
-        
+
         // 如果 Set 为空，删除整个键
         if (tokenIdSet.isEmpty()) {
             RedisUtils.deleteObject(userSessionsKey);
@@ -284,7 +284,7 @@ public class SessionHelperImpl implements SessionHelper {
      * 使用刷新令牌重新生成新的访问令牌（滑动会话模式）
      * 只刷新 AccessToken，RefreshToken 保持不变，到期必须重新登录
      * Session TTL 随 AccessToken 刷新而滑动续期
-     * 
+     *
      * 当 Session 已过期但 RefreshToken 仍有效时，会从 RefreshToken 白名单恢复 Session
      *
      * @param refreshToken 刷新令牌字符串
@@ -314,7 +314,7 @@ public class SessionHelperImpl implements SessionHelper {
 
         // 获取会话（滑动会话模式下，Session 可能已过期）
         UserSession session = getSessionByTokenId(tokenId);
-        
+
         // 如果 Session 已过期，从 RefreshToken 白名单恢复
         if (session == null) {
             session = refreshSession;
@@ -345,13 +345,13 @@ public class SessionHelperImpl implements SessionHelper {
         // 更新会话中的 AccessToken 过期时间
         session.setAccessExpireTime(newAccessExpireTime);
         session.setLastAccessTime(new Date());
-        
+
         // 计算 Session 滑动续期时长（取 AccessToken 有效期和 RefreshToken 剩余时间的较小值）
         long accessTtlMillis = newAccessExpireTime - System.currentTimeMillis();
         long refreshRemainingMillis = session.getRefreshExpireTime() - System.currentTimeMillis();
         long sessionTtlMillis = Math.min(accessTtlMillis, refreshRemainingMillis);
         Duration sessionTtl = Duration.ofMillis(sessionTtlMillis);
-        
+
         // 保存更新后的会话（滑动续期 TTL）
         String sessionKey = SESSION + tokenId;
         RedisUtils.setCacheObject(sessionKey, session, sessionTtl);
@@ -460,15 +460,15 @@ public class SessionHelperImpl implements SessionHelper {
         if (!expiredTokenIds.isEmpty()) {
             Set<String> remainingTokenIds = new HashSet<>(tokenIds);
             remainingTokenIds.removeAll(expiredTokenIds);
-            
+
             if (remainingTokenIds.isEmpty()) {
                 RedisUtils.deleteObject(userSessionsKey);
             } else {
                 RedisUtils.deleteObject(userSessionsKey);
                 RedisUtils.setCacheSet(userSessionsKey, remainingTokenIds);
             }
-            
-            log.debug("SessionIndexCleaned", "清理过期会话索引 | userId: " + userId 
+
+            log.debug("SessionIndexCleaned", "清理过期会话索引 | userId: " + userId
                     + " | 清理数量: " + expiredTokenIds.size());
         }
 
@@ -574,21 +574,16 @@ public class SessionHelperImpl implements SessionHelper {
         if (sessionKeys == null || sessionKeys.isEmpty())
             return Collections.emptyList();
 
-        List<UserSession> sessions = new ArrayList<>();
-        for (String key : sessionKeys) {
-            UserSession session = RedisUtils.getCacheObject(key);
-            if (session != null) {
-                sessions.add(session);
-            }
-        }
-        
+        List<UserSession> sessions = new ArrayList<>(
+                RedisUtils.<UserSession>getCacheObjects(sessionKeys).values());
+
         // 按登录时间降序排列
         sessions.sort((a, b) -> {
             if (a.getLoginTime() == null) return 1;
             if (b.getLoginTime() == null) return -1;
             return b.getLoginTime().compareTo(a.getLoginTime());
         });
-        
+
         return sessions;
     }
 
