@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -74,29 +75,27 @@ public class SysRoleServiceImpl implements ISysRoleService {
         List<SysRoleVO> roleVOList = SysRoleConverter.toVoList(resultPage.getRecords());
 
         // 使用字典API翻译状态和数据范围标签，并获取标签类型（颜色）
+        var dictItems = sysDictApi.getDictItemMaps(List.of(
+                DictTypeConstants.SYS_ROLE_STATUS, DictTypeConstants.SYS_DATA_SCOPE));
+        var statusItems = dictItems.getOrDefault(DictTypeConstants.SYS_ROLE_STATUS, Map.of());
+        var dataScopeItems = dictItems.getOrDefault(DictTypeConstants.SYS_DATA_SCOPE, Map.of());
         for (SysRoleVO roleVO : roleVOList) {
             if (roleVO.getStatus() != null) {
-                SysDictDataVO statusDict = sysDictApi.getDictItem(
-                    DictTypeConstants.SYS_ROLE_STATUS,
-                    String.valueOf(roleVO.getStatus())
-                );
+                SysDictDataVO statusDict = statusItems.get(String.valueOf(roleVO.getStatus()));
                 if (statusDict != null) {
                     roleVO.setStatusLabel(statusDict.getDictLabel());
                     roleVO.setStatusType(statusDict.getListClass());
                 }
             }
             if (roleVO.getDataScope() != null) {
-                SysDictDataVO dataScopeDict = sysDictApi.getDictItem(
-                    DictTypeConstants.SYS_DATA_SCOPE,
-                    roleVO.getDataScope()
-                );
+                SysDictDataVO dataScopeDict = dataScopeItems.get(roleVO.getDataScope());
                 if (dataScopeDict != null) {
                     roleVO.setDataScopeLabel(dataScopeDict.getDictLabel());
                     roleVO.setDataScopeType(dataScopeDict.getListClass());
                 }
             }
         }
-        
+
         return PageResult.of(roleVOList,
                 resultPage.getTotal(),
                 (int) resultPage.getCurrent(),
@@ -120,29 +119,27 @@ public class SysRoleServiceImpl implements ISysRoleService {
         List<SysRoleVO> roleVOList = SysRoleConverter.toVoList(sysRoles);
 
         // 使用字典API翻译状态和数据范围标签，并获取标签类型（颜色）
+        var dictItems = sysDictApi.getDictItemMaps(List.of(
+                DictTypeConstants.SYS_ROLE_STATUS, DictTypeConstants.SYS_DATA_SCOPE));
+        var statusItems = dictItems.getOrDefault(DictTypeConstants.SYS_ROLE_STATUS, Map.of());
+        var dataScopeItems = dictItems.getOrDefault(DictTypeConstants.SYS_DATA_SCOPE, Map.of());
         for (SysRoleVO roleVO : roleVOList) {
             if (roleVO.getStatus() != null) {
-                SysDictDataVO statusDict = sysDictApi.getDictItem(
-                    DictTypeConstants.SYS_ROLE_STATUS,
-                    String.valueOf(roleVO.getStatus())
-                );
+                SysDictDataVO statusDict = statusItems.get(String.valueOf(roleVO.getStatus()));
                 if (statusDict != null) {
                     roleVO.setStatusLabel(statusDict.getDictLabel());
                     roleVO.setStatusType(statusDict.getListClass());
                 }
             }
             if (roleVO.getDataScope() != null) {
-                SysDictDataVO dataScopeDict = sysDictApi.getDictItem(
-                    DictTypeConstants.SYS_DATA_SCOPE,
-                    roleVO.getDataScope()
-                );
+                SysDictDataVO dataScopeDict = dataScopeItems.get(roleVO.getDataScope());
                 if (dataScopeDict != null) {
                     roleVO.setDataScopeLabel(dataScopeDict.getDictLabel());
                     roleVO.setDataScopeType(dataScopeDict.getListClass());
                 }
             }
         }
-        
+
         return roleVOList;
     }
 
@@ -193,7 +190,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
         sysRole.setUpdateBy(SecurityUtils.getUserName());
         sysRole.setUpdateTime(DateUtils.getNowDate());
         sysRoleMapper.updateById(sysRole);
-        
+
         // 发布角色权限变更事件
         EventBus.get().callEvent(new PermissionChangedEvent(
                 PermissionChangedEvent.ChangeType.ROLE_PERM_UPDATE,
@@ -223,7 +220,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
         wrapper.eq(SysRole::getId, id)
                 .set(SysRole::isDelFlag, true);
         sysRoleMapper.update(null, wrapper);
-        
+
         // 发布角色删除事件
         EventBus.get().callEvent(new PermissionChangedEvent(
                 PermissionChangedEvent.ChangeType.ROLE_DELETE,
@@ -250,7 +247,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
         wrapper.in(SysRole::getId, ids)
                 .set(SysRole::isDelFlag, true);
         sysRoleMapper.update(null, wrapper);
-        
+
         // 发布角色删除事件
         for (Long id : ids) {
             EventBus.get().callEvent(new PermissionChangedEvent(

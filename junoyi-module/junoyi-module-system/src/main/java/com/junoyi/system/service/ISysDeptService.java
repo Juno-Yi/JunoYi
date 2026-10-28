@@ -23,6 +23,11 @@ public interface ISysDeptService {
     List<SysDeptVO> getDeptTree(SysDeptQueryDTO queryDTO);
 
     /**
+     * 获取用户管理使用的启用部门树，禁用节点及其子树不返回。
+     */
+    List<SysDeptVO> getEnabledDeptTree();
+
+    /**
      * 根据ID获取部门详情
      * @param id 部门ID
      * @return 部门信息

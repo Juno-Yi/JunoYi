@@ -194,6 +194,24 @@ public class RedisUtils {
         return rBucket.get();
     }
 
+    /** 一次读取多个对象，避免逐个 key 发起 Redis 请求。 */
+    public static <T> Map<String, T> getCacheObjects(final Collection<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return Map.of();
+        }
+        return CLIENT.getBuckets().get(keys.toArray(String[]::new));
+    }
+
+    /** 批量写入独立的对象 key。 */
+    public static void setCacheObjects(final Map<String, ?> values) {
+        if (values == null || values.isEmpty()) {
+            return;
+        }
+        RBatch batch = CLIENT.createBatch();
+        values.forEach((key, value) -> batch.getBucket(key).setAsync(value));
+        batch.execute();
+    }
+
     /**
      * 查询缓存键剩余存活时间。
      *

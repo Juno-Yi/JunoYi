@@ -13,7 +13,7 @@
 [![Vue3](https://img.shields.io/badge/Vue-3.x-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
 [![Element Plus](https://img.shields.io/badge/Element%20Plus-latest-409EFF)](https://element-plus.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-0.6.4-success)](https://github.com/Juno-Yi/JunoYi)
+[![Version](https://img.shields.io/badge/Version-0.6.5-success)](https://github.com/Juno-Yi/JunoYi)
 
 </div>
 

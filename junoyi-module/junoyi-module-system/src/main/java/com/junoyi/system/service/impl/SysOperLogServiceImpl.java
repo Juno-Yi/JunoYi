@@ -9,6 +9,7 @@ import com.junoyi.system.api.SysDictApi;
 import com.junoyi.system.constant.DictTypeConstants;
 import com.junoyi.system.domain.dto.SysOperLogQueryDTO;
 import com.junoyi.system.domain.po.SysOperLog;
+import com.junoyi.system.domain.vo.SysDictDataVO;
 import com.junoyi.system.domain.vo.SysOperLogVO;
 import com.junoyi.system.mapper.SysOperLogMapper;
 import com.junoyi.system.service.ISysOperLogService;
@@ -54,9 +55,12 @@ public class SysOperLogServiceImpl implements ISysOperLogService {
                 .orderByDesc(SysOperLog::getCreateTime);
 
         Page<SysOperLog> resultPage = sysOperLogMapper.selectPage(page, wrapper);
+        Map<String, Map<String, SysDictDataVO>> dictItems = sysDictApi.getDictItemMaps(List.of(
+                DictTypeConstants.SYS_LOG_LEVEL, DictTypeConstants.SYS_OPER_TYPE,
+                DictTypeConstants.SYS_OPER_MODULE));
 
         List<SysOperLogVO> voList = resultPage.getRecords().stream()
-                .map(this::convertToVO)
+                .map(log -> convertToVO(log, dictItems))
                 .collect(Collectors.toList());
 
         return PageResult.of(voList,
@@ -150,36 +154,32 @@ public class SysOperLogServiceImpl implements ISysOperLogService {
     }
 
 
-    private SysOperLogVO convertToVO(SysOperLog log) {
+    private SysOperLogVO convertToVO(SysOperLog log,
+                                     Map<String, Map<String, SysDictDataVO>> dictItems) {
         SysOperLogVO vo = new SysOperLogVO();
         BeanUtils.copyProperties(log, vo);
-        
+
         // 使用字典翻译日志级别
         if (log.getLevel() != null) {
-            String levelLabel = sysDictApi.getDictLabel(DictTypeConstants.SYS_LOG_LEVEL, log.getLevel());
+            SysDictDataVO levelItem = dictItems.getOrDefault(DictTypeConstants.SYS_LOG_LEVEL, Map.of()).get(log.getLevel());
+            String levelLabel = levelItem != null ? levelItem.getDictLabel() : null;
             vo.setLevelLabel(levelLabel);
         }
-        
+
         // 使用字典翻译操作类型
         if (log.getAction() != null) {
-            String actionLabel = sysDictApi.getDictLabel(DictTypeConstants.SYS_OPER_TYPE, log.getAction());
+            SysDictDataVO actionItem = dictItems.getOrDefault(DictTypeConstants.SYS_OPER_TYPE, Map.of()).get(log.getAction());
+            String actionLabel = actionItem != null ? actionItem.getDictLabel() : null;
             vo.setActionLabel(actionLabel);
-            // 如果前端直接使用 action 字段显示，则直接替换 action 的值为翻译后的标签
-            if (actionLabel != null && !actionLabel.isEmpty()) {
-                vo.setAction(actionLabel);
-            }
         }
-        
+
         // 使用字典翻译操作模块
         if (log.getModule() != null) {
-            String moduleLabel = sysDictApi.getDictLabel(DictTypeConstants.SYS_OPER_MODULE, log.getModule());
+            SysDictDataVO moduleItem = dictItems.getOrDefault(DictTypeConstants.SYS_OPER_MODULE, Map.of()).get(log.getModule());
+            String moduleLabel = moduleItem != null ? moduleItem.getDictLabel() : null;
             vo.setModuleLabel(moduleLabel);
-            // 如果前端直接使用 module 字段显示，则直接替换 module 的值为翻译后的标签
-            if (moduleLabel != null && !moduleLabel.isEmpty()) {
-                vo.setModule(moduleLabel);
-            }
         }
-        
+
         return vo;
     }
 }
