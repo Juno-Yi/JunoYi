@@ -93,6 +93,29 @@ public class SysDeptServiceImpl implements ISysDeptService {
     }
 
     /**
+     * 获取用户管理使用的启用部门树，禁用节点及其子树不返回。
+     */
+    @Override
+    public List<SysDeptVO> getEnabledDeptTree() {
+        // 先构建完整层级，再剪掉禁用节点，避免启用子部门被提升为根节点。
+        return retainEnabledDepts(getDeptTree(new SysDeptQueryDTO()));
+    }
+
+    private List<SysDeptVO> retainEnabledDepts(List<SysDeptVO> depts) {
+        List<SysDeptVO> enabled = new ArrayList<>();
+        for (SysDeptVO dept : depts) {
+            if (!Integer.valueOf(SysDeptStatus.ENABLE.getCode()).equals(dept.getStatus())) {
+                continue;
+            }
+            if (dept.getChildren() != null) {
+                dept.setChildren(retainEnabledDepts(dept.getChildren()));
+            }
+            enabled.add(dept);
+        }
+        return enabled;
+    }
+
+    /**
      * 根据ID获取部门信息
      * 查询指定ID的部门信息，如果部门不存在或已被删除则返回null
      *

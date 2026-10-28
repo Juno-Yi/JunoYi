@@ -45,6 +45,16 @@ public class SysDeptController extends BaseController {
     }
 
     /**
+     * 用户管理可选择的启用部门树。
+     */
+    @GetMapping("/tree/enabled")
+    @PlatformScope(PlatformType.ADMIN_WEB)
+    @Permission(value = {"system.ui.user.view", "system.api.dept.get.tree"})
+    public R<List<SysDeptVO>> getEnabledDeptTree() {
+        return R.ok(sysDeptService.getEnabledDeptTree());
+    }
+
+    /**
      * 获取部门详情
      */
     @GetMapping("/{id}")
