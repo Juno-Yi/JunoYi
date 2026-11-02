@@ -1,16 +1,522 @@
-spring:
-  datasource:
-    dynamic:
-      druid:
-        initial-size: 2
-        min-idle: 2
-        max-active: 20
-
 junoyi:
   log:
+    # 日志级别配置
     level:
-      root: INFO
-      sql: DEBUG
+      # 根日志级别
+      root: ${LOG_ROOT_LEVEL:INFO}
+      # JunoYi 框架日志级别（设置为 DEBUG 以查看所有日志）
+      junoyi: ${LOG_JUNOYI_LEVEL:INFO}
+      # Spring 框架日志级别
+      spring: WARN
+      # MyBatis 日志级别
+      mybatis: WARN
+      # SQL 日志级别
+      sql: ${LOG_SQL_LEVEL:WARN}
+
+    # 文件输出配置
+    file:
+      # 是否启用文件日志输出
+      enabled: ${LOG_FILE_ENABLED:true}
+      # 日志文件存储目录（只提供目录，不包含文件名）
+      path: /app/data/logs
+      # 单个日志文件的最大大小（支持KB、MB、GB单位）
+      max-size: 100MB
+      # 保留的历史日志文件数量（超过数量的旧文件会被删除）
+      max-history: 30
+      # 所有日志文件的总大小上限（超过后会删除最旧的文件）
+      total-size-cap: 1GB
+      # 是否压缩历史日志文件（true=压缩为.gz格式，false=不压缩）
+      compress: true
+      # 日志文件编码格式
+      encoding: UTF-8
+
+    # 日志格式配置
+    format:
+      # 日期时间显示格式（遵循Java SimpleDateFormat格式）
+      date-time-pattern: "yyyy-MM-dd HH:mm:ss.SSS"
+      # 异常堆栈跟踪显示的最大行数（0=显示全部，>0=限制行数）
+      max-stack-trace-lines: 0
+      # MDC属性显示的最大数量（超出部分会被截断）
+      max-mdc-properties: 3
+      # 线程名称显示的最大长度（超出部分会被截断）
+      max-thread-name-length: 30
+      # 是否简化包名显示（true=简化，false=显示完整包名）
+      simplify-package-names: true
+      # 包名简化映射配置（将长包名简化为短字符）
+      package-simplifications:
+        "com.junoyi.framework": "c.j.f"           # JunoYi框架包简化为"j"
+        "org.springframework": "s" # Spring框架包简化为"s"
+        "com.baomidou": "m"        # MyBatis Plus包简化为"m"
+        "org.apache": "a"          # Apache包简化为"a"
+        "java.lang": "j.l"         # Java基础包简化为"j.l"
+        "java.util": "j.u"         # Java工具包简化为"j.u"
+
+    # 异步日志配置
+    async:
+      # 是否启用异步日志（true=异步，false=同步）
+      enabled: true
+      # 异步日志队列大小（超过队列容量的日志会根据策略处理）
+      queue-size: 256
+      # 队列满时的丢弃策略（DISCARD=丢弃新日志，BLOCK=阻塞等待）
+      discarding-threshold: DISCARD
+      # 是否包含调用者信息（类名、方法名、行号，true=包含但影响性能，false=不包含）
+      include-caller-data: false
+      # 异步日志线程池大小（建议设置为CPU核心数的1-2倍）
+      thread-pool-size: 1
+
+  # ==================== 数据源配置 ====================
+  datasource:
+    # 启用 SQL 美化输出
+    sql-beautify-enabled: false
+    # 启用慢 SQL 监控
+    slow-sql-enabled: true
+    # 慢 SQL 阈值（毫秒）
+    slow-sql-threshold: 3000
+    # 启用 SQL 日志
+    sql-log-enabled: ${SQL_LOG_ENABLED:false}
+    # 是否启用乐观锁插件
+    optimistic-locker-enable: true
+    # 是否启用防止全表更新删除插件
+    block-attack-enable: true
+
+  # ==================== 数据权限配置 ====================
+  data-permission:
+    # 是否启用数据权限功能
+    enabled: true
+    # 数据范围配置
+    data-scope:
+      # 工作模式: ANNOTATION(注解模式) / GLOBAL(全局模式)
+      # ANNOTATION: 仅对标注 @DataScope 的方法生效（推荐，性能好）
+      # GLOBAL: 对所有查询生效（安全性高，但性能开销较大）
+      mode: ANNOTATION
+      # 默认部门字段名
+      dept-field: dept_id
+      # 默认用户字段名（用于 SELF 模式）
+      user-field: create_by
+      # 是否启用字段检查（自动检查表中是否存在数据范围字段）
+      field-check-enabled: true
+      # 是否启用缓存（缓存表字段信息和注解信息）
+      cache-enabled: true
+
+  # ==================== 文件存储配置 ====================
+  file:
+    storage-type: ${FILE_STORAGE_TYPE:local}  # local / aliyun-oss / minio
+    domain: ${FILE_DOMAIN:http://localhost:7588}  # 对外访问域名
+    local:
+      base-path: /app/data/uploads  # Docker 持久化目录
+      url-prefix: /files   # URL路径前缀
+    aliyun-oss:
+      access-key-id: ${OSS_ACCESS_KEY_ID:}
+      access-key-secret: ${OSS_ACCESS_KEY_SECRET:}
+      bucket-name: ${OSS_BUCKET_NAME:}
+      endpoint: ${OSS_ENDPOINT:}
+      custom-domain: ${OSS_CUSTOM_DOMAIN:}
+    minio:
+      endpoint: ${MINIO_ENDPOINT:}
+      access-key: ${MINIO_ACCESS_KEY:}
+      secret-key: ${MINIO_SECRET_KEY:}
+      bucket-name: ${MINIO_BUCKET_NAME:}
+
+  # ==================== Web 配置 ====================
   web:
+    # 跨域
     cors:
-      allowed-origins: ${CORS_ALLOWED_ORIGINS:${APP_PUBLIC_URL},http://localhost:3006}
+      # 是否开启跨域
+      enable: true
+      # 是否允许携带凭证（如 Cookie、Authorization Header）
+      allow-credentials: true
+      # 允许跨域访问的源（Origin）
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3006}
+      # 允许跨域的方法
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      # 允许跨域的请求头
+      allowed-headers:
+        - Authorization
+        - Content-Type
+        - X-Encrypted
+        - X-No-Encrypt
+
+    # XSS 攻击防护
+    xss:
+      # 是否启用 XSS 过滤
+      enable: true
+      # 过滤模式: clean（清理危险内容) / escape(转义特殊字符) / reject(拒绝请求)
+      # 生产环境建议使用 reject模式，clean模式会清除xss攻击内容，但是请求任何会传给controller继续执行，
+      # reject 模式
+      mode: ${XSS_MODE:reject}  # clean / escape / reject
+      # 是否过滤参数
+      filter-parameter: true
+      # 是否过滤请求头
+      filter-header: true
+      # 是否过滤请求体
+      filter-body: true
+      # 排除的 URL 路径（支持 Ant 风格）
+      exclude-urls:
+        - /test
+      # 排除的请求方法（如 GET)
+      exclude-methods:
+        - GET
+
+    # SQL 注入严格防护
+    sql-injection:
+      # 是否启用
+      enable: true
+      # 防护模式：detect(检测并拒绝) / clean(清理)
+      mode: detect
+      # 是否过滤参数
+      filter-parameter: true
+      # 是否过滤请求头
+      filter-header: false
+      # 是否过滤请求体
+      filter-body: true
+      # 排除的 URL 路径（支持 Ant 风格）
+      exclude-urls:
+        - /api/report/**
+      # 排除特定参数不检测
+      exclude-params:
+        - permCode
+        - permissionCode
+      # 排除特定 JSON 字段
+      exclude-json-fields:
+        - data.permCode
+      # 自定义危险关键词（追加到默认列表）
+      custom-keywords:
+        - xp_cmdshell
+    # 访问日志
+    access-log:
+      enable: true                    # 是否启用
+      slow-request-threshold: 3000    # 慢请求阈值（毫秒）
+      log-request-params: ${ACCESS_LOG_REQUEST_PARAMS:false} # 是否记录请求参数
+      log-request-headers: false      # 是否记录请求头
+      exclude-paths: # 排除路径
+        - /actuator/**
+        - /favicon.ico
+
+  # ==================== 验证码配置 ====================
+  captcha:
+    # 是否启用验证码
+    enable: true
+    # 默认验证码类型: IMAGE(图片)
+    type: IMAGE
+    # 验证码过期时间（秒）
+    expire-seconds: 120
+    # 图片验证码配置
+    image:
+      # 验证码长度
+      length: 4
+      # 图片宽度
+      width: 150
+      # 图片高度
+      height: 50
+      # 干扰线数量
+      line-count: 4
+      # 干扰圆圈数量
+      circle-count: 15
+      # 扭曲程度 (0-1, 0=不扭曲, 1=最大扭曲, 推荐0.2-0.4)
+      distortion: 0.3
+      # 噪点数量
+      noise-count: 50
+      # 字体大小
+      font-size: 32
+      # 验证码类型: math(数学运算) / char(字符)
+      code-type: math
+
+  # ==================== 企业微信配置 ====================
+  # 如果要使用企业微信支持请先将junoyi-framework-boot-starter模块中的junoyi-framework-wework注释去除
+  # 刷新maven，修改好配置文件，业务模块只要统一类似system模块引用junoyi-framework-boot-starter模块即可使用。
+  # 使用方法：
+  # 1、业务里直接注入 WxCpService 或 WeWorkClient，
+  # 2、后续会持续更新相关的Helper工具，可以查看junoyi-framework-wework模块helper包下的类查看方法如何使用
+  wework:
+    enable: ${WEWORK_ENABLED:false}
+    # 企业ID
+    corp-id: ${WEWORK_CORP_ID:}
+    # 应用AgentId
+    agent-id: ${WEWORK_AGENT_ID:0}
+    # 应用Secret
+    secret: ${WEWORK_SECRET:}
+    # OAuth回调地址
+    redirect-uri: ${WEWORK_REDIRECT_URI:}
+    # token 存储方式：memory / redis
+    token-store-type: ${WEWORK_TOKEN_STORE_TYPE:memory}
+    # Redis 中的 key 前缀
+    redis-key-prefix: junoyi:wework:cp
+    # 企微群机器人webhook列表哦
+    group-bot:
+      webhooks: [] # 使用 JUNOYI_WEWORK_GROUPBOT_WEBHOOKS_0 等环境变量追加
+
+  # ==================== 微信相关配置 ====================
+  # 如果要使用微信支持请先讲junoyi-framework-boot-starter模块中的junoyi-framework-wechat注释去掉
+  # 刷新maven，修改好配置文件，业务模块要统一类似system模块引用junoyi-framework-boot-starter模块即可使用。
+  wechat:
+    # 微信小程序配置
+    mp:
+      # 是否启用微信小程序功能（默认：false）
+      enabled: ${WECHAT_MP_ENABLED:false}
+      # 小程序 AppID（必填，启用时）
+      app-id: ${WECHAT_MP_APP_ID:}
+      # 小程序 AppSecret（必填，启用时）
+      secret: ${WECHAT_MP_SECRET:}
+    # 微信支付配置
+    pay:
+      # 是否启用微信支付功能（默认：false）
+      enabled: ${WECHAT_PAY_ENABLED:false}
+      # 微信支付分配的公众账号ID（必填，启用时）
+      app-id: ${WECHAT_PAY_APP_ID:}
+      # 微信支付分配的商户号（必填，启用时）
+      merchant-id: ${WECHAT_PAY_MERCHANT_ID:}
+      # APIv3密钥（必填，启用时）
+      api-v3-key: ${WECHAT_PAY_API_V3_KEY:}
+      # 商户私钥文件路径（必填，启用时）
+      private-key-path: ${WECHAT_PAY_PRIVATE_KEY_PATH:}
+      # 商户证书文件路径（必填，启用时）
+      private-cert-path: ${WECHAT_PAY_PRIVATE_CERT_PATH:}
+      # 商户证书序列号（必填，启用时）
+      cert-serial-no: ${WECHAT_PAY_CERT_SERIAL_NO:}
+      # 支付成功回调通知地址（必填，启用时）
+      pay-notify-url: ${WECHAT_PAY_NOTIFY_URL:}
+      # 退款成功回调通知地址（可选）
+      refund-notify-url: ${WECHAT_REFUND_NOTIFY_URL:}
+
+
+  # ==================== 安全验证配置 ====================
+  security:
+    # api 接口加密 (建议: 开发环境将接口加密关闭方便调试，生产环境开启保证安全)
+    # 建议：
+    # 生产环境不要使用示例中的密钥对，请自行生成密钥对替换resource/keys/目录中的密钥文件
+    # 推荐生成1024位以上密钥，2048、4096位也可以，不建议提高安全性了但是会降低性能
+    api-encrypt:
+      enable: ${API_ENCRYPT_ENABLED:false}
+      # 是否加密请求体
+      request: true
+      # 是否加密响应体
+      response: true
+      # 排除路径
+      exclude-urls:
+        # 小程序平台接口
+        - /auth/wechat/mp/login
+        - /auth/wechat/mp/refresh
+        - /auth/wechat/mp/logout
+        - /auth/wechat/mp/info
+        # 其他接口
+        - /swagger-ui/**
+        - /v3/api-docs/**
+        - /doc.html
+        - /webjars/**
+        - /your-custom-path/**
+        - /system/info/logo
+        # 静态文件路径（图片、视频等二进制文件不应加密）
+        - /files/**
+        # 其他可能的静态资源路径
+        - /static/**
+        - /public/**
+        - /*.ico
+        - /*.png
+        - /*.jpg
+        - /*.jpeg
+        - /*.gif
+        - /*.svg
+        - /*.css
+        - /*.js
+    # 白名单路径
+    whitelist:
+      - /auth/login
+      - /auth/register
+      - /auth/refresh
+      - /auth/wechat/mp/login
+      - /auth/wechat/mp/refresh
+      - /system/info/**
+      - /captcha/**
+      - /auth/captcha/config
+      # API 文档相关路径
+      - /doc.html
+      - /swagger-ui.html
+      - /swagger-ui/**
+      - /v3/api-docs/**
+      - /webjars/**
+      - /favicon.ico
+      # 资源文件地址
+      - /files/**
+    # 登录机制
+    login:
+      # 最大登录失败次数
+      max-fail-count: 5
+      # 登录失败冷却时间（分钟）
+      fail-coll-down-minutes: 5
+      # 是否启用 ip 限制模式
+      enable-ip-limit: true
+      # ip限制最大失败次数
+      ip-max-fail-count: 20
+      # ip限制冷却时间
+      ip_fail_coll_down-minutes: 30
+    # token 机制
+    token:
+      header: Authorization
+      # 令牌密钥 (HS512 算法要求至少 64 字符)
+      secret: ${JWT_SECRET}
+      # 是否开启单点登录（同一平台只允许一个会话）
+      # true: 单点登录，同平台重复登录会被拒绝
+      # false: 多点登录，允许同平台多个会话（默认）
+      single-login: false
+      # Access Token 有效期（不同平台不同有效期）
+      access-expire:
+        admin-web: 30m      # 后台管理 Web（安全要求高，有效期短）
+        front-web: 2h       # 前台用户 Web（用户体验优先，有效期稍长）
+        miniprogram: 12h    # 小程序
+        app: 24h            # App
+        desktop: 7d         # 桌面应用
+      # Refresh Token 有效期
+      refresh-expire:
+        admin-web: 3d       # 后台管理 Web
+        front-web: 7d      # 前台用户 Web
+        miniprogram: 30d    # 小程序
+        app: 30d            # App
+        desktop: 90d        # 桌面应用
+
+  # ==================== Permission 配置 ====================
+  permission:
+    # 是否启用权限控制功能
+    enable: true
+    # 是否启用字段权限功能
+    field-permission-enable: true
+
+
+
+  # ==================== API 文档配置 ====================
+  api-doc:
+    enable: ${API_DOC_ENABLED:true}
+    title: JunoYi API 文档
+    description: JunoYi 后台管理系统 API 接口文档
+    version: ${junoyi.version}
+    contact:
+      name: JunoYi
+      email: support@junoyi.com
+      url: https://junoyi.com
+    license:
+      name: Apache 2.0
+      url: https://www.apache.org/licenses/LICENSE-2.0
+    # API 分组配置
+    groups:
+      - name: system
+        displayName: 系统管理
+        pathsToMatch:
+          - /system/**
+          - /auth/**
+          - /captcha/**
+      - name: demo
+        displayName: 示例模块
+        pathsToMatch:
+          - /demo/**
+
+# Spring Boot服务器配置
+server:
+  # 应用服务端口
+  port: 7588
+
+# Spring Boot 日志配置
+logging:
+  level:
+    # 屏蔽 BeanPostProcessor 相关警告
+    org.springframework.context.support.PostProcessorRegistrationDelegate: ERROR
+    # 屏蔽 Tomcat 内嵌 Servlet 容器初始化日志
+    org.apache.catalina.core: WARN
+    # 屏蔽 MyBaits 扫描Mapper时候出现不必要的日志
+    org.mybatis.spring.mapper.ClassPathMapperScanner: ERROR
+    # 屏蔽 Netty DNS 警告
+    io.netty.resolver.dns: ERROR
+#    com.junoyi: DEBUG
+
+
+# ==================== Spring Boot 配置 ====================
+spring:
+  # 自动配置排除
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+  # DevTools 配置
+  devtools:
+    livereload:
+      # 禁用 LiveReload 服务器（避免端口占用警告）
+      enabled: false
+    restart:
+      # 排除框架安全模块，避免热重启时类加载器冲突导致 UserSession ClassCastException
+      exclude:
+        - junoyi-framework/**
+        - com.junoyi.framework.**
+
+
+  # ==================== 数据源配置 ====================
+  datasource:
+    # 动态数据源配置
+    dynamic:
+      primary: master
+      strict: true
+      # 数据源列表
+      datasource:
+        # 主库配置
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: ${DB_URL}
+          username: ${DB_USERNAME}
+          password: ${DB_PASSWORD}
+
+      # Druid 连接池配置
+      druid:
+        # 基础连接池配置
+        initial-size: ${DB_POOL_INITIAL_SIZE:2}
+        min-idle: ${DB_POOL_MIN_IDLE:2}
+        max-active: ${DB_POOL_MAX_ACTIVE:20}
+        max-wait: 5000
+        connect-timeout: 10000
+        socket-timeout: 30000
+        # 连接检测配置
+        time-between-eviction-runs-millis: 30000
+        min-evictable-idle-time-millis: 300000
+        max-evictable-idle-time-millis: 600000
+        validation-query: SELECT 1
+        test-while-idle: true
+        test-on-borrow: true
+        test-on-return: false
+        # 监控统计（简化配置）
+        filters: wall
+        remove-abandoned: false
+        remove-abandoned-timeout: 180
+        log-abandoned: true
+
+  # ==================== Redis 配置 ====================
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:0}
+      timeout: 10s
+      password: ${REDIS_PASSWORD:}
+
+# ==================== Redisson 配置 ====================
+redisson:
+  keyPrefix: ${REDIS_KEY_PREFIX:junoyi}
+  threads: 4
+  nettyThreads: 8
+  singleServerConfig:
+    clientName: junoyi-${APP_ENV:dev}
+    connectionMinimumIdleSize: 16
+    connectionPoolSize: 64
+    idleConnectionTimeout: 10000
+    timeout: 2000
+    subscriptionConnectionPoolSize: 50
+
+# ==================== MyBatis Plus 配置 ====================
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+  global-config:
+    db-config:
+      id-type: auto
