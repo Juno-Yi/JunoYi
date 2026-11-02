@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    dynamic:
+      druid:
+        initial-size: 2
+        min-idle: 2
+        max-active: 20
+
+junoyi:
+  log:
+    level:
+      root: INFO
+      sql: DEBUG
+  web:
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:${APP_PUBLIC_URL},http://localhost:3006}

@@ -1,0 +1,30 @@
+name: JunoYi-${APP_ENV:?请通过 --env-file 选择 dev、test 或 prod}
+
+services:
+  backend:
+    image: JunoYi-backend:${APP_ENV}
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    env_file:
+      - backend/env/${APP_ENV}.env
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,${APP_ENV}
+      SPRING_CONFIG_ADDITIONAL_LOCATION: file:/app/config/
+      JWT_SECRET: ${JWT_SECRET:?请在环境文件中设置 JWT_SECRET}
+    volumes:
+      - ./backend/config:/app/config:ro
+      - backend-data:/app/data
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    expose:
+      - "7588"
+    restart: unless-stopped
+    networks:
+      - app
+
+networks:
+  app:
+
+volumes:
+  backend-data:
