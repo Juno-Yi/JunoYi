@@ -1,0 +1,12 @@
+.git
+.idea
+.codex
+.agents
+.aws
+ara-ui
+deploy
+docs
+temp
+**/target
+**/.flattened-pom.xml
+**/.DS_Store
