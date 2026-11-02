@@ -4,16 +4,16 @@ services:
   backend:
     image: junoyi-backend:${APP_ENV}
     build:
-      context: ../..
+      context: ..
       dockerfile: deploy/backend/Dockerfile
     env_file:
-      - ./env/${APP_ENV}.env
+      - ./backend/env/${APP_ENV}.env
     environment:
       SPRING_PROFILES_ACTIVE: docker,${APP_ENV}
       SPRING_CONFIG_ADDITIONAL_LOCATION: file:/app/config/
       JWT_SECRET: ${JWT_SECRET:?请在环境文件中设置至少 64 字符的 JWT_SECRET}
     volumes:
-      - ./config:/app/config:ro
+      - ./backend/config:/app/config:ro
       - backend-data:/app/data
     extra_hosts:
       - host.docker.internal:host-gateway

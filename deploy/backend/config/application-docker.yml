@@ -18,7 +18,7 @@ junoyi:
       # 是否启用文件日志输出
       enabled: ${LOG_FILE_ENABLED:true}
       # 日志文件存储目录（只提供目录，不包含文件名）
-      path: /app/data/logs
+      path: ${LOG_FILE_PATH:/app/data/logs}
       # 单个日志文件的最大大小（支持KB、MB、GB单位）
       max-size: 100MB
       # 保留的历史日志文件数量（超过数量的旧文件会被删除）
@@ -103,7 +103,7 @@ junoyi:
     storage-type: ${FILE_STORAGE_TYPE:local}  # local / aliyun-oss / minio
     domain: ${FILE_DOMAIN:http://localhost:7588}  # 对外访问域名
     local:
-      base-path: /app/data/uploads  # Docker 持久化目录
+      base-path: ${FILE_LOCAL_BASE_PATH:/app/data/uploads}  # Docker 默认持久化目录
       url-prefix: /files   # URL路径前缀
     aliyun-oss:
       access-key-id: ${OSS_ACCESS_KEY_ID:}
@@ -122,24 +122,15 @@ junoyi:
     # 跨域
     cors:
       # 是否开启跨域
-      enable: true
+      enable: ${CORS_ENABLED:true}
       # 是否允许携带凭证（如 Cookie、Authorization Header）
-      allow-credentials: true
+      allow-credentials: ${CORS_ALLOW_CREDENTIALS:true}
       # 允许跨域访问的源（Origin）
       allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3006}
-      # 允许跨域的方法
-      allowed-methods:
-        - GET
-        - POST
-        - PUT
-        - DELETE
-        - OPTIONS
-      # 允许跨域的请求头
-      allowed-headers:
-        - Authorization
-        - Content-Type
-        - X-Encrypted
-        - X-No-Encrypt
+      # 允许跨域的方法（环境变量中用逗号分隔）
+      allowed-methods: ${CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE,OPTIONS}
+      # 允许跨域的请求头（环境变量中用逗号分隔）
+      allowed-headers: ${CORS_ALLOWED_HEADERS:Authorization,Content-Type,X-Encrypted,X-No-Encrypt}
 
     # XSS 攻击防护
     xss:
@@ -356,27 +347,27 @@ junoyi:
       ip_fail_coll_down-minutes: 30
     # token 机制
     token:
-      header: Authorization
+      header: ${TOKEN_HEADER:Authorization}
       # 令牌密钥 (HS512 算法要求至少 64 字符)
       secret: ${JWT_SECRET}
       # 是否开启单点登录（同一平台只允许一个会话）
       # true: 单点登录，同平台重复登录会被拒绝
       # false: 多点登录，允许同平台多个会话（默认）
-      single-login: false
+      single-login: ${TOKEN_SINGLE_LOGIN:false}
       # Access Token 有效期（不同平台不同有效期）
       access-expire:
-        admin-web: 30m      # 后台管理 Web（安全要求高，有效期短）
-        front-web: 2h       # 前台用户 Web（用户体验优先，有效期稍长）
-        miniprogram: 12h    # 小程序
-        app: 24h            # App
-        desktop: 7d         # 桌面应用
+        admin-web: ${TOKEN_ACCESS_EXPIRE_ADMIN_WEB:30m}      # 后台管理 Web（安全要求高，有效期短）
+        front-web: ${TOKEN_ACCESS_EXPIRE_FRONT_WEB:2h}       # 前台用户 Web（用户体验优先，有效期稍长）
+        miniprogram: ${TOKEN_ACCESS_EXPIRE_MINIPROGRAM:12h}  # 小程序
+        app: ${TOKEN_ACCESS_EXPIRE_APP:24h}                   # App
+        desktop: ${TOKEN_ACCESS_EXPIRE_DESKTOP:7d}           # 桌面应用
       # Refresh Token 有效期
       refresh-expire:
-        admin-web: 3d       # 后台管理 Web
-        front-web: 7d      # 前台用户 Web
-        miniprogram: 30d    # 小程序
-        app: 30d            # App
-        desktop: 90d        # 桌面应用
+        admin-web: ${TOKEN_REFRESH_EXPIRE_ADMIN_WEB:3d}      # 后台管理 Web
+        front-web: ${TOKEN_REFRESH_EXPIRE_FRONT_WEB:7d}      # 前台用户 Web
+        miniprogram: ${TOKEN_REFRESH_EXPIRE_MINIPROGRAM:30d} # 小程序
+        app: ${TOKEN_REFRESH_EXPIRE_APP:30d}                  # App
+        desktop: ${TOKEN_REFRESH_EXPIRE_DESKTOP:90d}         # 桌面应用
 
   # ==================== Permission 配置 ====================
   permission:
@@ -500,7 +491,7 @@ spring:
 
 # ==================== Redisson 配置 ====================
 redisson:
-  keyPrefix: ${REDIS_KEY_PREFIX:junoyi}
+  keyPrefix: ${REDIS_KEY_PREFIX}
   threads: 4
   nettyThreads: 8
   singleServerConfig:
