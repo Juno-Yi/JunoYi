@@ -13,7 +13,7 @@ openssl rand -hex 64
 
 将生成的随机值填入 `JWT_SECRET`，并填写 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD`、`REDIS_HOST` 等实际连接信息。测试和生产环境分别复制 `test.env.example`、`prod.env.example`，各自使用独立的数据库、Redis 和 JWT 密钥。`*.example` 中的 `example.invalid` 是占位地址，不能直接连接。
 
-容器里的 `localhost` 指容器自身。数据库或 Redis 运行在 Docker 宿主机时可使用 `host.docker.internal`；运行在同一 Docker 网络时使用服务名。`REDIS_PASSWORD` 可以留空，前提是对应 Redis 不需要密码。跨域由 `CORS_ENABLED`、`CORS_ALLOW_CREDENTIALS`、`CORS_ALLOWED_ORIGINS`、`CORS_ALLOWED_METHODS`、`CORS_ALLOWED_HEADERS` 完整控制；后三项是逗号分隔的列表，Origin 要填写浏览器页面的完整来源地址。
+容器里的 `localhost` 指容器自身。数据库或 Redis 运行在 Docker 宿主机时可使用 `host.docker.internal`；运行在同一 Docker 网络时使用服务名；连接远程服务器时填写实际主机名或 IP。无密码 Redis 不设置 `SPRING_DATA_REDIS_PASSWORD`；启用认证时，在对应环境文件中取消该行注释并填写密码。空密码会使 Redisson 尝试执行 `AUTH`，导致启动失败。跨域由 `CORS_ENABLED`、`CORS_ALLOW_CREDENTIALS`、`CORS_ALLOWED_ORIGINS`、`CORS_ALLOWED_METHODS`、`CORS_ALLOWED_HEADERS` 完整控制；后三项是逗号分隔的列表，Origin 要填写浏览器页面的完整来源地址。
 
 Token 的请求头和单点登录开关分别由 `TOKEN_HEADER`、`TOKEN_SINGLE_LOGIN` 设置；五个平台各有独立的 `TOKEN_ACCESS_EXPIRE_*` 和 `TOKEN_REFRESH_EXPIRE_*`。有效期可以写成 `30m`、`2h`、`7d`。三个环境文件中的示例值保留了原配置的有效期，可分别修改。如果修改 `TOKEN_HEADER`，也要将新名称加入 `CORS_ALLOWED_HEADERS`。
 

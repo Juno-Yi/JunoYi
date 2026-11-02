@@ -487,7 +487,7 @@ spring:
       port: ${REDIS_PORT:6379}
       database: ${REDIS_DATABASE:0}
       timeout: 10s
-      password: ${REDIS_PASSWORD:}
+      # 有密码时通过环境变量 SPRING_DATA_REDIS_PASSWORD 设置；不设置则不发送 AUTH。
 
 # ==================== Redisson 配置 ====================
 redisson:
