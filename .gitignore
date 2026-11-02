@@ -39,4 +39,9 @@ temp/
 
 /log
 
+# 部署环境真实配置（仅提交 *.example 模板）
+deploy/backend/env/*.env
+deploy/backend/config/certs/
+deploy/backend/data/
+
 .flattened-pom.xml

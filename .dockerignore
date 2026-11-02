@@ -1,0 +1,5 @@
+.git
+**/node_modules
+**/target
+deploy/env/
+deploy/backend/config/
