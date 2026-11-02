@@ -33,11 +33,18 @@ docker compose --env-file deploy/backend/env/dev.env -f deploy/compose.yaml up -
 
 ## 普通 JAR 启动
 
-打包后使用同一份环境模板，另存一个普通部署专用文件。例如生产环境：
+在仓库根目录先安装项目 BOM 并打包：
+
+```bash
+mvn -B -ntp -f junoyi-dependencies/pom.xml -Dmaven.test.skip=true install
+mvn -B -ntp -pl junoyi-server -am -Dmaven.test.skip=true package
+```
+
+打包产物是 `junoyi-server/target/junoyi-server.jar`。使用同一份环境模板，另存一个普通部署专用文件。例如生产环境：
 
 ```bash
 cp deploy/backend/env/prod.env.example deploy/backend/env/prod-jar.env
-# 编辑 prod-jar.env：填写数据库、Redis、JWT，并将数据库和 Redis 地址改为宿主机可访问的地址。
+# 编辑 prod-jar.env：填写数据库、Redis、JWT；本机服务用 127.0.0.1，远程服务用实际地址。
 # 同时设置 LOG_FILE_PATH 和 FILE_LOCAL_BASE_PATH 为宿主机可写目录。
 while IFS= read -r line || [[ -n "$line" ]]; do
   [[ -z "$line" || "$line" == \#* ]] && continue

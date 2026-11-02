@@ -101,11 +101,11 @@ idCard字段加入`user.data.idCard.write`（用户模块.数据.身份证.写�
 
 ### 环境要求
 
-- **Java**: 21+
-- **Maven**: 3.9+
 - **MySQL**: 8.0+
 - **Redis**: 7.0+
-- **Node.js**: 18+ (前端)
+- **Docker 部署**：Docker Engine 与 Docker Compose
+- **普通 JAR 部署**：Java 21+、Maven 3.9+
+- **前端项目**：独立仓库维护，按前端仓库的说明准备 Node.js 与 pnpm
 
 ### 一键创建项目
 
@@ -129,71 +129,69 @@ CLI 工具将引导你完成：
 - ✅ 检测开发环境
 - ✅ 自定义模块名和包名（可选）
 
-### 手动启动
+### 手动部署后端
 
-**1. 克隆项目**
+以下命令均在仓库根目录执行。先克隆项目，并准备 MySQL 和 Redis。以本机 MySQL 为例，仅首次安装到新数据库时导入初始化 SQL（脚本包含 `DROP TABLE`，不要对已有业务数据重复执行）：
 
 ```bash
-# Gitee (国内推荐)
-git clone https://gitee.com/juno-yi/JunoYi.git
-
-# GitHub
 git clone https://github.com/Juno-Yi/JunoYi.git
-```
-
-**2. 导入数据库**
-
-```bash
-# 创建数据库
-CREATE DATABASE junoyi DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-# 导入 SQL 文件
+cd JunoYi
+mysql -u root -p -e 'CREATE DATABASE IF NOT EXISTS junoyi DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'
 mysql -u root -p junoyi < sql/MySQL/junoyi.sql
 ```
 
-**3. 修改配置**
+开发、测试、生产环境分别使用 `dev.env`、`test.env`、`prod.env`。从对应的 `*.env.example` 复制后，填写 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD`、`REDIS_HOST` 和至少 64 字符的 `JWT_SECRET`。有密码的 Redis 还需设置 `SPRING_DATA_REDIS_PASSWORD`；无密码时保持该行注释。`DB_URL` 和 `REDIS_HOST` 可以指向宿主机或远程服务器。生产示例默认 `API_ENCRYPT_ENABLED=true`，开发和测试示例默认关闭。
 
-编辑 `junoyi-server/src/main/resources/application-local.yml`：
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/junoyi?useUnicode=true&characterEncoding=utf8
-    username: root
-    password: your_password
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
-```
-
-**4. 启动后端**
+#### 方式一：Docker 部署
 
 ```bash
-# 方式一：IDEA 运行
-# 打开 junoyi-server 模块，运行 JunoYiServerApplication 主类
-
-# 方式二：Maven 命令
-mvn spring-boot:run
-
-# 方式三：打包运行
-mvn clean package
-java -jar junoyi-server/target/junoyi-server-0.6.4.jar
+cp deploy/backend/env/dev.env.example deploy/backend/env/dev.env
+# 编辑 dev.env，填写实际连接信息和 JWT_SECRET
+docker compose --env-file deploy/backend/env/dev.env -f deploy/compose.yaml up -d --build
+docker compose --env-file deploy/backend/env/dev.env -f deploy/compose.yaml logs -f backend
 ```
 
-**5. 启动前端**
+测试或生产环境将命令中的 `dev` 改成 `test` 或 `prod`，并先复制相应的环境文件。Compose 会读取文件中的 `APP_ENV`，启用 `docker,dev`、`docker,test` 或 `docker,prod` Profile。修改 `.env` 后，用相同的 `--env-file` 和 `-f` 参数执行 `up -d --force-recreate` 使配置生效。
+
+容器内的 `localhost` 是容器自身：访问 Docker 宿主机上的 MySQL 或 Redis 时，在环境文件中使用 `host.docker.internal`；访问远程服务时填写其地址。`HOST_BIND_ADDRESS` 和 `HOST_PORT` 控制宿主机监听地址与端口，示例默认只监听 `127.0.0.1`。应用文件与日志保存在 Docker 卷中。若本机已有 JAR 占用 `7588`，请停止该进程或修改 `HOST_PORT`。
+
+#### 方式二：普通 JAR 部署
+
+先打包，然后创建独立的 JAR 环境文件。以下以开发环境为例：
 
 ```bash
-cd junoyi-ui/junoyi-vue-elementPlus
-pnpm install
-pnpm dev
+mvn -B -ntp -f junoyi-dependencies/pom.xml -Dmaven.test.skip=true install
+mvn -B -ntp -pl junoyi-server -am -Dmaven.test.skip=true package
+cp deploy/backend/env/dev.env.example deploy/backend/env/dev-jar.env
+# 编辑 dev-jar.env：填写数据库、Redis、JWT，并设置 LOG_FILE_PATH 和 FILE_LOCAL_BASE_PATH
 ```
 
-**6. 访问系统**
+如果 MySQL 或 Redis 在本机，JAR 环境文件中的 `host.docker.internal` 应改为 `127.0.0.1`；远程服务填写实际地址。普通 JAR 不会自动读取 `.env`，启动前需导出变量并指定外置配置文件：
 
-- 前端地址：http://localhost:5173
-- 后端地址：http://localhost:7588
-- API 文档：http://localhost:7588/doc.html
+```bash
+while IFS= read -r line || [[ -n "$line" ]]; do
+  [[ -z "$line" || "$line" == \#* ]] && continue
+  export "$line"
+done < deploy/backend/env/dev-jar.env
+mkdir -p "$LOG_FILE_PATH" "$FILE_LOCAL_BASE_PATH"
+java -jar junoyi-server/target/junoyi-server.jar \
+  --spring.profiles.active=dev \
+  "--spring.config.location=classpath:/application.yml,file:$PWD/deploy/backend/config/application-docker.yml" \
+  "--server.address=$HOST_BIND_ADDRESS" \
+  "--server.port=$HOST_PORT"
+```
+
+测试或生产环境复制对应的 `test.env.example` / `prod.env.example`，并将命令中的文件名和 `--spring.profiles.active` 改为 `test` / `prod`。两种部署方式共用 `deploy/backend/config/application-docker.yml`，更多变量说明见 [后端部署配置说明](deploy/backend/README.md)。
+
+### 前端项目
+
+前端源码在独立仓库维护，见 [JunoYi-Vue-ElementPlus](junoyi-ui/junoyi-vue-elementPlus/README.md)。启动前端后，将环境文件中的 `CORS_ALLOWED_ORIGINS` 设置为前端页面的实际 Origin；开发示例预设为 `http://localhost:3006`。
+
+### 访问系统
+
+- 后端地址：`http://localhost:7588`（以 `HOST_PORT=7588` 为例）
+- API 文档：`http://localhost:7588/doc.html`（启用 `API_DOC_ENABLED` 时）
+- 前端地址：以独立前端项目的实际启动端口为准
 
 ### 演示环境
 
@@ -298,11 +296,11 @@ JunoYi
 
 | 版本 | 说明 | 状态            |
 |------|------|---------------|
-| 前后端分离版 | 当前版本，适合中小型项目 | ✅ 正式发布 v0.6.4 |
+| 前后端分离版 | 当前版本，适合中小型项目 | ✅ 正式发布 v0.6.6 |
 | 多租户版 | 支持 SaaS 多租户架构 | 🚧 商业项目实践中    |
 | 微服务版 | 基于 Spring Cloud 的分布式架构 | 📋 规划中        |
 
-📝 **更新日志**：https://doc.framework.junoyi.com/changelog/java/standalone.html
+📝 **更新日志**：[v0.6.6 之后的开发记录](temp/更新日志.md) · [已发布版本记录](https://doc.framework.junoyi.com/changelog/java/standalone.html)
 
 ---
 
